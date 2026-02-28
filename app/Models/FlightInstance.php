@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class FlightInstance extends Model
+{
+    use HasFactory;
+
+    protected $primaryKey = 'flight_instance_id';
+    protected $table = 'flight_instances';
+
+    protected $fillable = ['schedule_id', 'aircraft_instance_id', 'flight_date', 'flight_status_id'];
+
+    // Tambahkan ini
+    protected $dates = ['flight_date'];
+    // atau
+    protected $casts = [
+        'flight_date' => 'date',
+    ];
+
+    public function schedule()
+    {
+        return $this->belongsTo(Schedule::class, 'schedule_id', 'schedule_id');
+    }
+
+    public function aircraftInstance()
+    {
+        return $this->belongsTo(AircraftInstance::class, 'aircraft_instance_id', 'aircraft_instance_id');
+    }
+
+    public function flightSeatPrices()
+    {
+        return $this->hasMany(FlightSeatPrice::class, 'flight_instance_id', 'flight_instance_id');
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'flight_instance_id', 'flight_instance_id');
+    }
+
+    public function flightStatus()
+    {
+        return $this->belongsTo(FlightStatus::class, 'flight_status_id', 'flight_status_id');
+    }
+}

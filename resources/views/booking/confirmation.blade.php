@@ -1,0 +1,97 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container mt-4">
+    <div class="card border-success">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="bi bi-check-circle"></i> Booking Confirmed!</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="alert alert-success">
+                        <h5>Thank you for your booking!</h5>
+                        <p class="mb-0">Your e-ticket has been sent to <strong>{{ $booking->client->email }}</strong></p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Booking Details</h6>
+                            <p><strong>Booking Code:</strong> {{ $booking->booking_code }}</p>
+                            <p><strong>Booking Date:</strong> {{ $booking->created_at->format('d M Y H:i') }}</p>
+                            <p><strong>Status:</strong> <span class="badge bg-success">Confirmed</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Flight Details</h6>
+                            <p><strong>Flight:</strong> {{ $booking->flightInstance->schedule->flight_number }}</p>
+                            <p><strong>Route:</strong> 
+                                {{ $booking->flightInstance->schedule->originAirport->city }} ({{ $booking->flightInstance->schedule->originAirport->iata_code }}) 
+                                → 
+                                {{ $booking->flightInstance->schedule->destinationAirport->city }} ({{ $booking->flightInstance->schedule->destinationAirport->iata_code }})
+                            </p>
+                            <p><strong>Date:</strong> {{ $booking->flightInstance->flight_date->format('d M Y') }}</p>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mt-4">Passengers</h6>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Passport</th>
+                                <th>Seat</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($booking->bookingSeats as $seat)
+                            <tr>
+                                <td>{{ $seat->passenger_first_name }} {{ $seat->passenger_last_name }}</td>
+                                <td>{{ $seat->passenger_passport }}</td>
+                                <td>{{ $seat->seat->seat_number ?? 'N/A' }}</td>
+                                <td>${{ number_format($seat->price_at_booking, 2) }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3">Total</th>
+                                <th>${{ number_format($booking->total_price_usd, 2) }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-outline-primary" onclick="window.print()">
+                            <i class="bi bi-printer"></i> Print Ticket
+                        </button>
+                        <a href="{{ route('home') }}" class="btn btn-primary">
+                            <i class="bi bi-house"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Boarding Pass</h6>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="border p-4 mb-3">
+                                <h5 class="text-primary">{{ $booking->booking_code }}</h5>
+                                <h3>{{ $booking->flightInstance->schedule->flight_number }}</h3>
+                                <p class="mb-1">{{ $booking->flightInstance->schedule->originAirport->iata_code }} → {{ $booking->flightInstance->schedule->destinationAirport->iata_code }}</p>
+                                <p class="mb-1">{{ $booking->flightInstance->flight_date->format('d M Y') }}</p>
+                                <p class="mb-0">Departure: {{ $booking->flightInstance->schedule->departure_time_gmt }}</p>
+                            </div>
+                            <div class="alert alert-info small">
+                                <i class="bi bi-info-circle"></i> Present this code at check-in counter
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

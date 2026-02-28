@@ -1,0 +1,1091 @@
+@extends('layouts.app')
+
+@section('title', 'Avoinex - Dashboard')
+
+@section('content')
+<!-- Dashboard Hero + Search -->
+<div class="avx-hero">
+    <!-- wallpaper alam FULL tanpa crop -->
+    <div class="avx-hero-bg" aria-hidden="true"></div>
+
+    <!-- Main content area -->
+    <main class="avx-main">
+        <!-- Background putih hanya bagian bawah -->
+        <div class="avx-white-bg" aria-hidden="true"></div>
+        
+        <!-- Card transparan (rongga) DI ATAS -->
+        <div class="avx-rongga" aria-hidden="true"></div>
+
+        <section class="avx-search-wrap" role="region" aria-label="Search flights">
+            <!-- Card utama DI BAWAH rongga -->
+            <div class="avx-search-card">
+                <!-- BARIS ATAS: Tabs + Options SEJAJAR -->
+                <div class="avx-search-header">
+                    <!-- Tabs -->
+                    <nav class="avx-tabs" role="tablist" aria-label="flight types">
+                        <button class="avx-tab avx-tab-active" data-tab="oneway" type="button">Sekali Jalan</button>
+                        <button class="avx-tab" data-tab="round" type="button">Pulang-Pergi</button>
+                        <button class="avx-tab" data-tab="multi" type="button">Multi-Kota</button>
+                    </nav>
+                    
+                    <!-- Options: Penerbangan Langsung + Passenger + Class -->
+                    <div class="avx-header-options">
+                        <!-- Checkbox Penerbangan Langsung -->
+                        <label class="avx-checkbox-inline">
+                            <input type="checkbox" name="direct" checked>
+                            <span>Penerbangan Langsung</span>
+                        </label>
+                        
+                        <!-- Passenger & Class -->
+                        <div class="avx-passenger-class">
+                            <button type="button" class="avx-passenger-toggle" aria-haspopup="true" aria-expanded="false">
+                                <svg class="avx-icon-user" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM2 20c0-3 6-5 10-5s10 2 10 5v1H2v-1z"/></svg>
+                                <span class="avx-passenger-text">1 Dewasa, 0 Anak, 0 Bayi</span>
+                                <svg class="avx-icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                            </button>
+                            
+                            <div class="avx-dropdown" aria-hidden="true">
+                                <label> Dewasa <input type="number" min="1" value="1" name="adults"></label>
+                                <label> Anak <input type="number" min="0" value="0" name="children"></label>
+                                <label> Bayi <input type="number" min="0" value="0" name="infants"></label>
+                            </div>
+                            
+                            <div class="avx-class-select">
+                                <svg class="avx-icon-seat" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 5h14v12H5z"/></svg>
+                                <select name="travel_class">
+                                    <option value="economy" selected>Ekonomi</option>
+                                    <option value="premium">Premium Economy</option>
+                                    <option value="business">Business</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BARIS TENGAH: Form Input -->
+                <form class="avx-search-form" action="{{ route('flights.search') }}" method="GET" novalidate>
+                    <div class="avx-search-main">
+                        <!-- Dari -->
+                        <label class="avx-field" for="from">
+                            <span class="avx-field-label">Dari</span>
+                            <div class="avx-input-wrap">
+                                <svg class="avx-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+                                <input id="from" name="from" placeholder="Kota atau Bandara" required>
+                            </div>
+                        </label>
+
+                        <!-- Ke -->
+                        <label class="avx-field" for="to">
+                            <span class="avx-field-label">Ke</span>
+                            <div class="avx-input-wrap">
+                                <svg class="avx-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+                                <input id="to" name="to" placeholder="Kota atau Bandara" required>
+                            </div>
+                        </label>
+
+                        <!-- Tanggal Pergi -->
+                        <label class="avx-field" for="depart">
+                            <span class="avx-field-label">Tanggal Pergi</span>
+                            <div class="avx-input-wrap avx-input-date">
+                                <svg class="avx-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10h5v5H7z"/></svg>
+                                <input id="depart" name="depart" type="date" required>
+                            </div>
+                        </label>
+
+                        <!-- Tanggal Pulang (default hidden, muncul saat tab Pulang-Pergi/Multi-Kota) -->
+                        <label class="avx-field avx-return-field" for="return" style="display: none;">
+                            <span class="avx-field-label">Tanggal Pulang</span>
+                            <div class="avx-input-wrap avx-input-date">
+                                <svg class="avx-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10h5v5H7z"/></svg>
+                                <input id="return" name="return" type="date">
+                            </div>
+                        </label>
+
+                        <!-- Tombol Cari Tiket -->
+                        <button class="avx-cta" type="submit">
+                            <span>Cari Tiket</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- BARIS BAWAH: Promo Text (di luar card) -->
+            <h3 class="avx-promo">Harga tiket Pesawat: Selalu Promo di Avoinex - PESAN SEKARANG!</h3>
+        </section>
+    </main>
+</div>
+
+<!-- Available Flights Section -->
+<div class="container mt-5 mb-5" style="position: relative; z-index: 10; background: white; padding-top: 40px; padding-bottom: 40px;">
+    <div class="text-center mb-4">
+        <h3 class="text-primary">Available Flights Today</h3>
+        <p class="text-muted">Book your next adventure with Avoinex</p>
+    </div>
+
+    @if(isset($flights) && $flights->count() > 0)
+        <div class="row">
+            @foreach($flights->take(3) as $flight)
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm" style="border: 2px solid #279ED6;">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            @php
+                                $flightNumber = $flight->schedule->flight_number ?? 'GA-201';
+                                $airlineCode = explode('-', $flightNumber)[0] ?? 'GA';
+                                $airlineNames = [
+                                    'GA' => 'Garuda Indonesia',
+                                    'QZ' => 'AirAsia',
+                                    'SQ' => 'Singapore Airlines',
+                                    'MH' => 'Malaysia Airlines'
+                                ];
+                            @endphp
+                            <h5 class="mb-0">{{ $airlineCode }}</h5>
+                            <span class="badge bg-light text-primary">
+                                {{ $flightNumber }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="flight-route mb-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-0">{{ date('H:i', strtotime($flight->schedule->departure_time_gmt ?? '08:00')) }}</h6>
+                                    <small class="text-muted">{{ $flight->schedule->originAirport->iata_code ?? 'CGK' }}</small>
+                                </div>
+                                <div class="text-center">
+                                    <small>{{ floor(($flight->schedule->duration_minutes ?? 150) / 60) }}h {{ ($flight->schedule->duration_minutes ?? 150) % 60 }}m</small>
+                                    <div class="dotted-line"></div>
+                                </div>
+                                <div class="text-end">
+                                    <h6 class="mb-0">{{ date('H:i', strtotime($flight->schedule->arrival_time_gmt ?? '10:30')) }}</h6>
+                                    <small class="text-muted">{{ $flight->schedule->destinationAirport->iata_code ?? 'DPS' }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flight-info">
+                            <p class="mb-1">
+                                <i class="bi bi-calendar"></i> 
+                                {{ $flight->flight_date->format('d M Y') ?? now()->format('d M Y') }}
+                            </p>
+                            <p class="mb-1">
+                                <i class="bi bi-geo-alt"></i> 
+                                {{ $flight->schedule->originAirport->city ?? 'Jakarta' }} → 
+                                {{ $flight->schedule->destinationAirport->city ?? 'Denpasar' }}
+                            </p>
+                            <p class="mb-2">
+                                <i class="bi bi-airplane"></i> 
+                                {{ $airlineNames[$airlineCode] ?? 'Garuda Indonesia' }}
+                            </p>
+                            
+                            @php
+                                $availableSeats = $flight->available_seats ?? 0;
+                                $isFull = $availableSeats <= 0;
+                            @endphp
+                            
+                            @if($isFull)
+                                <div class="alert alert-warning py-1 mb-2">
+                                    <small><i class="bi bi-exclamation-triangle"></i> Fully Booked</small>
+                                </div>
+                            @else
+                                <div class="alert alert-success py-1 mb-2">
+                                    <small><i class="bi bi-check-circle"></i> {{ $availableSeats }} seats available</small>
+                                </div>
+                            @endif
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <h4 class="text-primary mb-0">${{ number_format($flight->schedule->base_price_usd ?? 150, 0) }}</h4>
+                            @if(!$isFull)
+                                <a href="{{ route('flight.seats', $flight->flight_instance_id ?? 1) }}" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-ticket"></i> Book Now
+                                </a>
+                            @else
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    <i class="bi bi-x-circle"></i> Sold Out
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        
+        @if($flights->count() > 3)
+            <div class="text-center mt-4">
+                <a href="{{ route('flights.public') }}" class="btn btn-outline-primary">
+                    View All Flights ({{ $flights->count() }})
+                </a>
+            </div>
+        @endif
+    @else
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-airplane text-muted" style="font-size: 3rem;"></i>
+                <h4 class="mt-3">No flights scheduled for today</h4>
+                <p class="text-muted">Check back later or try different dates.</p>
+                <a href="{{ route('home') }}" class="btn btn-primary">Search Flights</a>
+            </div>
+        </div>
+    @endif
+</div>
+
+<!-- ===== CSS BARU DENGAN LAPISAN YANG BENAR ===== -->
+<style>
+/* Variables */
+/* Variables */
+/* Variables */
+/* Variables */
+/* Variables */
+:root{
+    --avx-primary: #279ED6;
+    --avx-primary-65: rgba(39,158,214,0.65);
+    --avx-link: #11549D;
+    --avx-muted: #787878;
+    --rongga: rgba(1,0,0,0.5);
+}
+
+/* SI GAMBARNYA FULL NGGA DI CROP */
+.avx-hero{ 
+    position:relative; 
+    min-height:100vh; 
+    font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial;
+    background-color: #f0f0f0;
+}
+
+/* REVISI UDAH BENER BANGET BANGET POKONYAMAH YANG TERAKHIRRR */
+.avx-hero-bg{ 
+    position:absolute; 
+    inset:0; 
+    background-image: url('{{ asset('images/wallpaperalam_01.png') }}'); 
+    background-size: 100%;
+    background-position: center -250px;
+    background-repeat: no-repeat;
+    background-color: #f0f0f0;
+    z-index:1;
+}
+
+/* POKOKNYAMAH YANG INI UDAH TRANSPARENT BANGET NGET NGETTTT */
+.avx-hero-bg::after{ 
+    content:''; 
+    position:absolute; 
+    inset:0; 
+    background: rgba(120,120,120,0.20);
+}
+
+/* PERUBAHAN 2: Background putih diperbesar dan diturunkan ke bawah */
+.avx-white-bg {
+    position: absolute;
+    width: 100%;
+    height: 85%;
+    background: #ffffff;
+    border-radius: 0; 
+    top: 54%; /*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+    left: 0;
+    z-index: 2;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.05);
+}
+
+/* Main center area */
+.avx-main{ 
+    position:relative; 
+    z-index: 5;
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+    padding: 80px 24px 160px;
+}
+
+/* PERUBAHAN: Card transparan dipusatkan */
+.avx-rongga{ 
+    position:absolute; 
+    width:calc(100% - 100px);
+    max-width:1400px; 
+    height:380px;
+    border-radius:50px; 
+    background: var(--rongga); 
+    z-index: 6;
+    /* PERUBAHAN: Dipusatkan secara horizontal dan vertikal */
+    top: 29%;
+    left: 50%;
+    transform: translateX(-50%);
+    filter: blur(0.2px); 
+}
+
+/* Search wrap - PERUBAHAN: Diubah menjadi center untuk semua konten */
+.avx-search-wrap{ 
+    position:relative; 
+    z-index: 7;
+    width:100%; 
+    display:flex; 
+    flex-direction: column;
+    align-items: center; /* PERUBAHAN: Semua konten di tengah */
+    margin-top: 300px;
+}
+
+/* Search card - PERUBAHAN: Card dipusatkan */
+.avx-search-card{ 
+    width:100%; 
+    max-width:1400px;
+    background:#ffffff; 
+    border-radius:30px; 
+    padding:36px 40px 40px;
+    box-shadow: 
+        0 25px 50px rgba(10,20,30,0.2),
+        0 10px 30px rgba(0,0,0,0.15),
+        0 0 0 1px #000000;
+    position: relative;
+    z-index: 8;
+    margin-bottom: 24px;
+    /* PERUBAHAN: Tambahkan margin auto untuk pusat horizontal */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ===== BARIS ATAS ===== */
+.avx-search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(120,120,120,0.15);
+}
+
+/* Tabs */
+.avx-tabs{ 
+    display:flex; 
+    gap:10px; 
+    margin:0;
+}
+.avx-tab{ 
+    padding:12px 28px; 
+    border-radius:30px; 
+    background: rgba(39,158,214,0.30); 
+    color: var(--avx-link); 
+    font-weight:600; 
+    border:none; 
+    cursor:pointer; 
+    font-family:'Segoe UI Semibold'; 
+    font-size: 16px;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+.avx-tab:hover {
+    background: rgba(39,158,214,0.45);
+}
+.avx-tab.avx-tab-active{ 
+    background: rgba(39,158,214,0.65); 
+    color:#11549D; 
+    box-shadow: 0 4px 12px rgba(39,158,214,0.3);
+}
+
+/* Header Options */
+.avx-header-options {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+}
+
+/* Checkbox */
+.avx-checkbox-inline{ 
+    display:flex; 
+    align-items:center; 
+    gap:10px; 
+    white-space: nowrap;
+}
+.avx-checkbox-inline input[type='checkbox']{ 
+    width:20px; 
+    height:20px; 
+    accent-color: var(--avx-primary); 
+    border-radius:6px; 
+    background: rgba(39,158,214,0.30); 
+}
+.avx-checkbox-inline span{ 
+    color: var(--avx-primary); 
+    font-weight:600; 
+    font-family:'Segoe UI Semibold'; 
+    font-size: 16px;
+}
+
+/* Passenger/class block */
+.avx-passenger-class{ 
+    display:flex; 
+    gap:18px; 
+    align-items:center; 
+    flex-wrap: wrap;
+}
+.avx-passenger-toggle{ 
+    display:inline-flex; 
+    align-items:center; 
+    gap:8px; 
+    padding:10px 18px; 
+    border-radius:10px; 
+    background:transparent; 
+    border:1px solid rgba(120,120,120,0.25); 
+    cursor:pointer; 
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+.avx-passenger-toggle:hover {
+    border-color: var(--avx-primary);
+    background: rgba(39,158,214,0.05);
+}
+.avx-passenger-toggle .avx-icon-user, 
+.avx-passenger-toggle .avx-icon-arrow{ 
+    width:18px; 
+    height:18px; 
+    color:var(--avx-primary); 
+}
+.avx-passenger-text{ 
+    color: var(--avx-primary); 
+    font-weight:600; 
+    font-family:'Segoe UI Semibold'; 
+    font-size: 16px;
+}
+
+.avx-dropdown{ 
+    display:none; 
+    position:absolute; 
+    margin-top:8px; 
+    background:white; 
+    border-radius:12px; 
+    padding:16px; 
+    box-shadow:0 12px 36px rgba(10,20,30,0.15);
+    border: 1px solid rgba(120,120,120,0.2);
+    z-index: 100;
+}
+
+.avx-class-select{ 
+    display:flex; 
+    align-items:center; 
+    gap:8px; 
+    padding:10px 18px; 
+    border-radius:10px; 
+    border:1px solid rgba(120,120,120,0.25); 
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+.avx-class-select:hover {
+    border-color: var(--avx-primary);
+}
+.avx-class-select .avx-icon-seat{ 
+    width:18px; 
+    height:18px; 
+    color:var(--avx-primary); 
+}
+.avx-class-select select{ 
+    border:0; 
+    background:transparent; 
+    outline:none; 
+    font-weight:600; 
+    font-family:'Segoe UI Semibold'; 
+    color:var(--avx-primary); 
+    font-size: 16px;
+    min-width: 140px;
+}
+
+/* ===== BARIS TENGAH: FORM ===== */
+.avx-search-form {
+    display: block;
+}
+
+.avx-search-main {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    align-items: end;
+}
+
+.avx-field{ 
+    display:flex; 
+    flex-direction:column; 
+    gap:10px; 
+}
+.avx-field-label{ 
+    color: var(--avx-link); 
+    font-weight:600; 
+    font-family:'Segoe UI Semibold';
+    font-size: 15px;
+}
+.avx-input-wrap{ 
+    display:flex; 
+    align-items:center; 
+    gap:12px; 
+    padding:15px 18px; 
+    border-radius:12px; 
+    border:1px solid rgba(120,120,120,0.35); 
+    background: rgba(255,255,255,0.95);
+    transition: all 0.3s ease;
+}
+.avx-input-wrap:hover {
+    border-color: var(--avx-primary);
+    box-shadow: 0 4px 12px rgba(39,158,214,0.1);
+}
+.avx-input-wrap .avx-icon{ 
+    width:20px; 
+    height:20px; 
+    color:var(--avx-primary); 
+    flex-shrink: 0;
+}
+.avx-input-wrap input{ 
+    border:0; 
+    outline:none; 
+    background:transparent; 
+    width:100%; 
+    font-size:16px; 
+    font-family:'Segoe UI',sans-serif; 
+    color: #333;
+}
+.avx-input-date input[type="date"]{ 
+    padding:8px 4px; 
+    min-height: 24px;
+    width: 100%;
+}
+
+/* CTA Button */
+.avx-cta{ 
+    background:var(--avx-primary); 
+    color:#fff; 
+    padding:16px 36px; 
+    border-radius:12px; 
+    border:none; 
+    font-weight:700; 
+    font-family:'Segoe UI Bold'; 
+    cursor:pointer; 
+    font-size: 17px;
+    height: 56px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 8px 20px rgba(39,158,214,0.3);
+    grid-column: 5;
+}
+.avx-cta:hover {
+    background: #1e8bc8;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(39,158,214,0.4);
+}
+
+/* ===== BARIS BAWAH: PROMO TEXT ===== */
+/* PERUBAHAN: Promo text disejajarkan dengan card transparan */
+.avx-promo{ 
+    margin-top: 28px;
+    font-family: 'Poppins', 'Segoe UI', sans-serif; 
+    font-weight:600; 
+    color:#000; 
+    text-align: left; /* Tetap left */
+    font-size: 18px;
+    padding: 18px 28px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 12px;
+    position: relative;
+    z-index: 7;
+    /* PERUBAHAN: Gunakan width yang sama dengan card transparan */
+    width: calc(100% - 100px);
+    max-width: 1400px;
+    /* PERUBAHAN: Tidak lagi auto margin, tapi menggunakan left offset yang sama dengan card transparan */
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+/* ===== MODIFIKASI UNTUK TANGGAL PULANG ===== */
+.avx-return-field {
+    display: flex !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1400px) {
+    .avx-search-card {
+        max-width: calc(100% - 100px);
+        padding: 32px 36px 36px;
+        margin-left: 50px;
+        margin-right: 50px;
+    }
+    
+    .avx-rongga {
+        width: calc(100% - 100px);
+        max-width: 1400px;
+        top: 35%;
+    }
+    
+    /* PERUBAHAN: Promo text sama dengan card transparan */
+    .avx-promo {
+        width: calc(100% - 100px);
+        max-width: 1400px;
+        margin-left: 50px;
+        margin-right: 50px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .avx-search-main {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    
+    .avx-cta {
+        grid-column: 3;
+    }
+    
+    .avx-search-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .avx-header-options {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .avx-white-bg {
+        height: 75%;
+    }
+    
+    .avx-rongga {
+        top: 32%;
+    }
+}
+
+@media (max-width: 992px) {
+    .avx-search-main {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .avx-cta {
+        grid-column: 2;
+    }
+    
+    .avx-main {
+        padding: 60px 20px 140px;
+    }
+    
+    .avx-search-card {
+        max-width: calc(100% - 80px);
+        padding: 28px 32px 32px;
+        margin-left: 40px;
+        margin-right: 40px;
+    }
+    
+    /* PERUBAHAN: Sesuaikan untuk tablet */
+    .avx-rongga {
+        top: 30%;
+        height: 360px;
+        width: calc(100% - 80px);
+    }
+    
+    /* PERUBAHAN: Promo text untuk tablet */
+    .avx-promo {
+        width: calc(100% - 80px);
+        margin-left: 40px;
+        margin-right: 40px;
+        font-size: 17px;
+    }
+    
+    .avx-hero-bg {
+        background-size: 120% auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .avx-main {
+        padding: 40px 16px 120px;
+    }
+    
+    .avx-search-main {
+        grid-template-columns: 1fr;
+    }
+    
+    .avx-cta {
+        grid-column: 1;
+        width: 100%;
+    }
+    
+    .avx-header-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .avx-passenger-class {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .avx-tabs {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .avx-tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    /* PERUBAHAN: Card untuk mobile */
+    .avx-search-card {
+        max-width: calc(100% - 40px);
+        padding: 24px 28px 28px;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    
+    .avx-promo {
+        font-size: 16px;
+        padding: 14px 20px;
+        /* Di mobile, text bisa center untuk readability yang lebih baik */
+        text-align: center;
+        width: calc(100% - 40px);
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    
+    .avx-white-bg {
+        top: 30%;
+        height: 70%;
+    }
+    
+    /* PERUBAHAN: Card transparan untuk mobile */
+    .avx-rongga {
+        height: 320px;
+        top: 28%;
+        width: calc(100% - 40px);
+    }
+    
+    .avx-search-wrap {
+        margin-top: 20px;
+    }
+    
+    .avx-hero-bg {
+        background-size: 150% auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .avx-main {
+        padding: 30px 12px 100px;
+    }
+    
+    .avx-search-card {
+        max-width: calc(100% - 24px);
+        padding: 20px;
+        border-radius: 24px;
+        margin-left: 12px;
+        margin-right: 12px;
+    }
+    
+    .avx-tab {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    .avx-checkbox-inline span,
+    .avx-passenger-text,
+    .avx-class-select select {
+        font-size: 14px;
+    }
+    
+    .avx-promo {
+        font-size: 15px;
+        padding: 12px 16px;
+        width: calc(100% - 24px);
+        margin-left: 12px;
+        margin-right: 12px;
+    }
+    
+    .avx-white-bg {
+        top: 25%;
+        height: 75%;
+    }
+    
+    /* PERUBAHAN: Card transparan untuk mobile kecil */
+    .avx-rongga {
+        top: 25%;
+        height: 300px;
+        width: calc(100% - 24px);
+    }
+    
+    .avx-hero-bg {
+        background-size: 180% auto;
+        background-position: center 20%;
+    }
+    /* ===== AVAILABLE FLIGHTS STYLES ===== */
+#available-flights {
+    position: relative;
+    z-index: 10;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-top: -50px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.dotted-line {
+    border-top: 2px dotted #ccc;
+    margin: 5px 0;
+    position: relative;
+    width: 50px;
+    display: inline-block;
+}
+
+.dotted-line::before {
+    content: '➝';
+    position: absolute;
+    left: 50%;
+    top: -10px;
+    transform: translateX(-50%);
+    background: white;
+    padding: 0 5px;
+    color: #279ED6;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 10px 20px rgba(39, 158, 214, 0.15) !important;
+}
+
+.bi {
+    margin-right: 5px;
+}
+
+/* Pastikan konten available flights responsive */
+@media (max-width: 768px) {
+    #available-flights {
+        margin-top: 0;
+        padding: 20px 15px;
+        border-radius: 15px;
+    }
+    
+    .dotted-line {
+        width: 30px;
+    }
+}
+}
+</style>
+
+<!-- JS untuk tabs + passenger dropdown + tanggal pulang -->
+<script>
+(function(){
+    // Fungsi untuk update jumlah penumpang di tampilan
+    function updatePassengerText() {
+        const adults = document.querySelector('input[name="adults"]').value || 1;
+        const children = document.querySelector('input[name="children"]').value || 0;
+        const infants = document.querySelector('input[name="infants"]').value || 0;
+        
+        const passengerText = document.querySelector('.avx-passenger-text');
+        if (passengerText) {
+            passengerText.textContent = `${adults} Dewasa, ${children} Anak, ${infants} Bayi`;
+        }
+    }
+    
+    // Inisialisasi jumlah penumpang
+    updatePassengerText();
+    
+    // Event listener untuk input jumlah penumpang
+    document.querySelectorAll('.avx-dropdown input[type="number"]').forEach(input => {
+        input.addEventListener('change', updatePassengerText);
+        input.addEventListener('input', updatePassengerText);
+    });
+
+    // Tabs - hanya untuk visual, tanggal pulang tetap ditampilkan
+    document.querySelectorAll('.avx-tab').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            document.querySelectorAll('.avx-tab').forEach(b=>b.classList.remove('avx-tab-active'));
+            btn.classList.add('avx-tab-active');
+            
+            // Tidak perlu toggle tanggal pulang karena selalu ditampilkan
+            // Tapi kita bisa tambahkan logika lain jika diperlukan
+            var target = btn.getAttribute('data-tab');
+            console.log('Tab aktif:', target);
+            
+            // Optional: Logika untuk form validation berdasarkan tab
+            if (target === 'oneway') {
+                // Untuk sekali jalan, tanggal pulang optional
+                document.getElementById('return').required = false;
+            } else {
+                // Untuk pulang-pergi dan multi-kota, tanggal pulang required
+                document.getElementById('return').required = true;
+            }
+        });
+    });
+
+    // Passenger dropdown
+    var toggle = document.querySelector('.avx-passenger-toggle');
+    var dropdown = document.querySelector('.avx-dropdown');
+    if(toggle && dropdown){
+        toggle.addEventListener('click', function(e){
+            e.stopPropagation();
+            var expanded = toggle.getAttribute('aria-expanded') === 'true';
+            toggle.setAttribute('aria-expanded', String(!expanded));
+            dropdown.style.display = expanded ? 'none' : 'block';
+        });
+        
+        document.addEventListener('click', function(ev){
+            if(!toggle.contains(ev.target) && !dropdown.contains(ev.target)){
+                dropdown.style.display = 'none';
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+    
+    // Close dropdown jika klik di dalam dropdown itu sendiri
+    if(dropdown) {
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    // Set minimum date untuk input tanggal (hari ini)
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('depart').min = today;
+    document.getElementById('return').min = today;
+    
+    // Validasi: tanggal pulang tidak boleh sebelum tanggal pergi
+    document.getElementById('depart').addEventListener('change', function() {
+        const returnInput = document.getElementById('return');
+        returnInput.min = this.value;
+        
+        // Jika tanggal pulang sudah dipilih dan lebih awal dari tanggal pergi
+        if (returnInput.value && returnInput.value < this.value) {
+            returnInput.value = this.value;
+        }
+    });
+})();
+</script>
+
+<!-- ===== MODAL JS ===== -->
+<script>
+(function(){
+    // Helper function untuk mendapatkan element by ID
+    function $(id){ return document.getElementById(id); }
+    
+    // Fungsi untuk menampilkan modal
+    function showOverlay(id) {
+        const el = $(id + 'Modal');
+        if(!el) return;
+        el.style.display = 'flex';
+        el.setAttribute('aria-hidden','false');
+        document.body.style.overflow = 'hidden';
+        
+        // Focus ke element pertama yang dapat difokus
+        const focusable = el.querySelector('button, a, input, [tabindex]:not([tabindex="-1"])');
+        if(focusable) focusable.focus();
+    }
+    
+    // Fungsi untuk menyembunyikan modal
+    function hideOverlay(id) {
+        const el = $(id + 'Modal');
+        if(!el) return;
+        el.style.display = 'none';
+        el.setAttribute('aria-hidden','true');
+        document.body.style.overflow = '';
+        
+        // Reset form email
+        const loginForm = $('emailLoginForm');
+        const regForm = $('emailRegisterForm');
+        if(loginForm) loginForm.style.display = 'none';
+        if(regForm) regForm.style.display = 'none';
+    }
+    
+    // Fungsi untuk toggle form email login
+    window.toggleEmailLogin = function(){
+        const f = $('emailLoginForm');
+        if(!f) return;
+        
+        if (f.style.display === 'block' || f.style.display === '') {
+            f.style.display = 'none';
+        } else {
+            f.style.display = 'block';
+            // Focus ke input pertama
+            const input = f.querySelector('input[name="identifier"]');
+            if(input) input.focus();
+        }
+    };
+    
+    // Fungsi untuk toggle form email register
+    window.toggleEmailRegister = function(){
+        const f = $('emailRegisterForm');
+        if(!f) return;
+        
+        if (f.style.display === 'block' || f.style.display === '') {
+            f.style.display = 'none';
+        } else {
+            f.style.display = 'block';
+            // Focus ke input pertama
+            const input = f.querySelector('input[name="first_name"]');
+            if(input) input.focus();
+        }
+    };
+
+    // Expose functions ke window object
+    window.showModal = function(type){ showOverlay(type); };
+    window.closeModal = function(type){ hideOverlay(type); };
+    
+    window.switchModal = function(from, to){
+        hideOverlay(from);
+        setTimeout(function(){ showOverlay(to); }, 160);
+    };
+    
+    // Placeholder untuk login sosial media
+    window.handleFacebookLogin = function(){ 
+        alert('Facebook login flow - akan diimplementasikan'); 
+    };
+    window.handleAppleLogin = function(){ 
+        alert('Apple login flow - akan diimplementasikan'); 
+    };
+    window.handleFacebookRegister = function(){ 
+        alert('Facebook register flow - akan diimplementasikan'); 
+    };
+    window.handleAppleRegister = function(){ 
+        alert('Apple register flow - akan diimplementasikan'); 
+    };
+    
+    // Close modal ketika klik di luar konten modal
+    document.addEventListener('click', function(e){
+        const overlays = document.querySelectorAll('.avx-modal-overlay');
+        overlays.forEach(function(ov){
+            if(ov.style.display !== 'none' && e.target === ov) {
+                const id = ov.id.replace('Modal','');
+                hideOverlay(id);
+            }
+        });
+    });
+    
+    // Close modal dengan tombol Escape
+    document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape' || e.key === 'Esc') {
+            const open = document.querySelector('.avx-modal-overlay[style*="display: flex"]');
+            if(open) {
+                const id = open.id.replace('Modal','');
+                hideOverlay(id);
+            }
+        }
+    });
+    
+    // Auto-show modal jika ada error dari server
+    document.addEventListener('DOMContentLoaded', function(){
+        @if(session('error'))
+            showOverlay('login');
+            setTimeout(function(){ 
+                toggleEmailLogin(); 
+            }, 250);
+        @endif
+
+        @if($errors->any())
+            showOverlay('register');
+            setTimeout(function(){ 
+                toggleEmailRegister(); 
+            }, 250);
+        @endif
+    });
+})();
+</script>
+@endsection
