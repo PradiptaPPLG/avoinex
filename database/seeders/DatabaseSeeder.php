@@ -163,7 +163,8 @@ class DatabaseSeeder extends Seeder
         $this->command->info('✅ Database seeded successfully!');
 
         $this->call([
-        FlightDataSeeder::class,
-    ]);
+            FlightDataSeeder::class,
+            AdminSeeder::class,
+        ]);
     }
 }

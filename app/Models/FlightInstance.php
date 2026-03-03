@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
 class FlightInstance extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $primaryKey = 'flight_instance_id';
     protected $table = 'flight_instances';
@@ -44,5 +45,18 @@ class FlightInstance extends Model
     public function flightStatus()
     {
         return $this->belongsTo(FlightStatus::class, 'flight_status_id', 'flight_status_id');
+    }
+
+    /**
+     * Boot the model and ensure related records are removed when a
+     * flight instance is deleted. This prevents foreign-key violations
+     * for flight_seat_prices and bookings.
+     */
+    protected static function booted()
+    {
+        static::deleting(function (FlightInstance $instance) {
+            $instance->flightSeatPrices()->delete();
+            $instance->bookings()->delete();
+        });
     }
 }

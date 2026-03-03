@@ -112,125 +112,84 @@
             <!-- BARIS BAWAH: Promo Text (di luar card) -->
             <h3 class="avx-promo">Harga tiket Pesawat: Selalu Promo di Avoinex - PESAN SEKARANG!</h3>
         </section>
+
+    {{-- flight results card list below hero --}}
+
     </main>
 </div>
 
-<!-- Available Flights Section -->
-<div class="container mt-5 mb-5" style="position: relative; z-index: 10; background: white; padding-top: 40px; padding-bottom: 40px;">
-    <div class="text-center mb-4">
-        <h3 class="text-primary">Available Flights Today</h3>
-        <p class="text-muted">Book your next adventure with Avoinex</p>
-    </div>
+@if(isset($flights) && $flights->count())
+    <section id="available-flights" class="flight-list-container">
+        <div class="container mt-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        Available Flights ({{ $flights->count() }} found)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @foreach($flights as $flight)
+                    <div class="flight-card border rounded p-3 mb-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-2 text-center">
+                                <div class="airline-logo bg-primary text-white rounded-circle p-3 d-inline-block">
+                                    {{ $flight->airline_code ?? 'GA' }}
+                                </div>
+                                <p class="mt-2 mb-0 fw-bold">{{ $flight->airline_name ?? 'Garuda Indonesia' }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 class="mb-1">{{ date('H:i', strtotime($flight->schedule->departure_time_gmt)) }}</h4>
+                                <p class="text-muted mb-0">{{ $flight->schedule->originAirport->city }} ({{ $flight->schedule->originAirport->iata_code }})</p>
+                                <small class="text-muted">{{ $flight->flight_date->format('d M') }}</small>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <p class="mb-1">{{ floor($flight->schedule->duration_minutes / 60) }}h {{ $flight->schedule->duration_minutes % 60 }}m</p>
+                                <div class="border-bottom"></div>
+                                <p class="text-muted small mb-0">Direct</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 class="mb-1">{{ date('H:i', strtotime($flight->schedule->arrival_time_gmt)) }}</h4>
+                                <p class="text-muted mb-0">{{ $flight->schedule->destinationAirport->city }} ({{ $flight->schedule->destinationAirport->iata_code }})</p>
+                                <small class="text-muted">{{ $flight->flight_date->format('d M') }}</small>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <h4 class="text-primary mb-1">${{ number_format($flight->schedule->base_price_usd, 0) }}</h4>
+                                <p class="text-muted small mb-2">per person</p>
 
-    @if(isset($flights) && $flights->count() > 0)
-        <div class="row">
-            @foreach($flights->take(3) as $flight)
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm" style="border: 2px solid #279ED6;">
-                    <div class="card-header bg-primary text-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            @php
-                                $flightNumber = $flight->schedule->flight_number ?? 'GA-201';
-                                $airlineCode = explode('-', $flightNumber)[0] ?? 'GA';
-                                $airlineNames = [
-                                    'GA' => 'Garuda Indonesia',
-                                    'QZ' => 'AirAsia',
-                                    'SQ' => 'Singapore Airlines',
-                                    'MH' => 'Malaysia Airlines'
-                                ];
-                            @endphp
-                            <h5 class="mb-0">{{ $airlineCode }}</h5>
-                            <span class="badge bg-light text-primary">
-                                {{ $flightNumber }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="flight-route mb-3">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h6 class="mb-0">{{ date('H:i', strtotime($flight->schedule->departure_time_gmt ?? '08:00')) }}</h6>
-                                    <small class="text-muted">{{ $flight->schedule->originAirport->iata_code ?? 'CGK' }}</small>
-                                </div>
-                                <div class="text-center">
-                                    <small>{{ floor(($flight->schedule->duration_minutes ?? 150) / 60) }}h {{ ($flight->schedule->duration_minutes ?? 150) % 60 }}m</small>
-                                    <div class="dotted-line"></div>
-                                </div>
-                                <div class="text-end">
-                                    <h6 class="mb-0">{{ date('H:i', strtotime($flight->schedule->arrival_time_gmt ?? '10:30')) }}</h6>
-                                    <small class="text-muted">{{ $flight->schedule->destinationAirport->iata_code ?? 'DPS' }}</small>
-                                </div>
+                                @php
+                                    $availableSeats = $flight->available_seats ?? 0;
+                                    $passengerCount = 1; // default for homepage
+                                    $hasEnoughSeats = $availableSeats >= $passengerCount;
+                                @endphp
+
+                                @if($hasEnoughSeats)
+                                    <a href="{{ route('flight.seats', $flight->flight_instance_id) }}" class="btn btn-primary">Select</a>
+                                @else
+                                    <button class="btn btn-secondary" disabled title="Not enough seats available">
+                                        <i class="bi bi-exclamation-circle"></i> Limited
+                                    </button>
+                                    <small class="text-danger d-block mt-1">Only {{ $availableSeats }} seat{{ $availableSeats != 1 ? 's' : '' }} left</small>
+                                @endif
                             </div>
                         </div>
-                        
-                        <div class="flight-info">
-                            <p class="mb-1">
-                                <i class="bi bi-calendar"></i> 
-                                {{ $flight->flight_date->format('d M Y') ?? now()->format('d M Y') }}
-                            </p>
-                            <p class="mb-1">
-                                <i class="bi bi-geo-alt"></i> 
-                                {{ $flight->schedule->originAirport->city ?? 'Jakarta' }} → 
-                                {{ $flight->schedule->destinationAirport->city ?? 'Denpasar' }}
-                            </p>
-                            <p class="mb-2">
-                                <i class="bi bi-airplane"></i> 
-                                {{ $airlineNames[$airlineCode] ?? 'Garuda Indonesia' }}
-                            </p>
-                            
-                            @php
-                                $availableSeats = $flight->available_seats ?? 0;
-                                $isFull = $availableSeats <= 0;
-                            @endphp
-                            
-                            @if($isFull)
-                                <div class="alert alert-warning py-1 mb-2">
-                                    <small><i class="bi bi-exclamation-triangle"></i> Fully Booked</small>
-                                </div>
-                            @else
-                                <div class="alert alert-success py-1 mb-2">
-                                    <small><i class="bi bi-check-circle"></i> {{ $availableSeats }} seats available</small>
-                                </div>
-                            @endif
-                        </div>
-                        
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <h4 class="text-primary mb-0">${{ number_format($flight->schedule->base_price_usd ?? 150, 0) }}</h4>
-                            @if(!$isFull)
-                                <a href="{{ route('flight.seats', $flight->flight_instance_id ?? 1) }}" 
-                                   class="btn btn-primary btn-sm">
-                                    <i class="bi bi-ticket"></i> Book Now
-                                </a>
-                            @else
-                                <button class="btn btn-secondary btn-sm" disabled>
-                                    <i class="bi bi-x-circle"></i> Sold Out
-                                </button>
-                            @endif
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <p class="mb-0">
+                                    <i class="bi bi-suitcase"></i> 20kg baggage •
+                                    <i class="bi bi-utensils"></i> Meal included •
+                                    <i class="bi bi-wifi"></i> Free Wi-Fi •
+                                    <span class="badge bg-success">{{ $availableSeats }} seats available</span>
+                                </p>
+                            </div>
                         </div>
                     </div>
+                    @endforeach
                 </div>
             </div>
-            @endforeach
         </div>
-        
-        @if($flights->count() > 3)
-            <div class="text-center mt-4">
-                <a href="{{ route('flights.public') }}" class="btn btn-outline-primary">
-                    View All Flights ({{ $flights->count() }})
-                </a>
-            </div>
-        @endif
-    @else
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="bi bi-airplane text-muted" style="font-size: 3rem;"></i>
-                <h4 class="mt-3">No flights scheduled for today</h4>
-                <p class="text-muted">Check back later or try different dates.</p>
-                <a href="{{ route('home') }}" class="btn btn-primary">Search Flights</a>
-            </div>
-        </div>
-    @endif
-</div>
+    </section>
+@endif
+
 
 <!-- ===== CSS BARU DENGAN LAPISAN YANG BENAR ===== -->
 <style>
@@ -279,10 +238,12 @@
 .avx-white-bg {
     position: absolute;
     width: 100%;
-    height: 85%;
+    /* cut the white background shorter so flight cards aren't pushed so far down */
+    height: 60%;
     background: #ffffff;
     border-radius: 0; 
-    top: 54%; /*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+    /* move up slightly so the white area begins earlier */
+    top: 40%;
     left: 0;
     z-index: 2;
     box-shadow: 0 -10px 40px rgba(0,0,0,0.05);
@@ -823,7 +784,8 @@
     background: white;
     border-radius: 20px;
     padding: 30px;
-    margin-top: -50px;
+    /* pull the flight list even higher so it's clearly visible under hero */
+    margin-top: -250px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
@@ -868,22 +830,20 @@
         width: 30px;
     }
 }
-}
-</style>
 
-<!-- JS untuk tabs + passenger dropdown + tanggal pulang -->
-<script>
-(function(){
-    // Fungsi untuk update jumlah penumpang di tampilan
-    function updatePassengerText() {
-        const adults = document.querySelector('input[name="adults"]').value || 1;
-        const children = document.querySelector('input[name="children"]').value || 0;
-        const infants = document.querySelector('input[name="infants"]').value || 0;
-        
-        const passengerText = document.querySelector('.avx-passenger-text');
-        if (passengerText) {
-            passengerText.textContent = `${adults} Dewasa, ${children} Anak, ${infants} Bayi`;
-        }
+/* flight result card styling (same as search page) */
+.flight-card:hover {
+    background-color: #f8f9fa;
+    border-color: #0d6efd;
+    cursor: pointer;
+}
+.airline-logo {
+    width: 60px;
+    height: 60px;
+    line-height: 1;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
     }
     
     // Inisialisasi jumlah penumpang

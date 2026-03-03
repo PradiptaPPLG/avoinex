@@ -61,6 +61,8 @@ Route::get('/flight/{flightInstanceId}/seats', [FlightController::class, 'seats'
 Route::post('/flight/{id}/book', [FlightController::class, 'storeBooking'])->name('flight.book');
 
 // Booking form and process
+Route::get('/my-bookings', [BookingController::class, 'index'])->name('booking.index');
+Route::post('/my-bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
 Route::get('/booking/form', [BookingController::class, 'create'])->name('booking.form');
 Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
 Route::get('/booking/{id}/confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
@@ -83,6 +85,61 @@ Route::get('/test-login', function () {
     ]);
 
     return redirect()->route('home'); // redirect ke home setelah login
+});
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES
+|--------------------------------------------------------------------------
+*/
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AircraftController;
+use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\FlightController as AdminFlightController;
+use App\Http\Controllers\Admin\BookingController as AdminBookingController;
+
+Route::prefix('admin')->group(function () {
+    Route::get('/', [AuthController::class, 'showLogin'])->name('admin.home');
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('admin.login');
+    Route::post('/login', [AuthController::class, 'login'])->name('admin.login.submit');
+
+    Route::middleware(['admin.auth'])->group(function () {
+        Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('admin.dashboard');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
+
+        Route::prefix('aircraft')->name('admin.aircraft.')->group(function () {
+        Route::get('/', [AircraftController::class, 'index'])->name('index');
+        Route::get('/create', [AircraftController::class, 'create'])->name('create');
+        Route::post('/', [AircraftController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [AircraftController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [AircraftController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AircraftController::class, 'destroy'])->name('destroy');
+    });
+
+        Route::prefix('schedules')->name('admin.schedules.')->group(function () {
+        Route::get('/', [ScheduleController::class, 'index'])->name('index');
+        Route::get('/create', [ScheduleController::class, 'create'])->name('create');
+        Route::post('/', [ScheduleController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [ScheduleController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ScheduleController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ScheduleController::class, 'destroy'])->name('destroy');
+    });
+
+        Route::prefix('flights')->name('admin.flights.')->group(function () {
+        Route::get('/', [AdminFlightController::class, 'index'])->name('index');
+        Route::get('/create', [AdminFlightController::class, 'create'])->name('create');
+        Route::post('/', [AdminFlightController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [AdminFlightController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [AdminFlightController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AdminFlightController::class, 'destroy'])->name('destroy');
+    });
+
+        Route::prefix('bookings')->name('admin.bookings.')->group(function () {
+            Route::get('/', [AdminBookingController::class, 'index'])->name('index');
+            Route::get('/{id}', [AdminBookingController::class, 'show'])->name('show');
+        });
+    });
 });
 
 /*

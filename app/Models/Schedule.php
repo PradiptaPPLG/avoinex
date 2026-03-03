@@ -10,7 +10,26 @@ class Schedule extends Model
     use HasFactory;
 
     protected $primaryKey = 'schedule_id';
-    protected $fillable = ['flight_number', 'origin_iata_code', 'destination_iata_code', 'departure_time_gmt', 'arrival_time_gmt'];
+    protected $fillable = [
+        'flight_number',
+        'airline_code',
+        'origin_iata_code',
+        'destination_iata_code',
+        'departure_time_gmt',
+        'arrival_time_gmt',
+        'duration_minutes',
+        'base_price_usd',
+        'effective_from',
+        'effective_to',
+        'is_daily',
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+        'sunday'
+    ];
 
     public function originAirport()
     {

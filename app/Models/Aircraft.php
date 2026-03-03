@@ -13,6 +13,7 @@ class Aircraft extends Model
     protected $table = 'aircrafts';
 
     protected $fillable = [
+        'registration_number',
         'aircraft_model',
         'manufacturer_id',
         'total_seats',

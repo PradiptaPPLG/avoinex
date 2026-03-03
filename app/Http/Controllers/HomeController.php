@@ -13,34 +13,22 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Cek jika user belum login
-        if (!session('client_id')) {
-            return redirect()->route('login')->with('error', 'Please login first');
-        }
-
-        // Ambil data client dari session
-        $clientId = session('client_id');
-        $clientName = session('client_name');
-        $clientEmail = session('client_email');
-
-        // Ambil data dari database
-        $client = Client::find($clientId);
-
         // Ambil semua bandara untuk dropdown search
         $airports = Airport::orderBy('city')->get();
 
-        // Ambil available flights (sama seperti FlightSearchController)
+        // Ambil available flights from FlightInstance
+        // NOTE: Removed strict filtering temporarily for debugging purposes
         $flights = FlightInstance::with([
                 'schedule.originAirport',
                 'schedule.destinationAirport',
                 'aircraftInstance.aircraft',
                 'flightStatus'
             ])
-            ->where('flight_date', '>=', now()->toDateString())
-            ->where('flight_status_id', 1)
+            // ->where('flight_date', '>=', now()->toDateString())
+            // ->where('flight_status_id', 1)
             ->orderBy('flight_date')
             ->orderBy('created_at')
-            ->take(10)
+            // ->take(10)
             ->get();
 
         // Calculate available seats untuk setiap flight
@@ -59,13 +47,39 @@ class HomeController extends Controller
             $flightNumber = $flight->schedule->flight_number ?? 'GA-201';
             $airlineCode = explode('-', $flightNumber)[0] ?? 'GA';
             $flight->airline_code = $airlineCode;
+            // simple mapping for airline name used on home page cards
+            $flight->airline_name = $this->getAirlineName($airlineCode);
         }
 
-        return view('home', compact('client', 'airports', 'clientName', 'clientEmail', 'flights'));
+        // If client is logged in, load client data
+        if (session('client_id')) {
+            $clientId = session('client_id');
+            $clientName = session('client_name');
+            $clientEmail = session('client_email');
+            $client = Client::find($clientId);
+
+            return view('home', compact('client', 'airports', 'clientName', 'clientEmail', 'flights'));
+        }
+
+        return view('home', compact('airports', 'flights'));
     }
 
     public function dashboard()
     {
         return $this->index();
+    }
+
+    private function getAirlineName($code)
+    {
+        $airlines = [
+            'GA' => 'Garuda Indonesia',
+            'QZ' => 'AirAsia',
+            'SQ' => 'Singapore Airlines',
+            'MH' => 'Malaysia Airlines',
+            'CX' => 'Cathay Pacific',
+            'JL' => 'Japan Airlines',
+            'KE' => 'Korean Air'
+        ];
+        return $airlines[$code] ?? 'Airlines';
     }
 }
