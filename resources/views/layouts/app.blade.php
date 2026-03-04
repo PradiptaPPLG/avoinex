@@ -40,6 +40,18 @@
             background:#ffffff;
             z-index:1000;
         }
+
+        @media print {
+            .avx-topbar {
+                display: none !important;
+            }
+            main {
+                padding-top: 0 !important;
+            }
+            body {
+                background-color: #fff !important;
+            }
+        }
         .avx-topbar .avx-left{ display:flex; align-items:center; gap:12px; }
         .avx-topbar .avx-logo{ height:36px; }
         .avx-topbar .avx-currency-block{

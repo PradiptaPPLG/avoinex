@@ -844,9 +844,10 @@
     font-weight: bold;
     font-size: 1.2rem;
 }
-    }
-    
-    // Inisialisasi jumlah penumpang
+</style>
+
+<script>
+(function() {
     updatePassengerText();
     
     // Event listener untuk input jumlah penumpang

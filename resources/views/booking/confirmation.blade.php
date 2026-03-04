@@ -1,5 +1,36 @@
 @extends('layouts.app')
 
+@push('styles')
+<style>
+    @media print {
+        .btn, .alert-success, .card-header.bg-success {
+            display: none !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .container {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .row {
+            display: block !important;
+        }
+        .col-md-8, .col-md-4 {
+            width: 100% !important;
+            margin-bottom: 20px;
+        }
+        .boarding-pass-card {
+            border: 2px solid #000 !important;
+            padding: 10px;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="container mt-4">
     <div class="card border-success">
@@ -72,7 +103,7 @@
                 </div>
                 
                 <div class="col-md-4">
-                    <div class="card">
+                    <div class="card boarding-pass-card">
                         <div class="card-header">
                             <h6 class="mb-0">Boarding Pass</h6>
                         </div>
