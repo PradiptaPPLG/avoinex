@@ -22,3 +22,10 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Debug & temporary files
+*.txt
+!README.txt
+test.php
+*.log
+catatan.md
