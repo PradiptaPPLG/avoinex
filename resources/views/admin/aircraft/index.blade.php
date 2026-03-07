@@ -20,7 +20,11 @@
                         <th>Registration</th>
                         <th>Model</th>
                         <th>Manufacturer</th>
+                        <th>Layout</th>
                         <th>Total Seats</th>
+                        <th>Business</th>
+                        <th>Preferred</th>
+                        <th>Economy</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -29,9 +33,27 @@
                     <tr>
                         <td>{{ $item->aircraft_id }}</td>
                         <td><strong>{{ $item->registration_number }}</strong></td>
-                        <td>{{ $item->model }}</td>
-                        <td>{{ $item->manufacturer }}</td>
-                        <td>{{ $item->total_seats }}</td>
+                        <td>{{ $item->aircraft_model }}</td>
+                        <td>{{ $item->manufacturer->name ?? '-' }}</td>
+                        <td>
+                            <span class="badge bg-secondary">{{ $item->seat_columns ?? 6 }}×{{ $item->seat_rows ?? 30 }}</span>
+                        </td>
+                        <td><strong>{{ $item->total_seats }}</strong></td>
+                        <td>
+                            @if(($item->business_rows ?? 0) > 0)
+                                <span class="badge bg-warning text-dark">{{ ($item->seat_columns ?? 6) * ($item->business_rows ?? 0) }}</span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($item->preferred_zone_enabled)
+                                <span class="badge bg-info">Rows {{ $item->preferred_zone_start_row }}-{{ $item->preferred_zone_end_row }}</span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td>{{ $item->economy_seats ?? '-' }}</td>
                         <td>
                             <a href="{{ route('admin.aircraft.edit', $item->aircraft_id) }}" class="btn btn-sm btn-warning">
                                 <i class="bi bi-pencil"></i>
@@ -47,7 +69,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">No aircraft found</td>
+                        <td colspan="10" class="text-center py-4 text-muted">No aircraft found</td>
                     </tr>
                     @endforelse
                 </tbody>

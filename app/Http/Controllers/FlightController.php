@@ -130,9 +130,19 @@ class FlightController extends Controller
             }, ARRAY_FILTER_USE_KEY);
             \Log::info('Row 1-2 seats:', array_keys($row1and2));
             
+            $aircraft = $flight->aircraftInstance->aircraft;
             return view('flight.seats', [
                 'flight' => $flight,
-                'availableSeats' => $availableSeats
+                'availableSeats' => $availableSeats,
+                'aircraftConfig' => [
+                    'seat_columns' => $aircraft->seat_columns ?? 6,
+                    'seat_rows' => $aircraft->seat_rows ?? 30,
+                    'business_rows' => $aircraft->business_rows ?? 2,
+                    'preferred_zone_enabled' => $aircraft->preferred_zone_enabled ?? false,
+                    'preferred_zone_start_row' => $aircraft->preferred_zone_start_row,
+                    'preferred_zone_end_row' => $aircraft->preferred_zone_end_row,
+                    'seat_letters' => $aircraft->seat_letters ?? ['A','B','C','D','E','F'],
+                ]
             ]);
             
         } catch (\Exception $e) {
@@ -204,9 +214,19 @@ class FlightController extends Controller
                 }
             }
             
+            $aircraft = $flight->aircraftInstance->aircraft;
             return view('flight.seats', [
                 'flight' => $flight,
-                'availableSeats' => $availableSeats
+                'availableSeats' => $availableSeats,
+                'aircraftConfig' => [
+                    'seat_columns' => $aircraft->seat_columns ?? 6,
+                    'seat_rows' => $aircraft->seat_rows ?? 30,
+                    'business_rows' => $aircraft->business_rows ?? 2,
+                    'preferred_zone_enabled' => $aircraft->preferred_zone_enabled ?? false,
+                    'preferred_zone_start_row' => $aircraft->preferred_zone_start_row,
+                    'preferred_zone_end_row' => $aircraft->preferred_zone_end_row,
+                    'seat_letters' => $aircraft->seat_letters ?? ['A','B','C','D','E','F'],
+                ]
             ]);
             
         } catch (\Exception $e) {

@@ -1,12 +1,12 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Create Aircraft')
-@section('page-title', 'Create Aircraft')
+@section('title', 'Edit Aircraft')
+@section('page-title', 'Edit Aircraft')
 
 @section('content')
 <div class="card">
     <div class="card-header bg-white">
-        <h5 class="mb-0"><i class="bi bi-airplane"></i> Add New Aircraft</h5>
+        <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Aircraft — {{ $aircraft->registration_number }}</h5>
     </div>
     <div class="card-body">
         @if($errors->any())
@@ -19,25 +19,26 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.aircraft.store') }}" method="POST" id="aircraft-form">
+        <form action="{{ route('admin.aircraft.update', $aircraft->aircraft_id) }}" method="POST" id="aircraft-form">
             @csrf
+            @method('PUT')
 
             {{-- Basic Info --}}
             <div class="row mb-4">
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Registration Number</label>
-                    <input type="text" name="registration_number" class="form-control" value="{{ old('registration_number') }}" required>
+                    <input type="text" name="registration_number" class="form-control" value="{{ old('registration_number', $aircraft->registration_number) }}" required>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Model</label>
-                    <input type="text" name="model" class="form-control" value="{{ old('model') }}" required>
+                    <input type="text" name="model" class="form-control" value="{{ old('model', $aircraft->aircraft_model) }}" required>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Manufacturer</label>
                     <select name="manufacturer" class="form-control" required>
                         <option value="">-- Select Manufacturer --</option>
                         @foreach($manufacturers as $mfg)
-                            <option value="{{ $mfg->aircraft_manufacturer_id }}" {{ old('manufacturer') == $mfg->aircraft_manufacturer_id ? 'selected' : '' }}>
+                            <option value="{{ $mfg->aircraft_manufacturer_id }}" {{ old('manufacturer', $aircraft->manufacturer_id) == $mfg->aircraft_manufacturer_id ? 'selected' : '' }}>
                                 {{ $mfg->name }}
                             </option>
                         @endforeach
@@ -52,16 +53,16 @@
             <div class="row mb-3">
                 <div class="col-md-3">
                     <label class="form-label fw-semibold">Seats per Row (Width)</label>
-                    <input type="number" name="seat_columns" id="seat_columns" class="form-control" min="2" max="12" value="{{ old('seat_columns', 6) }}" required>
+                    <input type="number" name="seat_columns" id="seat_columns" class="form-control" min="2" max="12" value="{{ old('seat_columns', $aircraft->seat_columns ?? 6) }}" required>
                     <small class="text-muted">e.g. 6 = A B C | D E F</small>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-semibold">Total Rows (Length)</label>
-                    <input type="number" name="seat_rows" id="seat_rows" class="form-control" min="5" max="80" value="{{ old('seat_rows', 30) }}" required>
+                    <input type="number" name="seat_rows" id="seat_rows" class="form-control" min="5" max="80" value="{{ old('seat_rows', $aircraft->seat_rows ?? 30) }}" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-semibold">Total Seats</label>
-                    <div class="form-control bg-light fw-bold text-primary" id="total_seats_display">180</div>
+                    <div class="form-control bg-light fw-bold text-primary" id="total_seats_display">{{ ($aircraft->seat_columns ?? 6) * ($aircraft->seat_rows ?? 30) }}</div>
                     <small class="text-muted">Auto-calculated</small>
                 </div>
                 <div class="col-md-3">
@@ -77,16 +78,16 @@
             <div class="row mb-3">
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Business Class Rows</label>
-                    <input type="number" name="business_rows" id="business_rows" class="form-control" min="0" max="20" value="{{ old('business_rows', 2) }}" required>
+                    <input type="number" name="business_rows" id="business_rows" class="form-control" min="0" max="20" value="{{ old('business_rows', $aircraft->business_rows ?? 2) }}" required>
                     <small class="text-muted">Starting from row 1</small>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Business Seats</label>
-                    <div class="form-control bg-light" id="business_seats_display">12</div>
+                    <div class="form-control bg-light" id="business_seats_display">{{ ($aircraft->seat_columns ?? 6) * ($aircraft->business_rows ?? 2) }}</div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Economy Seats</label>
-                    <div class="form-control bg-light" id="economy_seats_display">168</div>
+                    <div class="form-control bg-light" id="economy_seats_display">{{ $aircraft->economy_seats ?? 168 }}</div>
                 </div>
             </div>
 
@@ -96,7 +97,7 @@
             <h6 class="fw-bold mb-3"><i class="bi bi-arrows-angle-expand"></i> Preferred Zone (Extra Legroom)</h6>
             <div class="mb-3">
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" name="preferred_zone_enabled" id="preferred_zone_enabled" value="1" {{ old('preferred_zone_enabled') ? 'checked' : '' }}>
+                    <input class="form-check-input" type="checkbox" name="preferred_zone_enabled" id="preferred_zone_enabled" value="1" {{ old('preferred_zone_enabled', $aircraft->preferred_zone_enabled) ? 'checked' : '' }}>
                     <label class="form-check-label fw-semibold" for="preferred_zone_enabled">
                         Enable Preferred Zone (Extra Legroom Seats)
                     </label>
@@ -107,16 +108,16 @@
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Start Row</label>
-                        <input type="number" name="preferred_zone_start_row" id="preferred_zone_start_row" class="form-control" min="1" value="{{ old('preferred_zone_start_row', 3) }}">
+                        <input type="number" name="preferred_zone_start_row" id="preferred_zone_start_row" class="form-control" min="1" value="{{ old('preferred_zone_start_row', $aircraft->preferred_zone_start_row ?? 3) }}">
                         <small class="text-muted">Auto-filled: after business rows</small>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">End Row</label>
-                        <input type="number" name="preferred_zone_end_row" id="preferred_zone_end_row" class="form-control" min="1" value="{{ old('preferred_zone_end_row', 5) }}">
+                        <input type="number" name="preferred_zone_end_row" id="preferred_zone_end_row" class="form-control" min="1" value="{{ old('preferred_zone_end_row', $aircraft->preferred_zone_end_row ?? 5) }}">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Preferred Zone Seats</label>
-                        <div class="form-control bg-light" id="preferred_seats_display">18</div>
+                        <div class="form-control bg-light" id="preferred_seats_display">0</div>
                     </div>
                 </div>
             </div>
@@ -133,7 +134,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Create Aircraft</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Update Aircraft</button>
             <a href="{{ route('admin.aircraft.index') }}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
@@ -175,10 +176,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (prefEnabled.checked) {
             prefFields.style.display = 'block';
-            // Auto-fill preferred start
-            if (!prefStart.dataset.userEdited) {
-                prefStart.value = b + 1;
-            }
             const ps = parseInt(prefStart.value) || (b + 1);
             const pe = parseInt(prefEnd.value) || (b + 3);
             prefSeats = c * (pe - ps + 1);
@@ -208,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
     rows.addEventListener('input', update);
     bizRows.addEventListener('input', update);
     prefEnabled.addEventListener('change', update);
-    prefStart.addEventListener('input', function() { this.dataset.userEdited = '1'; update(); });
+    prefStart.addEventListener('input', update);
     prefEnd.addEventListener('input', update);
 
     update();

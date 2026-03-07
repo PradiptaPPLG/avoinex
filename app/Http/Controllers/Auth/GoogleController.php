@@ -8,53 +8,63 @@ use App\Models\Client;
 
 class GoogleController extends Controller
 {
+    /**
+     * Redirect to Google OAuth consent screen.
+     */
     public function redirect()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with(['prompt' => 'select_account'])
+            ->redirect();
     }
 
+    /**
+     * Handle the callback from Google after user selects an account.
+     */
     public function callback()
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
-        } catch (\Exception $e) {
-            return redirect('/login')->with('error', 'Google authentication failed');
+        }
+        catch (\Exception $e) {
+            return redirect()->route('landing')
+                ->with('error', 'Google authentication failed. Please try again.');
         }
 
-        // cari berdasarkan email
+        // Find existing client by email
         $client = Client::where('email', $googleUser->email)->first();
 
         if (!$client) {
-            // PECAH nama dengan aman
+            // Create new client from Google profile
             $names = explode(' ', $googleUser->name, 2);
 
-            $client = Client::create([
-                'first_name' => $names[0],
-                'last_name'  => $names[1] ?? null,
-                'email'      => $googleUser->email,
-                'google_id'  => $googleUser->id,
-                'profile_completed' => 0,
-            ]);
-        } else {
-            if (!$client->google_id) {
-                $client->update([
-                    'google_id' => $googleUser->id
+            try {
+                $client = Client::create([
+                    'first_name' => $names[0] ?? 'User',
+                    'last_name' => $names[1] ?? null,
+                    'email' => $googleUser->email,
+                    'google_id' => $googleUser->id,
                 ]);
             }
+            catch (\Exception $e) {
+                return redirect()->route('landing')
+                    ->with('error', 'Failed to create account. Please try again.');
+            }
+        }
+        elseif (!$client->google_id) {
+            // Link Google ID to existing account
+            $client->update(['google_id' => $googleUser->id]);
         }
 
-        // simpan session
+        // Set session
         session([
             'client_id' => $client->client_id,
             'client_name' => trim($client->first_name . ' ' . $client->last_name),
             'client_email' => $client->email,
-            'client_logged_in' => true
+            'client_logged_in' => true,
         ]);
 
-       // 🔥 CEK PROFIL
-
-return redirect('/home')
-    ->with('success', 'Login with Google successful!');
-
+        return redirect()->route('home')
+            ->with('success', 'Login with Google successful!');
     }
 }

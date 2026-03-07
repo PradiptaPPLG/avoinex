@@ -1,6 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $config = $aircraftConfig ?? [
+        'seat_columns' => 6,
+        'seat_rows' => 30,
+        'business_rows' => 2,
+        'preferred_zone_enabled' => false,
+        'preferred_zone_start_row' => null,
+        'preferred_zone_end_row' => null,
+        'seat_letters' => ['A','B','C','D','E','F'],
+    ];
+    $seatLetters = $config['seat_letters'];
+    $halfCols = (int) ceil(count($seatLetters) / 2);
+    $leftLetters = array_slice($seatLetters, 0, $halfCols);
+    $rightLetters = array_slice($seatLetters, $halfCols);
+    $businessRows = $config['business_rows'];
+    $prefEnabled = $config['preferred_zone_enabled'];
+    $prefStart = $config['preferred_zone_start_row'] ?? ($businessRows + 1);
+    $prefEnd = $config['preferred_zone_end_row'] ?? ($businessRows + 3);
+    $totalRows = $config['seat_rows'];
+    $econStart = $prefEnabled ? ($prefEnd + 1) : ($businessRows + 1);
+@endphp
 <div class="container mt-4">
     <!-- Flight Info -->
     <div class="card mb-4">
@@ -50,10 +71,18 @@
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <div class="legend d-flex flex-wrap gap-3 justify-content-center">
+                            @if($businessRows > 0)
                             <div class="d-flex align-items-center">
                                 <div class="seat-legend business me-2"></div>
                                 <span>Business Class</span>
                             </div>
+                            @endif
+                            @if($prefEnabled)
+                            <div class="d-flex align-items-center">
+                                <div class="seat-legend preferred me-2"></div>
+                                <span>Preferred (Extra Legroom)</span>
+                            </div>
+                            @endif
                             <div class="d-flex align-items-center">
                                 <div class="seat-legend economy me-2"></div>
                                 <span>Economy Class</span>
@@ -75,20 +104,23 @@
                     <i class="bi bi-cup-hot"></i> FRONT GALLEY
                 </div>
 
-                <!-- BUSINESS CLASS SECTION -->
+                {{-- =============================== --}}
+                {{-- BUSINESS CLASS SECTION           --}}
+                {{-- =============================== --}}
+                @if($businessRows > 0)
                 <div class="business-section mb-5">
                     <h5 class="text-warning mb-3">
                         <i class="bi bi-star-fill"></i> Business Class
-                        <small class="text-muted ms-2">Rows 1-2</small>
+                        <small class="text-muted ms-2">Rows 1-{{ $businessRows }}</small>
                     </h5>
                     
                     <div class="seat-map">
-                        @for($row = 1; $row <= 2; $row++)
+                        @for($row = 1; $row <= $businessRows; $row++)
                             <div class="seat-row d-flex justify-content-center align-items-center mb-2">
                                 <div class="row-number me-2 fw-bold text-warning">{{ $row }}</div>
                                 
-                                <!-- A, B, C -->
-                                @foreach(['A', 'B', 'C'] as $letter)
+                                {{-- Left side --}}
+                                @foreach($leftLetters as $letter)
                                     @php
                                         $seatNumber = $row . $letter;
                                         $seat = $availableSeats[$seatNumber] ?? null;
@@ -119,8 +151,8 @@
                                     <div class="aisle-line"></div>
                                 </div>
                                 
-                                <!-- D, E, F -->
-                                @foreach(['D', 'E', 'F'] as $letter)
+                                {{-- Right side --}}
+                                @foreach($rightLetters as $letter)
                                     @php
                                         $seatNumber = $row . $letter;
                                         $seat = $availableSeats[$seatNumber] ?? null;
@@ -151,96 +183,137 @@
                         @endfor
                     </div>
                 </div>
+                @endif
 
-                <!-- PREFERRED ZONE (Extra Legroom) -->
-                <div class="preferred-section mb-4 p-3 bg-light-blue rounded">
-                    <div class="section-header mb-3">
-                        <h6 class="text-primary mb-0">
-                            <i class="bi bi-arrows-angle-expand"></i> PREFERRED ZONE
-                            <small class="text-muted ms-2">Rows 3-5 • Extra legroom seats</small>
-                        </h6>
-                    </div>
-                    
-                    @for($row = 3; $row <= 5; $row++)
-                        <div class="seat-row d-flex justify-content-center align-items-center mb-2">
-                            <div class="row-number me-2 fw-bold text-primary">{{ $row }}</div>
-                            
-                            @foreach(['A', 'B', 'C'] as $letter)
-                                @php
-                                    $seatNumber = $row . $letter;
-                                    $seat = $availableSeats[$seatNumber] ?? null;
-                                    $isAvailable = $seat ? $seat['is_available'] : true;
-                                    $seatId = $seat ? $seat['seat_id'] : 'p_' . $row . $letter;
-                                    $price = $seat ? $seat['price'] : 180.00;
-                                @endphp
-                                <div class="seat m-1">
-                                    @if($isAvailable)
-                                        <div class="seat-item" 
-                                             data-seat-id="{{ $seatId }}"
-                                             data-seat-number="{{ $seatNumber }}"
-                                             data-price="{{ $price }}"
-                                             data-class="preferred">
-                                            <div class="seat-number">{{ $seatNumber }}</div>
-                                            <div class="seat-price">${{ number_format($price, 2) }}</div>
-                                        </div>
-                                    @else
-                                        <div class="seat-unavailable">
-                                            {{ $seatNumber }}
-                                        </div>
-                                    @endif
-                                </div>
-                            @endforeach
-                            
-                            <!-- AISLE -->
-                            <div class="aisle mx-3 d-flex align-items-center">
-                                <div class="aisle-mark">↔<br><small>AISLE</small></div>
+                {{-- =============================== --}}
+                {{-- PREFERRED ZONE (Extra Legroom)   --}}
+                {{-- =============================== --}}
+                @if($prefEnabled)
+                <div class="preferred-section mb-5">
+                    {{-- Premium Header --}}
+                    <div class="preferred-header mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="preferred-icon-badge">
+                                <i class="bi bi-arrows-angle-expand"></i>
                             </div>
-                            
-                            @foreach(['D', 'E', 'F'] as $letter)
-                                @php
-                                    $seatNumber = $row . $letter;
-                                    $seat = $availableSeats[$seatNumber] ?? null;
-                                    $isAvailable = $seat ? $seat['is_available'] : true;
-                                    $seatId = $seat ? $seat['seat_id'] : 'p_' . $row . $letter;
-                                    $price = $seat ? $seat['price'] : 180.00;
-                                @endphp
-                                <div class="seat m-1">
-                                    @if($isAvailable)
-                                        <div class="seat-item" 
-                                             data-seat-id="{{ $seatId }}"
-                                             data-seat-number="{{ $seatNumber }}"
-                                             data-price="{{ $price }}"
-                                             data-class="preferred">
-                                            <div class="seat-number">{{ $seatNumber }}</div>
-                                            <div class="seat-price">${{ number_format($price, 2) }}</div>
-                                        </div>
-                                    @else
-                                        <div class="seat-unavailable">
-                                            {{ $seatNumber }}
-                                        </div>
-                                    @endif
-                                </div>
-                            @endforeach
-                            
-                            <div class="row-number ms-2 fw-bold text-primary">{{ $row }}</div>
+                            <div>
+                                <h5 class="mb-0 preferred-title">PREFERRED ZONE</h5>
+                                <small class="preferred-subtitle">Rows {{ $prefStart }}-{{ $prefEnd }} • Extra legroom seats</small>
+                            </div>
+                            <span class="preferred-badge ms-auto">
+                                <i class="bi bi-gem"></i> EXTRA LEGROOM
+                            </span>
                         </div>
-                    @endfor
-                </div>
+                    </div>
 
-                <!-- ECONOMY CLASS SECTION -->
+                    {{-- Legroom indicator --}}
+                    <div class="legroom-indicator mb-3">
+                        <div class="d-flex justify-content-center gap-4 align-items-center">
+                            <div class="legroom-item">
+                                <i class="bi bi-arrows-expand text-info"></i>
+                                <span>+8cm legroom</span>
+                            </div>
+                            <div class="legroom-item">
+                                <i class="bi bi-lightning-charge text-info"></i>
+                                <span>Priority boarding</span>
+                            </div>
+                            <div class="legroom-item">
+                                <i class="bi bi-headset text-info"></i>
+                                <span>Premium amenities</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preferred-seat-area">
+                        @for($row = $prefStart; $row <= $prefEnd; $row++)
+                            <div class="seat-row d-flex justify-content-center align-items-center mb-2">
+                                <div class="row-number me-2 fw-bold preferred-row-num">{{ $row }}</div>
+                                
+                                @foreach($leftLetters as $letter)
+                                    @php
+                                        $seatNumber = $row . $letter;
+                                        $seat = $availableSeats[$seatNumber] ?? null;
+                                        $isAvailable = $seat ? $seat['is_available'] : true;
+                                        $seatId = $seat ? $seat['seat_id'] : 'p_' . $row . $letter;
+                                        $price = $seat ? $seat['price'] : 180.00;
+                                    @endphp
+                                    <div class="seat m-1">
+                                        @if($isAvailable)
+                                            <div class="seat-item preferred-seat" 
+                                                 data-seat-id="{{ $seatId }}"
+                                                 data-seat-number="{{ $seatNumber }}"
+                                                 data-price="{{ $price }}"
+                                                 data-class="preferred">
+                                                <div class="seat-number">{{ $seatNumber }}</div>
+                                                <div class="seat-price">${{ number_format($price, 2) }}</div>
+                                                <div class="legroom-icon"><i class="bi bi-arrows-expand"></i></div>
+                                            </div>
+                                        @else
+                                            <div class="seat-unavailable">
+                                                {{ $seatNumber }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                                
+                                <!-- AISLE with premium styling -->
+                                <div class="aisle mx-3 d-flex align-items-center justify-content-center">
+                                    <div class="aisle-preferred">
+                                        <div class="aisle-preferred-line"></div>
+                                        <div class="aisle-preferred-dot"></div>
+                                    </div>
+                                </div>
+                                
+                                @foreach($rightLetters as $letter)
+                                    @php
+                                        $seatNumber = $row . $letter;
+                                        $seat = $availableSeats[$seatNumber] ?? null;
+                                        $isAvailable = $seat ? $seat['is_available'] : true;
+                                        $seatId = $seat ? $seat['seat_id'] : 'p_' . $row . $letter;
+                                        $price = $seat ? $seat['price'] : 180.00;
+                                    @endphp
+                                    <div class="seat m-1">
+                                        @if($isAvailable)
+                                            <div class="seat-item preferred-seat" 
+                                                 data-seat-id="{{ $seatId }}"
+                                                 data-seat-number="{{ $seatNumber }}"
+                                                 data-price="{{ $price }}"
+                                                 data-class="preferred">
+                                                <div class="seat-number">{{ $seatNumber }}</div>
+                                                <div class="seat-price">${{ number_format($price, 2) }}</div>
+                                                <div class="legroom-icon"><i class="bi bi-arrows-expand"></i></div>
+                                            </div>
+                                        @else
+                                            <div class="seat-unavailable">
+                                                {{ $seatNumber }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                                
+                                <div class="row-number ms-2 fw-bold preferred-row-num">{{ $row }}</div>
+                            </div>
+                        @endfor
+                    </div>
+                </div>
+                @endif
+
+                {{-- =============================== --}}
+                {{-- ECONOMY CLASS SECTION            --}}
+                {{-- =============================== --}}
                 <div class="economy-section">
                     <h5 class="text-success mb-3">
                         <i class="bi bi-person-fill"></i> Economy Class
-                        <small class="text-muted ms-2">Rows 6-30</small>
+                        <small class="text-muted ms-2">Rows {{ $econStart }}-{{ $totalRows }}</small>
                     </h5>
                     
                     <div class="seat-map">
-                        @for($row = 6; $row <= 30; $row++)
+                        @for($row = $econStart; $row <= $totalRows; $row++)
                             <div class="seat-row d-flex justify-content-center align-items-center mb-2">
                                 <div class="row-number me-2 fw-bold">{{ $row }}</div>
                                 
-                                <!-- A, B, C -->
-                                @foreach(['A', 'B', 'C'] as $letter)
+                                {{-- Left side --}}
+                                @foreach($leftLetters as $letter)
                                     @php
                                         $seatNumber = $row . $letter;
                                         $seat = $availableSeats[$seatNumber] ?? null;
@@ -271,8 +344,8 @@
                                     <div class="aisle-line"></div>
                                 </div>
                                 
-                                <!-- D, E, F -->
-                                @foreach(['D', 'E', 'F'] as $letter)
+                                {{-- Right side --}}
+                                @foreach($rightLetters as $letter)
                                     @php
                                         $seatNumber = $row . $letter;
                                         $seat = $availableSeats[$seatNumber] ?? null;
@@ -343,7 +416,6 @@
                     <p class="mt-2">No seats selected yet</p>
                 </div>
             </div>
-            <!-- GANTI BAGIAN INI: -->
 <div class="d-flex justify-content-between align-items-center">
     <div>
         <h4>Total: <span id="total-price" class="text-primary fw-bold">$0.00</span></h4>
@@ -354,21 +426,17 @@
             <i class="bi bi-x-circle"></i> Clear All
         </button>
         
-        <!-- HAPUS FORM INI DAN GANTI DENGAN: -->
         <button type="button" class="btn btn-success btn-lg" id="continue-btn" disabled>
             <i class="bi bi-arrow-right"></i> Continue to Booking
         </button>
     </div>
 </div>
 
-<!-- TAMBAHKAN HIDDEN FORM UNTUK CSRF -->
 <form id="hidden-form" method="POST" action="{{ route('flight.book', ['id' => $flight->flight_instance_id]) }}" style="display: none;">
     @csrf
     <input type="hidden" name="selected_seats" id="selected-seats-hidden" value="">
     <input type="hidden" name="total_price" id="total-price-hidden" value="0">
 </form>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -402,6 +470,7 @@
     padding: 5px;
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     border-color: #ced4da;
+    position: relative;
 }
 
 .seat-item:hover {
@@ -441,14 +510,169 @@
     border-color: #ffc107;
 }
 
-.preferred-section .seat-item {
-    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-    border-color: #90caf9;
-}
-
 .economy-section .seat-item {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     border-color: #ced4da;
+}
+
+/* ===================== */
+/* PREFERRED ZONE DESIGN */
+/* ===================== */
+.preferred-section {
+    position: relative;
+    padding: 20px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #e0f4ff 0%, #cce5ff 30%, #e8f4fd 70%, #d6ecfa 100%);
+    border: 2px solid #7ec8e3;
+    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.preferred-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #00b4d8, #0077b6, #00b4d8);
+    border-radius: 16px 16px 0 0;
+}
+
+.preferred-header {
+    padding: 8px 12px;
+    background: linear-gradient(135deg, rgba(0,119,182,0.08), rgba(0,180,216,0.08));
+    border-radius: 10px;
+    border: 1px solid rgba(0,119,182,0.15);
+}
+
+.preferred-icon-badge {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #0077b6, #00b4d8);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    box-shadow: 0 3px 8px rgba(0,119,182,0.3);
+}
+
+.preferred-title {
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    background: linear-gradient(135deg, #0077b6, #00b4d8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.1rem;
+}
+
+.preferred-subtitle {
+    color: #4a90a4;
+    font-weight: 500;
+}
+
+.preferred-badge {
+    background: linear-gradient(135deg, #0077b6, #00b4d8);
+    color: white;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: 0 3px 8px rgba(0,119,182,0.3);
+    text-transform: uppercase;
+}
+
+.legroom-indicator {
+    padding: 8px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 8px;
+    border: 1px dashed #7ec8e3;
+}
+
+.legroom-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #0077b6;
+    font-weight: 500;
+}
+
+.preferred-row-num {
+    color: #0077b6 !important;
+    font-size: 1.05rem;
+}
+
+.preferred-seat-area {
+    padding: 10px 0;
+}
+
+/* Preferred seat styling — bigger, bolder, premium feel */
+.preferred-seat {
+    background: linear-gradient(135deg, #d6f0ff 0%, #b3e0ff 50%, #cce8ff 100%) !important;
+    border: 2px solid #4db8e8 !important;
+    border-radius: 10px !important;
+    height: 78px !important;
+    box-shadow: 0 2px 8px rgba(0,119,182,0.15);
+    position: relative;
+}
+
+.preferred-seat:hover {
+    background: linear-gradient(135deg, #c0e5ff 0%, #99d6ff 50%, #b3dcff 100%) !important;
+    border-color: #0077b6 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,119,182,0.25);
+}
+
+.preferred-seat .seat-number {
+    color: #0077b6;
+    font-weight: 700;
+}
+
+.preferred-seat .seat-price {
+    color: #0077b6;
+    font-weight: 600;
+}
+
+.legroom-icon {
+    position: absolute;
+    bottom: 2px;
+    right: 3px;
+    font-size: 0.6rem;
+    color: #00b4d8;
+    opacity: 0.7;
+}
+
+/* Preferred aisle */
+.aisle-preferred {
+    position: relative;
+    width: 8px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.aisle-preferred-line {
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 0%, #7ec8e3 20%, #7ec8e3 80%, transparent 100%);
+    border-radius: 2px;
+}
+
+.aisle-preferred-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(135deg, #00b4d8, #0077b6);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(0,180,216,0.4);
 }
 
 /* SELECTED STATE */
@@ -460,6 +684,15 @@
 
 .seat-item.selected .seat-price {
     color: rgba(255,255,255,0.8) !important;
+}
+
+.seat-item.selected .seat-number {
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+}
+
+.seat-item.selected .legroom-icon {
+    color: rgba(255,255,255,0.6) !important;
 }
 
 /* AISLE STYLING */
@@ -530,6 +763,11 @@
     border: 2px solid #ffc107;
 }
 
+.seat-legend.preferred {
+    background: linear-gradient(135deg, #d6f0ff, #b3e0ff);
+    border: 2px solid #4db8e8;
+}
+
 .seat-legend.economy {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     border: 2px solid #ced4da;
@@ -549,10 +787,6 @@
 .galley-section, .facility-box {
     font-size: 0.9rem;
     font-weight: 500;
-}
-
-.bg-light-blue {
-    background-color: #e3f2fd;
 }
 
 /* CUSTOM CARD SHADOW */
@@ -582,6 +816,10 @@
     .seat-item, .seat-unavailable {
         height: 55px;
         padding: 2px;
+    }
+
+    .preferred-seat {
+        height: 60px !important;
     }
     
     .seat-number {
@@ -614,6 +852,19 @@
     .card-body {
         padding: 1rem;
     }
+
+    .preferred-section {
+        padding: 12px;
+    }
+
+    .preferred-badge {
+        display: none;
+    }
+
+    .legroom-indicator {
+        flex-direction: column;
+        gap: 4px !important;
+    }
 }
 
 /* SCROLLBAR STYLING */
@@ -644,47 +895,33 @@
 </style>
 
 <script>
-// ULTRA SIMPLE VERSION - GUARANTEED TO WORK
+// SEAT SELECTION LOGIC
 console.log('=== SEAT SELECTION PAGE LOADING ===');
 
-// Global variables
 let selectedSeats = [];
 let totalPrice = 0;
 
-// 1. INITIALIZE - Dipanggil saat DOM siap
 function initializeSeatSelection() {
     console.log('🔄 Initializing seat selection...');
-    
-    // Reset state
     selectedSeats = [];
     totalPrice = 0;
-    
-    // Update UI awal
     updateUI();
-    
     console.log('✅ Initialization complete');
 }
 
-// 2. SEAT CLICK HANDLER - Gunakan event delegation
 document.addEventListener('click', function(event) {
-    // Cek jika klik adalah seat item
     if (event.target.closest('.seat-item')) {
         const seatElement = event.target.closest('.seat-item');
         handleSeatClick(seatElement);
     }
-    
-    // Cek jika klik adalah clear button
     if (event.target.closest('#clear-seats')) {
         handleClearSeats();
     }
-    
-    // Cek jika klik adalah continue button
     if (event.target.closest('#continue-btn')) {
         handleContinueBooking();
     }
 });
 
-// 3. HANDLE SEAT CLICK
 function handleSeatClick(seatElement) {
     const seatId = seatElement.dataset.seatId;
     const seatNumber = seatElement.dataset.seatNumber;
@@ -693,13 +930,11 @@ function handleSeatClick(seatElement) {
     console.log(`🪑 Seat clicked: ${seatNumber} ($${price})`);
     
     if (seatElement.classList.contains('selected')) {
-        // Deselect
         seatElement.classList.remove('selected');
         selectedSeats = selectedSeats.filter(s => s.id !== seatId);
         totalPrice -= price;
         console.log(`➖ Deselected: ${seatNumber}`);
     } else {
-        // Select
         if (selectedSeats.length >= 9) {
             alert('Maximum 9 seats allowed');
             return;
@@ -717,7 +952,6 @@ function handleSeatClick(seatElement) {
     updateUI();
 }
 
-// 4. HANDLE CLEAR SEATS
 function handleClearSeats() {
     if (selectedSeats.length === 0) {
         alert('No seats to clear');
@@ -725,25 +959,19 @@ function handleClearSeats() {
     }
     
     if (confirm('Clear all selected seats?')) {
-        // Clear visual
         document.querySelectorAll('.seat-item.selected').forEach(seat => {
             seat.classList.remove('selected');
         });
-        
-        // Clear data
         selectedSeats = [];
         totalPrice = 0;
-        
         console.log('🗑️ All seats cleared');
         updateUI();
     }
 }
 
-// 5. HANDLE CONTINUE BOOKING - INI YANG PENTING!
 function handleContinueBooking() {
     console.log('🚀 CONTINUE TO BOOKING CLICKED!');
     
-    // Cek apakah button disabled
     const continueBtn = document.getElementById('continue-btn');
     if (continueBtn.disabled) {
         alert('Please select seats first');
@@ -759,19 +987,15 @@ function handleContinueBooking() {
     console.log('💰 Total price:', totalPrice);
     console.log('✈️ Flight ID:', {{ $flight->flight_instance_id }});
     
-    // Tampilkan loading
     continueBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Redirecting...';
     continueBtn.disabled = true;
     
-    // SIMPLE REDIRECT - PASTI BEKERJA!
     setTimeout(() => {
-        // Simpan data di localStorage/sessionStorage
         try {
             localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
             localStorage.setItem('totalPrice', totalPrice);
             localStorage.setItem('flightId', {{ $flight->flight_instance_id }});
             
-            // Juga simpan di sessionStorage
             sessionStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
             sessionStorage.setItem('totalPrice', totalPrice);
             sessionStorage.setItem('flightId', {{ $flight->flight_instance_id }});
@@ -781,7 +1005,6 @@ function handleContinueBooking() {
             console.log('⚠️ Could not save to storage:', e);
         }
         
-        // METHOD 1: Redirect dengan data di URL (paling reliable)
         const params = new URLSearchParams();
         params.set('seats', JSON.stringify(selectedSeats));
         params.set('total', totalPrice);
@@ -790,23 +1013,19 @@ function handleContinueBooking() {
         const redirectUrl = '{{ route("booking.form") }}?' + params.toString();
         console.log('🔗 Redirect URL:', redirectUrl);
 
-        // DO THE REDIRECT
         window.location.href = redirectUrl;
         
-    }, 500); // Delay kecil untuk efek visual
+    }, 500);
 }
 
-// 6. UPDATE UI
 function updateUI() {
     console.log('🎨 Updating UI...');
     
-    // Update total price display
     const totalElement = document.getElementById('total-price');
     if (totalElement) {
         totalElement.textContent = '$' + totalPrice.toFixed(2);
     }
     
-    // Update continue button
     const continueBtn = document.getElementById('continue-btn');
     if (continueBtn) {
         if (selectedSeats.length > 0) {
@@ -822,11 +1041,9 @@ function updateUI() {
         }
     }
     
-    // Update seat list display
     updateSeatList();
 }
 
-// 7. UPDATE SEAT LIST DISPLAY
 function updateSeatList() {
     const container = document.getElementById('selected-seats-list');
     if (!container) return;

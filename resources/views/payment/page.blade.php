@@ -4,6 +4,29 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-8">
+            <!-- Booking Steps -->
+            <div class="mb-4 position-relative">
+                <div class="progress" style="height: 3px; position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); z-index: 1;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-between position-relative" style="z-index: 2;">
+                    <div class="text-center" style="width: 32%;">
+                        <div class="bg-success text-white rounded-pill py-2 border border-2 border-success shadow-sm">
+                            <i class="bi bi-check-circle-fill me-1"></i> 1. Passenger Details
+                        </div>
+                    </div>
+                    <div class="text-center" style="width: 32%;">
+                        <div class="bg-primary text-white rounded-pill py-2 border border-2 border-primary fw-bold shadow-sm">
+                            <i class="bi bi-credit-card-fill me-1"></i> 2. Payment
+                        </div>
+                    </div>
+                    <div class="text-center" style="width: 32%;">
+                        <div class="bg-light text-muted rounded-pill py-2 border border-2 shadow-sm">
+                            <i class="bi bi-check-circle me-1"></i> 3. Confirmation
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">Payment Method</h5>

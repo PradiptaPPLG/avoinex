@@ -21,16 +21,17 @@ class Client extends Model
         'passport',
         'iata_country_code',
         'password_hash',
-        'date_of_birth'
+        'date_of_birth',
+        'google_id'
     ];
 
     public function country()
     {
-        return $this->belongsTo(Country::class, 'iata_country_code', 'country_code');
+        return $this->belongsTo(Country::class , 'iata_country_code', 'country_code');
     }
 
     public function bookings()
     {
-        return $this->hasMany(Booking::class, 'client_id', 'client_id');
+        return $this->hasMany(Booking::class , 'client_id', 'client_id');
     }
 }

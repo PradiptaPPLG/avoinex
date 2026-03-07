@@ -32,7 +32,30 @@
 @endpush
 
 @section('content')
-<div class="container mt-4">
+<div class="container mt-4 mb-4">
+    <!-- Booking Steps -->
+    <div class="mb-4 position-relative d-print-none">
+        <div class="progress" style="height: 3px; position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); z-index: 1;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <div class="d-flex justify-content-between position-relative" style="z-index: 2;">
+            <div class="text-center" style="width: 32%;">
+                <div class="bg-success text-white rounded-pill py-2 border border-2 border-success shadow-sm">
+                    <i class="bi bi-check-circle-fill me-1"></i> 1. Passenger Details
+                </div>
+            </div>
+            <div class="text-center" style="width: 32%;">
+                <div class="bg-success text-white rounded-pill py-2 border border-2 border-success shadow-sm">
+                    <i class="bi bi-check-circle-fill me-1"></i> 2. Payment
+                </div>
+            </div>
+            <div class="text-center" style="width: 32%;">
+                <div class="bg-success text-white rounded-pill py-2 border border-2 border-success fw-bold shadow-sm">
+                    <i class="bi bi-check-circle-fill me-1"></i> 3. Confirmation
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="card border-success">
         <div class="card-header bg-success text-white">
             <h4 class="mb-0"><i class="bi bi-check-circle"></i> Booking Confirmed!</h4>
