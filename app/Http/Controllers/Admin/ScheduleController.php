@@ -12,7 +12,7 @@ class ScheduleController extends Controller
 {
     public function index()
     {
-        $schedules = Schedule::with(['originAirport', 'destinationAirport', 'airline'])->paginate(20);
+        $schedules = Schedule::with(['originAirport', 'destinationAirport', 'airline'])->where('is_active', true)->paginate(20);
         return view('admin.schedules.index', compact('schedules'));
     }
 
@@ -77,9 +77,10 @@ class ScheduleController extends Controller
 
     public function destroy($id)
     {
-        Schedule::findOrFail($id)->delete();
+        $schedule = Schedule::findOrFail($id);
+        $schedule->update(['is_active' => false]);
 
         return redirect()->route('admin.schedules.index')
-            ->with('success', 'Schedule deleted successfully');
+            ->with('success', 'Schedule deleted successfully.');
     }
 }

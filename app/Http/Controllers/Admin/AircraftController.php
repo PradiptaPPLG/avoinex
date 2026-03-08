@@ -12,7 +12,7 @@ class AircraftController extends Controller
 {
     public function index()
     {
-        $aircraft = Aircraft::with('manufacturer')->paginate(20);
+        $aircraft = Aircraft::with('manufacturer')->where('is_active', true)->paginate(20);
         return view('admin.aircraft.index', compact('aircraft'));
     }
 
@@ -129,10 +129,11 @@ class AircraftController extends Controller
 
     public function destroy($id)
     {
-        Aircraft::findOrFail($id)->delete();
+        $aircraft = Aircraft::findOrFail($id);
+        $aircraft->update(['is_active' => false]);
 
         return redirect()->route('admin.aircraft.index')
-            ->with('success', 'Aircraft deleted successfully');
+            ->with('success', 'Aircraft deleted successfully.');
     }
 
     /**

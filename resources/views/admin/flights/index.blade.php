@@ -1,37 +1,50 @@
 @extends('admin.layouts.app')
 
 @section('title', 'Flight Management')
-@section('page-title', 'Flight Instances Management')
+@section('page-title', 'Flight Instances')
 
 @section('content')
+
 <div class="card">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Flight Instances</h5>
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-airplane-engines-fill text-primary"></i>
+            <h5 class="mb-0">Flight Instances</h5>
+        </div>
         <a href="{{ route('admin.flights.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add Flight
+            <i class="bi bi-plus-lg me-1"></i> New Flight
         </a>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Flight Number</th>
+                        <th>Flight No.</th>
                         <th>Aircraft</th>
                         <th>Date</th>
-                        <th>Available Seats</th>
+                        <th>Seat Availability</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th style="width: 100px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($flights as $flight)
                     <tr>
-                        <td>{{ $flight->flight_instance_id }}</td>
-                        <td><strong>{{ $flight->schedule->flight_number ?? 'N/A' }}</strong></td>
-                        <td>{{ $flight->aircraftInstance->registration_number ?? 'N/A' }}</td>
-                        <td>{{ $flight->flight_date->format('d M Y') }}</td>
+                        <td>
+                            <span style="font-family:'JetBrains Mono',monospace; font-size: 14px; font-weight: 700; color: var(--text-primary);">
+                                {{ $flight->schedule->flight_number ?? 'N/A' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 32px; height: 32px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 14px;">
+                                    <i class="bi bi-airplane"></i>
+                                </div>
+                                <span style="font-family:'JetBrains Mono',monospace; font-size: 13px; font-weight: 600;">{{ $flight->aircraftInstance->registration_number ?? 'N/A' }}</span>
+                            </div>
+                        </td>
+                        <td style="font-weight: 600; font-size: 13.5px;">{{ $flight->flight_date->format('d M Y') }}</td>
                         <td>
                             @php
                                 $totalSeats = $flight->aircraftInstance->aircraft->total_seats ?? 0;
@@ -40,38 +53,55 @@
                                           ->whereIn('booking_status', ['confirmed', 'pending']);
                                 })->count();
                                 $availableSeats = $totalSeats - $bookedSeats;
+                                $pct = $totalSeats > 0 ? round(($bookedSeats / $totalSeats) * 100) : 0;
                             @endphp
-                            {{ $availableSeats }} / {{ $totalSeats }}
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="flex: 1; max-width: 120px; height: 6px; background: var(--surface-3); border-radius: 4px; overflow: hidden;">
+                                    <div style="height: 100%; width: {{ $pct }}%; background: {{ $pct >= 90 ? 'var(--danger)' : ($pct >= 70 ? 'var(--warning)' : 'var(--success)') }}; border-radius: 4px; transition: width 0.3s;"></div>
+                                </div>
+                                <span style="font-family:'JetBrains Mono',monospace; font-size: 12px; color: var(--text-secondary);">{{ $availableSeats }}/{{ $totalSeats }}</span>
+                            </div>
                         </td>
                         <td>
                             @if($availableSeats > 0)
-                                <span class="badge bg-success">Available</span>
+                                <span class="badge bg-success"><i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Available</span>
                             @else
-                                <span class="badge bg-danger">Full</span>
+                                <span class="badge bg-danger"><i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Full</span>
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('admin.flights.edit', $flight->flight_instance_id) }}" class="btn btn-sm btn-warning">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <form action="{{ route('admin.flights.destroy', $flight->flight_instance_id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this flight?')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                            <div class="d-flex gap-1">
+                                <a href="{{ route('admin.flights.edit', $flight->flight_instance_id) }}" class="btn btn-sm btn-warning" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="{{ route('admin.flights.destroy', $flight->flight_instance_id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Delete this flight instance?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">No flights found</td>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-airplane-engines" style="font-size: 32px; color: var(--border); display: block; margin-bottom: 12px;"></i>
+                            <span style="color: var(--text-muted); font-weight: 500;">No flight instances found</span>
+                        </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        {{ $flights->links() }}
+
+        @if($flights->hasPages())
+        <div class="d-flex justify-content-end px-4 py-3" style="border-top: 1px solid var(--border);">
+            {{ $flights->links() }}
+        </div>
+        @endif
     </div>
 </div>
+
 @endsection

@@ -26,6 +26,7 @@ class HomeController extends Controller
         ])
             ->where('flight_date', '>=', now()->toDateString())
             ->where('flight_status_id', 1)
+            ->where('is_active', true)
             ->orderBy('flight_date')
             ->orderBy('created_at')
             ->take(10)

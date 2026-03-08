@@ -13,7 +13,7 @@ class FlightController extends Controller
 {
     public function index()
     {
-        $flights = FlightInstance::with(['schedule', 'aircraftInstance.aircraft'])->paginate(20);
+        $flights = FlightInstance::with(['schedule', 'aircraftInstance.aircraft'])->where('is_active', true)->paginate(20);
         return view('admin.flights.index', compact('flights'));
     }
 
@@ -89,10 +89,11 @@ class FlightController extends Controller
 
     public function destroy($id)
     {
-        FlightInstance::findOrFail($id)->delete();
+        $flight = FlightInstance::findOrFail($id);
+        $flight->update(['is_active' => false]);
 
         return redirect()->route('admin.flights.index')
-            ->with('success', 'Flight hidden (soft deleted) successfully');
+            ->with('success', 'Flight deleted successfully.');
     }
 
     /**

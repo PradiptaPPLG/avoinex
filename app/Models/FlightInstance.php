@@ -13,7 +13,7 @@ class FlightInstance extends Model
     protected $primaryKey = 'flight_instance_id';
     protected $table = 'flight_instances';
 
-    protected $fillable = ['schedule_id', 'aircraft_instance_id', 'flight_date', 'flight_status_id'];
+    protected $fillable = ['schedule_id', 'aircraft_instance_id', 'flight_date', 'flight_status_id', 'is_active'];
 
     // Tambahkan ini
     protected $dates = ['flight_date'];
@@ -24,27 +24,27 @@ class FlightInstance extends Model
 
     public function schedule()
     {
-        return $this->belongsTo(Schedule::class, 'schedule_id', 'schedule_id');
+        return $this->belongsTo(Schedule::class , 'schedule_id', 'schedule_id');
     }
 
     public function aircraftInstance()
     {
-        return $this->belongsTo(AircraftInstance::class, 'aircraft_instance_id', 'aircraft_instance_id');
+        return $this->belongsTo(AircraftInstance::class , 'aircraft_instance_id', 'aircraft_instance_id');
     }
 
     public function flightSeatPrices()
     {
-        return $this->hasMany(FlightSeatPrice::class, 'flight_instance_id', 'flight_instance_id');
+        return $this->hasMany(FlightSeatPrice::class , 'flight_instance_id', 'flight_instance_id');
     }
 
     public function bookings()
     {
-        return $this->hasMany(Booking::class, 'flight_instance_id', 'flight_instance_id');
+        return $this->hasMany(Booking::class , 'flight_instance_id', 'flight_instance_id');
     }
 
     public function flightStatus()
     {
-        return $this->belongsTo(FlightStatus::class, 'flight_status_id', 'flight_status_id');
+        return $this->belongsTo(FlightStatus::class , 'flight_status_id', 'flight_status_id');
     }
 
     /**

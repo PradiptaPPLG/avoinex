@@ -12,7 +12,8 @@ use Carbon\Carbon;
 
 class FlightSearchController extends Controller
 {
-    public function index()    {
+    public function index()
+    {
         $airports = Airport::all();
 
         // Get available flights
@@ -24,6 +25,7 @@ class FlightSearchController extends Controller
         ])
             ->where('flight_date', '>=', now()->toDateString())
             ->where('flight_status_id', 1)
+            ->where('is_active', true)
             ->orderBy('flight_date')
             ->orderBy('created_at')
             ->take(10) // Changed from paginate to take for home page
@@ -47,8 +49,10 @@ class FlightSearchController extends Controller
             $flight->airline_code = $airlineCode;
         }
 
-        return view('home', compact('airports', 'flights'));    }
-    private function getAirlineName($code)    {
+        return view('home', compact('airports', 'flights'));
+    }
+    private function getAirlineName($code)
+    {
         $airlines = [
             'GA' => 'Garuda Indonesia',
             'QZ' => 'AirAsia',
@@ -59,7 +63,8 @@ class FlightSearchController extends Controller
             'KE' => 'Korean Air'
         ];
 
-        return $airlines[$code] ?? 'Airlines';    }
+        return $airlines[$code] ?? 'Airlines';
+    }
 
     public function search(Request $request)
     {
@@ -108,6 +113,7 @@ class FlightSearchController extends Controller
             ->whereIn('schedules.destination_iata_code', $destinationIataCodes)
             ->where('flight_instances.flight_date', $departDate)
             ->where('flight_instances.flight_status_id', 1) // Scheduled
+            ->where('flight_instances.is_active', true)
             ->orderBy('schedules.departure_time_gmt')
             ->select('flight_instances.*')
             ->get();

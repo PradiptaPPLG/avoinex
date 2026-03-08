@@ -28,27 +28,28 @@ class Schedule extends Model
         'thursday',
         'friday',
         'saturday',
-        'sunday'
+        'sunday',
+        'is_active',
     ];
 
     public function originAirport()
     {
-        return $this->belongsTo(Airport::class, 'origin_iata_code', 'iata_code');
+        return $this->belongsTo(Airport::class , 'origin_iata_code', 'iata_code');
     }
 
     public function destinationAirport()
     {
-        return $this->belongsTo(Airport::class, 'destination_iata_code', 'iata_code');
+        return $this->belongsTo(Airport::class , 'destination_iata_code', 'iata_code');
     }
 
     public function flightInstances()
     {
-        return $this->hasMany(FlightInstance::class, 'schedule_id');
+        return $this->hasMany(FlightInstance::class , 'schedule_id');
     }
 
     // TAMBAHKAN INI:
     public function airline()
     {
-        return $this->belongsTo(Airline::class, 'airline_code', 'airline_code');
+        return $this->belongsTo(Airline::class , 'airline_code', 'airline_code');
     }
 }
