@@ -51,6 +51,33 @@
         </div>
     </div>
 
+    <!-- PASSENGER SEAT REQUIREMENT BANNER -->
+    <div class="card mb-4 border-info">
+        <div class="card-body py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1 text-info"><i class="bi bi-people-fill"></i> Seat Selection Requirement</h6>
+                    <p class="mb-0">
+                        Select exactly <strong>{{ $requiredSeats }}</strong> seat{{ $requiredSeats > 1 ? 's' : '' }} for
+                        <strong>{{ $adults }}</strong> Adult{{ $adults > 1 ? 's' : '' }}
+                        @if($children > 0)
+                            + <strong>{{ $children }}</strong> Child{{ $children > 1 ? 'ren' : '' }}
+                        @endif
+                        @if($infants > 0)
+                            <span class="text-muted">(+ {{ $infants }} Infant{{ $infants > 1 ? 's' : '' }}, no seat needed)</span>
+                        @endif
+                    </p>
+                </div>
+                <div class="text-end">
+                    <div class="seat-counter-badge">
+                        <span id="seat-counter">0</span> / {{ $requiredSeats }}
+                    </div>
+                    <small class="text-muted">seats selected</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- AIRCRAFT VISUALIZATION -->
     <div class="aircraft-container">
         <!-- FRONT PLANE IMAGE -->
@@ -892,11 +919,43 @@
 .aircraft-container::-webkit-scrollbar-thumb:hover {
     background: #0056b3;
 }
+
+/* DISABLED SEAT STATE - when max seats reached */
+.seat-item.seat-disabled {
+    opacity: 0.35;
+    cursor: not-allowed !important;
+    pointer-events: none;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* SEAT COUNTER BADGE */
+.seat-counter-badge {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0d6efd;
+    line-height: 1;
+}
+
+.seat-counter-badge .counter-full {
+    color: #198754;
+}
+
+.border-info {
+    border-color: #0dcaf0 !important;
+}
 </style>
 
 <script>
-// SEAT SELECTION LOGIC
+// SEAT SELECTION LOGIC WITH PASSENGER LIMIT ENFORCEMENT
 console.log('=== SEAT SELECTION PAGE LOADING ===');
+
+const REQUIRED_SEATS = {{ $requiredSeats ?? 1 }};
+const ADULTS = {{ $adults ?? 1 }};
+const CHILDREN = {{ $children ?? 0 }};
+const INFANTS = {{ $infants ?? 0 }};
+
+console.log(`📋 Required seats: ${REQUIRED_SEATS} (${ADULTS} adults + ${CHILDREN} children, ${INFANTS} infants)`);
 
 let selectedSeats = [];
 let totalPrice = 0;
@@ -912,6 +971,10 @@ function initializeSeatSelection() {
 document.addEventListener('click', function(event) {
     if (event.target.closest('.seat-item')) {
         const seatElement = event.target.closest('.seat-item');
+        // Block clicks on disabled seats
+        if (seatElement.classList.contains('seat-disabled')) {
+            return;
+        }
         handleSeatClick(seatElement);
     }
     if (event.target.closest('#clear-seats')) {
@@ -930,13 +993,15 @@ function handleSeatClick(seatElement) {
     console.log(`🪑 Seat clicked: ${seatNumber} ($${price})`);
     
     if (seatElement.classList.contains('selected')) {
+        // Deselect
         seatElement.classList.remove('selected');
         selectedSeats = selectedSeats.filter(s => s.id !== seatId);
         totalPrice -= price;
         console.log(`➖ Deselected: ${seatNumber}`);
     } else {
-        if (selectedSeats.length >= 9) {
-            alert('Maximum 9 seats allowed');
+        // Check against required seats limit
+        if (selectedSeats.length >= REQUIRED_SEATS) {
+            alert(`You can only select ${REQUIRED_SEATS} seat${REQUIRED_SEATS > 1 ? 's' : ''} for your ${ADULTS + CHILDREN} passenger${(ADULTS + CHILDREN) > 1 ? 's' : ''} (${ADULTS} Adult${ADULTS > 1 ? 's' : ''}${CHILDREN > 0 ? ' + ' + CHILDREN + ' Child' + (CHILDREN > 1 ? 'ren' : '') : ''}).`);
             return;
         }
         seatElement.classList.add('selected');
@@ -946,10 +1011,27 @@ function handleSeatClick(seatElement) {
             price: price
         });
         totalPrice += price;
-        console.log(`➕ Selected: ${seatNumber}`);
+        console.log(`➕ Selected: ${seatNumber} (${selectedSeats.length}/${REQUIRED_SEATS})`);
     }
     
     updateUI();
+}
+
+function toggleSeatDisabledState() {
+    const allSeatItems = document.querySelectorAll('.seat-item');
+    if (selectedSeats.length >= REQUIRED_SEATS) {
+        // Disable all unselected seats
+        allSeatItems.forEach(seat => {
+            if (!seat.classList.contains('selected')) {
+                seat.classList.add('seat-disabled');
+            }
+        });
+    } else {
+        // Re-enable all disabled seats
+        allSeatItems.forEach(seat => {
+            seat.classList.remove('seat-disabled');
+        });
+    }
 }
 
 function handleClearSeats() {
@@ -974,12 +1056,11 @@ function handleContinueBooking() {
     
     const continueBtn = document.getElementById('continue-btn');
     if (continueBtn.disabled) {
-        alert('Please select seats first');
         return;
     }
     
-    if (selectedSeats.length === 0) {
-        alert('Please select at least one seat');
+    if (selectedSeats.length !== REQUIRED_SEATS) {
+        alert(`Please select exactly ${REQUIRED_SEATS} seat${REQUIRED_SEATS > 1 ? 's' : ''}.`);
         return;
     }
     
@@ -1009,6 +1090,9 @@ function handleContinueBooking() {
         params.set('seats', JSON.stringify(selectedSeats));
         params.set('total', totalPrice);
         params.set('flight_id', {{ $flight->flight_instance_id }});
+        params.set('adults', ADULTS);
+        params.set('children', CHILDREN);
+        params.set('infants', INFANTS);
 
         const redirectUrl = '{{ route("booking.form") }}?' + params.toString();
         console.log('🔗 Redirect URL:', redirectUrl);
@@ -1021,14 +1105,30 @@ function handleContinueBooking() {
 function updateUI() {
     console.log('🎨 Updating UI...');
     
+    // Update total price display
     const totalElement = document.getElementById('total-price');
     if (totalElement) {
         totalElement.textContent = '$' + totalPrice.toFixed(2);
     }
     
+    // Update seat counter badge
+    const seatCounter = document.getElementById('seat-counter');
+    if (seatCounter) {
+        seatCounter.textContent = selectedSeats.length;
+        if (selectedSeats.length === REQUIRED_SEATS) {
+            seatCounter.classList.add('counter-full');
+            seatCounter.parentElement.style.color = '#198754';
+        } else {
+            seatCounter.classList.remove('counter-full');
+            seatCounter.parentElement.style.color = '#0d6efd';
+        }
+    }
+    
+    // Update continue button
     const continueBtn = document.getElementById('continue-btn');
     if (continueBtn) {
-        if (selectedSeats.length > 0) {
+        const remaining = REQUIRED_SEATS - selectedSeats.length;
+        if (selectedSeats.length === REQUIRED_SEATS) {
             continueBtn.disabled = false;
             continueBtn.classList.remove('btn-secondary');
             continueBtn.classList.add('btn-success');
@@ -1037,9 +1137,16 @@ function updateUI() {
             continueBtn.disabled = true;
             continueBtn.classList.remove('btn-success');
             continueBtn.classList.add('btn-secondary');
-            continueBtn.innerHTML = '<i class="bi bi-arrow-right"></i> Continue to Booking';
+            if (remaining > 0) {
+                continueBtn.innerHTML = `<i class="bi bi-geo-alt"></i> Select ${remaining} more seat${remaining > 1 ? 's' : ''}`;
+            } else {
+                continueBtn.innerHTML = '<i class="bi bi-arrow-right"></i> Continue to Booking';
+            }
         }
     }
+    
+    // Toggle disabled state on remaining seats
+    toggleSeatDisabledState();
     
     updateSeatList();
 }
@@ -1052,21 +1159,21 @@ function updateSeatList() {
         container.innerHTML = `
             <div class="text-center text-muted py-3">
                 <i class="bi bi-emoji-frown display-4"></i>
-                <p class="mt-2">No seats selected yet</p>
+                <p class="mt-2">No seats selected yet. Please select ${REQUIRED_SEATS} seat${REQUIRED_SEATS > 1 ? 's' : ''}.</p>
             </div>
         `;
         return;
     }
     
     let html = '<div class="row">';
-    selectedSeats.forEach(seat => {
+    selectedSeats.forEach((seat, index) => {
         html += `
             <div class="col-md-4 mb-2">
                 <div class="border rounded p-2 bg-light">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <strong class="fs-5">${seat.number}</strong>
-                            <div class="small text-muted">Seat</div>
+                            <div class="small text-muted">Passenger ${index + 1}</div>
                         </div>
                         <div class="text-end">
                             <span class="text-primary fw-bold">$${seat.price.toFixed(2)}</span>
@@ -1080,6 +1187,11 @@ function updateSeatList() {
     
     container.innerHTML = html;
 }
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', function() {
+    updateUI();
+});
 
 console.log('✅ Seat selection script loaded');
 </script>

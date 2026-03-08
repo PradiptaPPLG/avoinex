@@ -38,21 +38,58 @@
                         
                         <!-- Passenger & Class -->
                         <div class="avx-passenger-class">
-                            <button type="button" class="avx-passenger-toggle" aria-haspopup="true" aria-expanded="false">
+                            <button type="button" class="avx-passenger-toggle" id="passengerToggleBtn" aria-haspopup="true" aria-expanded="false">
                                 <svg class="avx-icon-user" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM2 20c0-3 6-5 10-5s10 2 10 5v1H2v-1z"/></svg>
-                                <span class="avx-passenger-text">1 Dewasa, 0 Anak, 0 Bayi</span>
+                                <span class="avx-passenger-text" id="passengerSummaryText">1 Passengers, Economy</span>
                                 <svg class="avx-icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
                             </button>
                             
-                            <div class="avx-dropdown" aria-hidden="true">
-                                <label> Dewasa <input type="number" min="1" value="1" name="adults"></label>
-                                <label> Anak <input type="number" min="0" value="0" name="children"></label>
-                                <label> Bayi <input type="number" min="0" value="0" name="infants"></label>
+                            <div class="avx-dropdown avx-pax-dropdown" id="passengerDropdown" aria-hidden="true">
+                                <!-- Adults -->
+                                <div class="avx-pax-row">
+                                    <div class="avx-pax-info">
+                                        <span class="avx-pax-label">Dewasa</span>
+                                        <span class="avx-pax-desc">Usia 12 tahun ke atas</span>
+                                    </div>
+                                    <div class="avx-pax-stepper">
+                                        <button type="button" class="avx-pax-btn avx-pax-minus" data-target="adults" aria-label="Kurangi dewasa" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">−</button>
+                                        <span class="avx-pax-count" id="adultsCount">1</span>
+                                        <button type="button" class="avx-pax-btn avx-pax-plus" data-target="adults" aria-label="Tambah dewasa" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">+</button>
+                                    </div>
+                                </div>
+                                <!-- Children -->
+                                <div class="avx-pax-row">
+                                    <div class="avx-pax-info">
+                                        <span class="avx-pax-label">Anak</span>
+                                        <span class="avx-pax-desc">Usia 2 - 11 tahun</span>
+                                    </div>
+                                    <div class="avx-pax-stepper">
+                                        <button type="button" class="avx-pax-btn avx-pax-minus" data-target="children" aria-label="Kurangi anak" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">−</button>
+                                        <span class="avx-pax-count" id="childrenCount">0</span>
+                                        <button type="button" class="avx-pax-btn avx-pax-plus" data-target="children" aria-label="Tambah anak" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">+</button>
+                                    </div>
+                                </div>
+                                <!-- Infants -->
+                                <div class="avx-pax-row">
+                                    <div class="avx-pax-info">
+                                        <span class="avx-pax-label">Bayi</span>
+                                        <span class="avx-pax-desc">Di bawah 2 tahun</span>
+                                    </div>
+                                    <div class="avx-pax-stepper">
+                                        <button type="button" class="avx-pax-btn avx-pax-minus" data-target="infants" aria-label="Kurangi bayi" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">−</button>
+                                        <span class="avx-pax-count" id="infantsCount">0</span>
+                                        <button type="button" class="avx-pax-btn avx-pax-plus" data-target="infants" aria-label="Tambah bayi" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">+</button>
+                                    </div>
+                                </div>
+                                <!-- Done button -->
+                                <div class="avx-pax-done-row">
+                                    <button type="button" class="avx-pax-done-btn" id="paxDoneBtn" style="background:#279ED6;color:#fff;border:none;border-radius:10px;padding:10px 28px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(39,158,214,0.25);">Selesai</button>
+                                </div>
                             </div>
                             
                             <div class="avx-class-select">
                                 <svg class="avx-icon-seat" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 5h14v12H5z"/></svg>
-                                <select name="travel_class">
+                                <select name="travel_class" id="travelClassSelect">
                                     <option value="economy" selected>Ekonomi</option>
                                     <option value="premium">Premium Economy</option>
                                     <option value="business">Business</option>
@@ -64,6 +101,10 @@
 
                 <!-- BARIS TENGAH: Form Input -->
                 <form class="avx-search-form" action="{{ route('flights.search') }}" method="GET" novalidate>
+                    <input type="hidden" name="adults" id="hiddenAdults" value="1">
+                    <input type="hidden" name="children" id="hiddenChildren" value="0">
+                    <input type="hidden" name="infants" id="hiddenInfants" value="0">
+                    <input type="hidden" name="passengers" id="hiddenPassengers" value="1">
                     <div class="avx-search-main">
                         <!-- Dari -->
                         <label class="avx-field" for="from">
@@ -152,24 +193,19 @@
                                 <p class="text-muted mb-0">{{ $flight->schedule->destinationAirport->city }} ({{ $flight->schedule->destinationAirport->iata_code }})</p>
                                 <small class="text-muted">{{ $flight->flight_date->format('d M') }}</small>
                             </div>
-                            <div class="col-md-2 text-end">
+                            <div class="col-md-2 text-end" data-available-seats="{{ $flight->available_seats ?? 0 }}" data-flight-id="{{ $flight->flight_instance_id }}">
                                 <h4 class="text-primary mb-1">${{ number_format($flight->schedule->base_price_usd, 0) }}</h4>
                                 <p class="text-muted small mb-2">per person</p>
 
                                 @php
                                     $availableSeats = $flight->available_seats ?? 0;
-                                    $passengerCount = 1; // default for homepage
-                                    $hasEnoughSeats = $availableSeats >= $passengerCount;
                                 @endphp
 
-                                @if($hasEnoughSeats)
-                                    <a href="{{ route('flight.seats', $flight->flight_instance_id) }}" class="btn btn-primary">Select</a>
-                                @else
-                                    <button class="btn btn-secondary" disabled title="Not enough seats available">
-                                        <i class="bi bi-exclamation-circle"></i> Limited
-                                    </button>
-                                    <small class="text-danger d-block mt-1">Only {{ $availableSeats }} seat{{ $availableSeats != 1 ? 's' : '' }} left</small>
-                                @endif
+                                <a href="{{ route('flight.seats', $flight->flight_instance_id) }}?adults=1&children=0&infants=0" class="btn btn-primary avx-select-btn avx-seat-link" data-seats="{{ $availableSeats }}" data-base-url="{{ route('flight.seats', $flight->flight_instance_id) }}">Select</a>
+                                <button class="btn btn-secondary avx-limited-btn" style="display:none;" disabled title="Not enough seats available">
+                                    <i class="bi bi-exclamation-circle"></i> Limited
+                                </button>
+                                <small class="text-danger d-block mt-1 avx-seats-warning" style="display:none;">Only {{ $availableSeats }} seat{{ $availableSeats != 1 ? 's' : '' }} left</small>
                             </div>
                         </div>
                         <div class="row mt-3">
@@ -844,81 +880,333 @@
     font-weight: bold;
     font-size: 1.2rem;
 }
+
+/* ===== PASSENGER STEPPER DROPDOWN ===== */
+.avx-pax-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px 24px 16px;
+    box-shadow: 0 16px 48px rgba(10,20,30,0.18), 0 0 0 1px rgba(0,0,0,0.04);
+    border: 1px solid rgba(120,120,120,0.12);
+    z-index: 200;
+    min-width: 300px;
+}
+.avx-pax-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(120,120,120,0.1);
+}
+.avx-pax-row:last-of-type {
+    border-bottom: none;
+}
+.avx-pax-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.avx-pax-label {
+    font-weight: 700;
+    font-size: 15px;
+    color: #222;
+    font-family: 'Segoe UI Semibold', sans-serif;
+}
+.avx-pax-desc {
+    font-size: 12px;
+    color: #888;
+    font-family: 'Segoe UI', sans-serif;
+}
+.avx-pax-stepper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.avx-pax-dropdown .avx-pax-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px;
+    border-radius: 50% !important;
+    border: 2px solid var(--avx-primary) !important;
+    background: transparent !important;
+    color: var(--avx-primary) !important;
+    font-size: 20px !important;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    line-height: 1;
+    padding: 0 !important;
+    margin: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    box-shadow: none !important;
+    text-decoration: none;
+}
+.avx-pax-dropdown .avx-pax-btn:hover:not(:disabled) {
+    background: var(--avx-primary) !important;
+    color: #fff !important;
+    transform: scale(1.08);
+}
+.avx-pax-dropdown .avx-pax-btn:disabled {
+    border-color: #ccc !important;
+    color: #ccc !important;
+    cursor: not-allowed;
+    opacity: 0.5;
+    background: transparent !important;
+}
+.avx-pax-dropdown .avx-pax-btn:focus {
+    outline: 2px solid rgba(39,158,214,0.3);
+    outline-offset: 2px;
+}
+.avx-pax-count {
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+    min-width: 24px;
+    text-align: center;
+    font-family: 'Segoe UI Semibold', sans-serif;
+}
+.avx-pax-done-row {
+    padding-top: 12px;
+    text-align: right;
+}
+.avx-pax-done-btn {
+    background: var(--avx-primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 28px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Segoe UI Semibold', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(39,158,214,0.25);
+}
+.avx-pax-done-btn:hover {
+    background: #1e8bc8;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(39,158,214,0.35);
+}
+
+/* Passenger toggle container needs relative positioning */
+.avx-passenger-class {
+    position: relative;
+}
 </style>
 
 <script>
 (function() {
-    updatePassengerText();
-    
-    // Event listener untuk input jumlah penumpang
-    document.querySelectorAll('.avx-dropdown input[type="number"]').forEach(input => {
-        input.addEventListener('change', updatePassengerText);
-        input.addEventListener('input', updatePassengerText);
+    // ===== PASSENGER STATE =====
+    var pax = { adults: 1, children: 0, infants: 0 };
+
+    // DOM references
+    var adultsCountEl   = document.getElementById('adultsCount');
+    var childrenCountEl = document.getElementById('childrenCount');
+    var infantsCountEl  = document.getElementById('infantsCount');
+    var summaryTextEl   = document.getElementById('passengerSummaryText');
+    var hiddenAdults    = document.getElementById('hiddenAdults');
+    var hiddenChildren  = document.getElementById('hiddenChildren');
+    var hiddenInfants   = document.getElementById('hiddenInfants');
+    var hiddenPassengers = document.getElementById('hiddenPassengers');
+    var travelClassSel  = document.getElementById('travelClassSelect');
+    var toggle          = document.getElementById('passengerToggleBtn');
+    var dropdown        = document.getElementById('passengerDropdown');
+    var doneBtn         = document.getElementById('paxDoneBtn');
+
+    // Class label mapping
+    var classLabels = { economy: 'Economy', premium: 'Premium Economy', business: 'Business' };
+
+    // ===== CORE: updatePassengerText =====
+    function updatePassengerText() {
+        var total = pax.adults + pax.children + pax.infants;
+        var classLabel = classLabels[travelClassSel.value] || 'Economy';
+
+        // Update summary text
+        summaryTextEl.textContent = total + ' Passengers, ' + classLabel;
+
+        // Update counter displays
+        adultsCountEl.textContent = pax.adults;
+        childrenCountEl.textContent = pax.children;
+        infantsCountEl.textContent = pax.infants;
+
+        // Sync hidden form inputs
+        hiddenAdults.value = pax.adults;
+        hiddenChildren.value = pax.children;
+        hiddenInfants.value = pax.infants;
+        hiddenPassengers.value = total;
+
+        // Update button disabled states
+        updateStepperStates();
+
+        // Update flight card Select/Limited buttons
+        updateFlightCards(total);
+    }
+    // Expose globally so the (function(){ ... })() IIFE can call it
+    window.updatePassengerText = updatePassengerText;
+
+    // ===== STEPPER BUTTON STATES =====
+    function updateStepperStates() {
+        var total = pax.adults + pax.children + pax.infants;
+
+        // Adults: min 1, also cannot go below infants count
+        setBtn('adults', 'minus', pax.adults > 1 && pax.adults > pax.infants);
+        setBtn('adults', 'plus',  total < 9);
+
+        // Children: min 0
+        setBtn('children', 'minus', pax.children > 0);
+        setBtn('children', 'plus',  total < 9);
+
+        // Infants: min 0, max = adults count, and total < 9
+        setBtn('infants', 'minus', pax.infants > 0);
+        setBtn('infants', 'plus',  pax.infants < pax.adults && total < 9);
+    }
+
+    function setBtn(target, direction, enabled) {
+        var selector = '.avx-pax-btn.avx-pax-' + direction + '[data-target="' + target + '"]';
+        var btn = document.querySelector(selector);
+        if (btn) btn.disabled = !enabled;
+    }
+
+    // ===== FLIGHT CARD DYNAMIC FILTERING =====
+    function updateFlightCards(totalPassengers) {
+        // Seats needed = adults + children (infants don't occupy seats)
+        var seatsNeeded = pax.adults + pax.children;
+
+        document.querySelectorAll('.avx-select-btn').forEach(function(selectBtn) {
+            var seats = parseInt(selectBtn.getAttribute('data-seats'), 10) || 0;
+            var parent = selectBtn.parentElement;
+            var limitedBtn = parent.querySelector('.avx-limited-btn');
+            var warning = parent.querySelector('.avx-seats-warning');
+
+            if (seats >= seatsNeeded) {
+                selectBtn.style.display = '';
+                if (limitedBtn) limitedBtn.style.display = 'none';
+                if (warning) warning.style.display = 'none';
+            } else {
+                selectBtn.style.display = 'none';
+                if (limitedBtn) limitedBtn.style.display = '';
+                if (warning) warning.style.display = '';
+            }
+        });
+
+        // Update seat selection links with current passenger counts
+        document.querySelectorAll('.avx-seat-link').forEach(function(link) {
+            var baseUrl = link.getAttribute('data-base-url');
+            if (baseUrl) {
+                link.href = baseUrl + '?adults=' + pax.adults + '&children=' + pax.children + '&infants=' + pax.infants;
+            }
+        });
+    }
+
+    // ===== STEPPER CLICK HANDLERS =====
+    document.querySelectorAll('.avx-pax-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var target = this.getAttribute('data-target');
+            var isPlus = this.classList.contains('avx-pax-plus');
+            var total = pax.adults + pax.children + pax.infants;
+
+            if (isPlus) {
+                if (total >= 9) return;
+                if (target === 'infants' && pax.infants >= pax.adults) return;
+                pax[target]++;
+            } else {
+                if (target === 'adults' && pax.adults <= 1) return;
+                if (target === 'adults' && pax.adults <= pax.infants) return;
+                if (pax[target] <= 0) return;
+                pax[target]--;
+                // If adults decreased, check infants constraint
+                if (target === 'adults' && pax.infants > pax.adults) {
+                    pax.infants = pax.adults;
+                }
+            }
+
+            updatePassengerText();
+        });
     });
 
-    // Tabs - hanya untuk visual, tanggal pulang tetap ditampilkan
-    document.querySelectorAll('.avx-tab').forEach(function(btn){
-        btn.addEventListener('click', function(){
-            document.querySelectorAll('.avx-tab').forEach(b=>b.classList.remove('avx-tab-active'));
+    // ===== TRAVEL CLASS CHANGE =====
+    travelClassSel.addEventListener('change', function() {
+        updatePassengerText();
+    });
+
+    // ===== DROPDOWN TOGGLE =====
+    if (toggle && dropdown) {
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var expanded = toggle.getAttribute('aria-expanded') === 'true';
+            toggle.setAttribute('aria-expanded', String(!expanded));
+            dropdown.style.display = expanded ? 'none' : 'block';
+            dropdown.setAttribute('aria-hidden', String(expanded));
+        });
+
+        // Click outside closes
+        document.addEventListener('click', function(ev) {
+            if (!toggle.contains(ev.target) && !dropdown.contains(ev.target)) {
+                dropdown.style.display = 'none';
+                toggle.setAttribute('aria-expanded', 'false');
+                dropdown.setAttribute('aria-hidden', 'true');
+            }
+        });
+    }
+
+    // Stop propagation inside dropdown
+    if (dropdown) {
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+
+    // Done button closes dropdown
+    if (doneBtn) {
+        doneBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.style.display = 'none';
+            toggle.setAttribute('aria-expanded', 'false');
+            dropdown.setAttribute('aria-hidden', 'true');
+        });
+    }
+
+    // ===== TABS =====
+    document.querySelectorAll('.avx-tab').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.avx-tab').forEach(function(b) { b.classList.remove('avx-tab-active'); });
             btn.classList.add('avx-tab-active');
-            
-            // Tidak perlu toggle tanggal pulang karena selalu ditampilkan
-            // Tapi kita bisa tambahkan logika lain jika diperlukan
+
             var target = btn.getAttribute('data-tab');
-            console.log('Tab aktif:', target);
-            
-            // Optional: Logika untuk form validation berdasarkan tab
             if (target === 'oneway') {
-                // Untuk sekali jalan, tanggal pulang optional
                 document.getElementById('return').required = false;
             } else {
-                // Untuk pulang-pergi dan multi-kota, tanggal pulang required
                 document.getElementById('return').required = true;
             }
         });
     });
 
-    // Passenger dropdown
-    var toggle = document.querySelector('.avx-passenger-toggle');
-    var dropdown = document.querySelector('.avx-dropdown');
-    if(toggle && dropdown){
-        toggle.addEventListener('click', function(e){
-            e.stopPropagation();
-            var expanded = toggle.getAttribute('aria-expanded') === 'true';
-            toggle.setAttribute('aria-expanded', String(!expanded));
-            dropdown.style.display = expanded ? 'none' : 'block';
-        });
-        
-        document.addEventListener('click', function(ev){
-            if(!toggle.contains(ev.target) && !dropdown.contains(ev.target)){
-                dropdown.style.display = 'none';
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-        });
-    }
-    
-    // Close dropdown jika klik di dalam dropdown itu sendiri
-    if(dropdown) {
-        dropdown.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    }
-    
-    // Set minimum date untuk input tanggal (hari ini)
-    const today = new Date().toISOString().split('T')[0];
+    // ===== DATE VALIDATION =====
+    var today = new Date().toISOString().split('T')[0];
     document.getElementById('depart').min = today;
     document.getElementById('return').min = today;
-    
-    // Validasi: tanggal pulang tidak boleh sebelum tanggal pergi
+
     document.getElementById('depart').addEventListener('change', function() {
-        const returnInput = document.getElementById('return');
+        var returnInput = document.getElementById('return');
         returnInput.min = this.value;
-        
-        // Jika tanggal pulang sudah dipilih dan lebih awal dari tanggal pergi
         if (returnInput.value && returnInput.value < this.value) {
             returnInput.value = this.value;
         }
     });
+
+    // ===== INITIAL RENDER =====
+    updatePassengerText();
 })();
 </script>
 

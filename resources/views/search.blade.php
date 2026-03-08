@@ -96,7 +96,7 @@
                             @endphp
                             
                             @if($hasEnoughSeats)
-                                <a href="{{ route('flight.seats', $flight->flight_instance_id) }}" class="btn btn-primary">Select</a>
+                                <a href="{{ route('flight.seats', $flight->flight_instance_id) }}?adults={{ $searchParams['adults'] ?? 1 }}&children={{ $searchParams['children'] ?? 0 }}&infants={{ $searchParams['infants'] ?? 0 }}" class="btn btn-primary">Select</a>
                             @else
                                 <button class="btn btn-secondary" disabled title="Not enough seats available">
                                     <i class="bi bi-exclamation-circle"></i> Limited

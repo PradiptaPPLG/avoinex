@@ -19,25 +19,25 @@ class HomeController extends Controller
         // Ambil available flights from FlightInstance
         // NOTE: Removed strict filtering temporarily for debugging purposes
         $flights = FlightInstance::with([
-                'schedule.originAirport',
-                'schedule.destinationAirport',
-                'aircraftInstance.aircraft',
-                'flightStatus'
-            ])
-            // ->where('flight_date', '>=', now()->toDateString())
-            // ->where('flight_status_id', 1)
+            'schedule.originAirport',
+            'schedule.destinationAirport',
+            'aircraftInstance.aircraft',
+            'flightStatus'
+        ])
+            ->where('flight_date', '>=', now()->toDateString())
+            ->where('flight_status_id', 1)
             ->orderBy('flight_date')
             ->orderBy('created_at')
-            // ->take(10)
+            ->take(10)
             ->get();
 
         // Calculate available seats untuk setiap flight
         foreach ($flights as $flight) {
             $totalSeats = $flight->aircraftInstance->aircraft->total_seats ?? 180;
 
-            $bookedSeats = BookingSeat::whereHas('booking', function($query) use ($flight) {
+            $bookedSeats = BookingSeat::whereHas('booking', function ($query) use ($flight) {
                 $query->where('flight_instance_id', $flight->flight_instance_id)
-                      ->whereIn('booking_status', ['confirmed', 'pending']);
+                    ->whereIn('booking_status', ['confirmed', 'pending']);
             })->count();
 
             $flight->available_seats = $totalSeats - $bookedSeats;
