@@ -653,9 +653,38 @@
                     Bookings
                 </a>
             </div>
-        </nav>
 
-        <div class="sidebar-footer">
+            <div class="nav-section-label">Master Data</div>
+
+            <div class="nav-item">
+                <a href="{{ route('admin.airports.index') }}" class="nav-link {{ request()->routeIs('admin.airports.*') ? 'active' : '' }}">
+                    <i class="bi bi-geo-alt nav-icon"></i>
+                    Airports
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="{{ route('admin.manufacturers.index') }}" class="nav-link {{ request()->routeIs('admin.manufacturers.*') ? 'active' : '' }}">
+                    <i class="bi bi-building nav-icon"></i>
+                    Manufacturers
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="{{ route('admin.countries.index') }}" class="nav-link {{ request()->routeIs('admin.countries.*') ? 'active' : '' }}">
+                    <i class="bi bi-globe-americas nav-icon"></i>
+                    Countries
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="{{ route('admin.airlines.index') }}" class="nav-link {{ request()->routeIs('admin.airlines.*') ? 'active' : '' }}">
+                    <i class="bi bi-briefcase nav-icon"></i>
+                    Airlines
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="logout-btn">

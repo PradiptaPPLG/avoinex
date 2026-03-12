@@ -70,6 +70,10 @@ use App\Http\Controllers\Admin\AircraftController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\FlightController as AdminFlightController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
+use App\Http\Controllers\Admin\AirportController;
+use App\Http\Controllers\Admin\ManufacturerController;
+use App\Http\Controllers\Admin\CountryController;
+use App\Http\Controllers\Admin\AirlineController;
 
 Route::prefix('admin')->group(function () {
     Route::get('/', [AuthController::class , 'showLogin'])->name('admin.home');
@@ -116,8 +120,50 @@ Route::prefix('admin')->group(function () {
                     Route::get('/{id}', [AdminBookingController::class , 'show'])->name('show');
                 }
                 );
+
+                // Master Data
+                Route::prefix('airports')->name('admin.airports.')->group(function () {
+                    Route::get('/', [AirportController::class , 'index'])->name('index');
+                    Route::get('/create', [AirportController::class , 'create'])->name('create');
+                    Route::post('/', [AirportController::class , 'store'])->name('store');
+                    Route::get('/{id}/edit', [AirportController::class , 'edit'])->name('edit');
+                    Route::put('/{id}', [AirportController::class , 'update'])->name('update');
+                    Route::delete('/{id}', [AirportController::class , 'destroy'])->name('destroy');
+                }
+                );
+
+                Route::prefix('manufacturers')->name('admin.manufacturers.')->group(function () {
+                    Route::get('/', [ManufacturerController::class , 'index'])->name('index');
+                    Route::get('/create', [ManufacturerController::class , 'create'])->name('create');
+                    Route::post('/', [ManufacturerController::class , 'store'])->name('store');
+                    Route::get('/{id}/edit', [ManufacturerController::class , 'edit'])->name('edit');
+                    Route::put('/{id}', [ManufacturerController::class , 'update'])->name('update');
+                    Route::delete('/{id}', [ManufacturerController::class , 'destroy'])->name('destroy');
+                }
+                );
+
+                Route::prefix('countries')->name('admin.countries.')->group(function () {
+                    Route::get('/', [CountryController::class , 'index'])->name('index');
+                    Route::get('/create', [CountryController::class , 'create'])->name('create');
+                    Route::post('/', [CountryController::class , 'store'])->name('store');
+                    Route::get('/{id}/edit', [CountryController::class , 'edit'])->name('edit');
+                    Route::put('/{id}', [CountryController::class , 'update'])->name('update');
+                    Route::delete('/{id}', [CountryController::class , 'destroy'])->name('destroy');
+                }
+                );
+
+                Route::prefix('airlines')->name('admin.airlines.')->group(function () {
+                    Route::get('/', [AirlineController::class , 'index'])->name('index');
+                    Route::get('/create', [AirlineController::class , 'create'])->name('create');
+                    Route::post('/', [AirlineController::class , 'store'])->name('store');
+                    Route::get('/{id}/edit', [AirlineController::class , 'edit'])->name('edit');
+                    Route::put('/{id}', [AirlineController::class , 'update'])->name('update');
+                    Route::delete('/{id}', [AirlineController::class , 'destroy'])->name('destroy');
+                }
+                );
             }
-            );        });
+            );
+        });
 
 /* |-------------------------------------------------------------------------- | FALLBACK |-------------------------------------------------------------------------- */
 Route::fallback(fn() => view('errors.404'));

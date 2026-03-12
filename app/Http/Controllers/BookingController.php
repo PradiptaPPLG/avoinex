@@ -17,9 +17,9 @@ class BookingController extends Controller
             ->whereIn('booking_status', ['confirmed', 'pending'])
             ->where('payment_status', 'paid')
             ->with([
-                'flightInstance.schedule.originAirport',
-                'flightInstance.schedule.destinationAirport'
-            ])
+            'flightInstance.schedule.originAirport',
+            'flightInstance.schedule.destinationAirport'
+        ])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -39,7 +39,8 @@ class BookingController extends Controller
             Session::put('selected_seats', $selectedSeats);
             Session::put('flight_instance_id', $flightInstanceId);
             Session::put('total_price', $totalPrice);
-        } else {
+        }
+        else {
             // Data dari session
             $selectedSeats = Session::get('selected_seats');
             $flightInstanceId = Session::get('flight_instance_id');
@@ -123,14 +124,12 @@ class BookingController extends Controller
         try {
             \Log::info('Starting booking process for flight: ' . $flightInstanceId);
 
-            // 1. Cari atau buat Client - PERBAIKAN
+            // 1. Cari atau buat Client
             \Log::info('Looking for client with email: ' . $validated['contact_email']);
 
-            // Cek dulu apakah client ada
             $client = Client::where('email', $validated['contact_email'])->first();
 
             if (!$client) {
-                // Buat client baru
                 $client = Client::create([
                     'first_name' => $validated['contact_first_name'],
                     'last_name' => $validated['contact_last_name'],
@@ -140,8 +139,8 @@ class BookingController extends Controller
                     'iata_country_code' => $validated['contact_country'] ?? 'ID'
                 ]);
                 \Log::info('New client created:', ['client_id' => $client->client_id]);
-            } else {
-                // Update client yang ada
+            }
+            else {
                 $client->update([
                     'first_name' => $validated['contact_first_name'],
                     'last_name' => $validated['contact_last_name'],
@@ -171,28 +170,66 @@ class BookingController extends Controller
                 'total_price' => $booking->total_price_usd
             ]);
 
-            // 3. Buat BookingSeat untuk setiap penumpang - PERBAIKAN
+            // 3. Buat BookingSeat untuk setiap penumpang
             \Log::info('Creating booking seats, count: ' . count($validated['passenger_first_name']));
 
-            // Cari flight_seat_price_id berdasarkan seat_id
+            // Get the aircraft_id for this flight (used when resolving dummy seat IDs)
+            $flightInst = FlightInstance::with('aircraftInstance')->find($flightInstanceId);
+            $aircraftId = null;
+            if ($flightInst && $flightInst->aircraftInstance) {
+                $aircraftId = $flightInst->aircraftInstance->aircraft_id;
+            }
+
             foreach ($validated['passenger_first_name'] as $index => $firstName) {
-                // Konversi seat_id ke integer jika perlu
                 $seatId = $validated['seat_ids'][$index];
-                if (is_string($seatId) && strpos($seatId, 'test_') === 0) {
-                    // Jika seat_id adalah string test_1, ambil angka saja
-                    $seatId = intval(str_replace('test_', '', $seatId));
+
+                // Handle prefixed dummy seat IDs: e_3F, b_1A, p_3C, test_1
+                if (is_string($seatId) && preg_match('/^(e|b|p|test)_(.+)$/', $seatId, $matches)) {
+                    $seatNumber = $matches[2];
+                    \Log::info('Resolving dummy seat_id', ['raw' => $seatId, 'seat_number' => $seatNumber, 'aircraft_id' => $aircraftId]);
+
+                    // Look up the actual seat_id from the seats table
+                    $actualSeat = \App\Models\Seat::where('aircraft_id', $aircraftId)
+                        ->where('seat_number', $seatNumber)
+                        ->first();
+
+                    if ($actualSeat) {
+                        $seatId = $actualSeat->seat_id;
+                        \Log::info('Resolved to real seat_id: ' . $seatId);
+                    }
+                    else {
+                        \Log::warning('Could not resolve seat_number', ['seat_number' => $seatNumber, 'aircraft_id' => $aircraftId]);
+                    }
                 }
+
+                // Ensure seat_id is a valid integer
+                if (!is_numeric($seatId)) {
+                    \Log::error('seat_id is not numeric after resolution, skipping', ['seat_id' => $seatId]);
+                    continue;
+                }
+                $seatId = intval($seatId);
 
                 // Cari flight_seat_price_id berdasarkan seat_id dan flight_instance_id
                 $flightSeatPrice = \App\Models\FlightSeatPrice::where('flight_instance_id', $flightInstanceId)
                     ->where('seat_id', $seatId)
                     ->first();
 
-                $flightSeatPriceId = $flightSeatPrice ? $flightSeatPrice->flight_seat_price_id : 1; // Default ke 1 jika tidak ditemukan
+                // If no flight_seat_price record exists, create one on-the-fly
+                if (!$flightSeatPrice) {
+                    $price = floatval($validated['seat_prices'][$index]);
+                    $flightSeatPrice = \App\Models\FlightSeatPrice::create([
+                        'flight_instance_id' => $flightInstanceId,
+                        'seat_id' => $seatId,
+                        'price_usd' => $price,
+                        'currency' => 'USD',
+                        'is_available' => true,
+                    ]);
+                    \Log::info('Auto-created FlightSeatPrice', ['id' => $flightSeatPrice->flight_seat_price_id, 'seat_id' => $seatId]);
+                }
 
                 BookingSeat::create([
                     'booking_id' => $booking->booking_id,
-                    'flight_seat_price_id' => $flightSeatPriceId,
+                    'flight_seat_price_id' => $flightSeatPrice->flight_seat_price_id,
                     'passenger_first_name' => $firstName,
                     'passenger_last_name' => $validated['passenger_last_name'][$index],
                     'passenger_passport' => $validated['passenger_passport'][$index],
@@ -206,8 +243,8 @@ class BookingController extends Controller
             // 4. Simpan booking_id di session untuk payment
             Session::put('current_booking_id', $booking->booking_id);
 
-            // 5. Log success dengan detail
-            \Log::info('✅ Booking process completed successfully:', [
+            // 5. Log success
+            \Log::info('Booking process completed successfully:', [
                 'booking_id' => $booking->booking_id,
                 'booking_code' => $booking->booking_code,
                 'client_id' => $client->client_id,
@@ -220,8 +257,9 @@ class BookingController extends Controller
             return redirect()->route('payment.page', ['booking' => $booking->booking_id])
                 ->with('success', 'Booking created successfully! Please complete payment.');
 
-        } catch (\Exception $e) {
-            \Log::error('❌ BookingController::store error: ' . $e->getMessage());
+        }
+        catch (\Exception $e) {
+            \Log::error('BookingController::store error: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
             \Log::error('Full error context:', [
                 'validated_data' => $validated,

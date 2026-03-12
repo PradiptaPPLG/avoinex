@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Country;
 use App\Models\Airport;
-use App\Models\FlightStatus;
 use App\Models\Airline;
 use App\Models\AircraftManufacturer;
 use App\Models\Aircraft;
@@ -21,23 +20,23 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Countries
         Country::firstOrCreate(['country_code' => 'ID'], [
-            'country_name' => 'Indonesia', 
+            'country_name' => 'Indonesia',
             'continent' => 'Asia'
         ]);
         Country::firstOrCreate(['country_code' => 'SG'], [
-            'country_name' => 'Singapore', 
+            'country_name' => 'Singapore',
             'continent' => 'Asia'
         ]);
         Country::firstOrCreate(['country_code' => 'MY'], [
-            'country_name' => 'Malaysia', 
+            'country_name' => 'Malaysia',
             'continent' => 'Asia'
         ]);
         Country::firstOrCreate(['country_code' => 'US'], [
-            'country_name' => 'United States', 
+            'country_name' => 'United States',
             'continent' => 'North America'
         ]);
         Country::firstOrCreate(['country_code' => 'FR'], [
-            'country_name' => 'France', 
+            'country_name' => 'France',
             'continent' => 'Europe'
         ]);
 
@@ -63,13 +62,6 @@ class DatabaseSeeder extends Seeder
             'country_code' => 'MY'
         ]);
 
-        // 3. Flight Statuses
-        FlightStatus::firstOrCreate(['name' => 'Scheduled']);
-        FlightStatus::firstOrCreate(['name' => 'Boarding']);
-        FlightStatus::firstOrCreate(['name' => 'Departed']);
-        FlightStatus::firstOrCreate(['name' => 'Arrived']);
-        FlightStatus::firstOrCreate(['name' => 'Cancelled']);
-
         // 4. Airlines
         Airline::firstOrCreate(['airline_code' => 'GA'], [
             'airline_name' => 'Garuda Indonesia',
@@ -88,7 +80,7 @@ class DatabaseSeeder extends Seeder
             'country_code' => 'FR'
         ]);
 
-                // 6. Aircrafts
+        // 6. Aircrafts
         $aircraft = Aircraft::first();
         if (!$aircraft) {
             $aircraft = Aircraft::create([
@@ -130,7 +122,7 @@ class DatabaseSeeder extends Seeder
             'effective_to' => now()->addYear()
         ]);
 
-                // 9. Aircraft Instance
+        // 9. Aircraft Instance
         $aircraftInstance = AircraftInstance::first();
         if (!$aircraftInstance) {
             $aircraftInstance = AircraftInstance::create([
@@ -144,8 +136,7 @@ class DatabaseSeeder extends Seeder
             'schedule_id' => $schedule->schedule_id,
             'flight_date' => now()->addDay()
         ], [
-            'aircraft_instance_id' => $aircraftInstance->aircraft_instance_id,
-            'flight_status_id' => 1
+            'aircraft_instance_id' => $aircraftInstance->aircraft_instance_id
         ]);
 
         // 11. Flight Seat Prices
@@ -163,8 +154,8 @@ class DatabaseSeeder extends Seeder
         $this->command->info('✅ Database seeded successfully!');
 
         $this->call([
-            FlightDataSeeder::class,
-            AdminSeeder::class,
+            FlightDataSeeder::class ,
+            AdminSeeder::class ,
         ]);
     }
 }

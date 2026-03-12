@@ -17,22 +17,23 @@ class Country extends Model
         'country_code',
         'country_name',
         'phone_code',
-        'continent'
+        'continent',
+        'is_active',
     ];
 
     // Relationships
     public function airports()
     {
-        return $this->hasMany(Airport::class, 'country_code', 'country_code');
+        return $this->hasMany(Airport::class , 'country_code', 'country_code');
     }
 
     public function clients()
     {
-        return $this->hasMany(Client::class, 'iata_country_code', 'country_code');
+        return $this->hasMany(Client::class , 'iata_country_code', 'country_code');
     }
 
     public function airlines()
     {
-        return $this->hasMany(Airline::class, 'country_code', 'country_code');
+        return $this->hasMany(Airline::class , 'country_code', 'country_code');
     }
 }

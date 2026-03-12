@@ -21,11 +21,9 @@ class HomeController extends Controller
         $flights = FlightInstance::with([
             'schedule.originAirport',
             'schedule.destinationAirport',
-            'aircraftInstance.aircraft',
-            'flightStatus'
+            'aircraftInstance.aircraft'
         ])
             ->where('flight_date', '>=', now()->toDateString())
-            ->where('flight_status_id', 1)
             ->where('is_active', true)
             ->orderBy('flight_date')
             ->orderBy('created_at')

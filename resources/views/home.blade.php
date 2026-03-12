@@ -100,7 +100,7 @@
                 </div>
 
                 <!-- BARIS TENGAH: Form Input -->
-                <form class="avx-search-form" action="{{ route('flights.search') }}" method="GET" novalidate>
+                <form class="avx-search-form" action="{{ route('flights.search') }}" method="GET">
                     <input type="hidden" name="adults" id="hiddenAdults" value="1">
                     <input type="hidden" name="children" id="hiddenChildren" value="0">
                     <input type="hidden" name="infants" id="hiddenInfants" value="0">

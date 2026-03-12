@@ -24,7 +24,6 @@
                         <th>Aircraft</th>
                         <th>Date</th>
                         <th>Seat Availability</th>
-                        <th>Status</th>
                         <th style="width: 100px;">Actions</th>
                     </tr>
                 </thead>
@@ -63,13 +62,6 @@
                             </div>
                         </td>
                         <td>
-                            @if($availableSeats > 0)
-                                <span class="badge bg-success"><i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Available</span>
-                            @else
-                                <span class="badge bg-danger"><i class="bi bi-circle-fill me-1" style="font-size: 7px;"></i>Full</span>
-                            @endif
-                        </td>
-                        <td>
                             <div class="d-flex gap-1">
                                 <a href="{{ route('admin.flights.edit', $flight->flight_instance_id) }}" class="btn btn-sm btn-warning" title="Edit">
                                     <i class="bi bi-pencil"></i>
@@ -86,7 +78,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5">
+                        <td colspan="5" class="text-center py-5">
                             <i class="bi bi-airplane-engines" style="font-size: 32px; color: var(--border); display: block; margin-bottom: 12px;"></i>
                             <span style="color: var(--text-muted); font-weight: 500;">No flight instances found</span>
                         </td>

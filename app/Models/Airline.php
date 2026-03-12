@@ -12,15 +12,15 @@ class Airline extends Model
     protected $primaryKey = 'airline_id';
     protected $table = 'airlines';
 
-    protected $fillable = ['airline_code', 'airline_name', 'country_code', 'website', 'contact_phone'];
+    protected $fillable = ['airline_code', 'airline_name', 'country_code', 'website', 'contact_phone', 'is_active'];
 
     public function country()
     {
-        return $this->belongsTo(Country::class, 'country_code', 'country_code');
+        return $this->belongsTo(Country::class , 'country_code', 'country_code');
     }
 
     public function schedules()
     {
-        return $this->hasMany(Schedule::class, 'airline_code', 'airline_code');
+        return $this->hasMany(Schedule::class , 'airline_code', 'airline_code');
     }
 }

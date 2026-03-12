@@ -34,16 +34,15 @@ class FlightDataSeeder extends Seeder
                 // we can bring back a hidden flight instead of creating a
                 // duplicate record
                 $flight = FlightInstance::withTrashed()->firstOrCreate(
-                    [
-                        'schedule_id' => $schedule->schedule_id,
-                        'flight_date' => $flightDate,
-                    ],
-                    [
-                        'aircraft_instance_id' => $aircraftInstance->aircraft_instance_id,
-                        'flight_status_id' => 1,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]
+                [
+                    'schedule_id' => $schedule->schedule_id,
+                    'flight_date' => $flightDate,
+                ],
+                [
+                    'aircraft_instance_id' => $aircraftInstance->aircraft_instance_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
                 );
 
                 if ($flight->trashed()) {
@@ -61,17 +60,17 @@ class FlightDataSeeder extends Seeder
 
                     // FIX: Prevent duplicate seat price
                     $seatPrice = FlightSeatPrice::withTrashed()->firstOrCreate(
-                        [
-                            'flight_instance_id' => $flight->flight_instance_id,
-                            'seat_id' => $seat->seat_id,
-                        ],
-                        [
-                            'price_usd' => $price,
-                            'currency' => 'USD',
-                            'is_available' => true,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]
+                    [
+                        'flight_instance_id' => $flight->flight_instance_id,
+                        'seat_id' => $seat->seat_id,
+                    ],
+                    [
+                        'price_usd' => $price,
+                        'currency' => 'USD',
+                        'is_available' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
                     );
 
                     if ($seatPrice->trashed()) {

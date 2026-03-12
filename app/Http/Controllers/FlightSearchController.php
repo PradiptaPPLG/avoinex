@@ -20,11 +20,9 @@ class FlightSearchController extends Controller
         $flights = FlightInstance::with([
             'schedule.originAirport',
             'schedule.destinationAirport',
-            'aircraftInstance.aircraft',
-            'flightStatus'
+            'aircraftInstance.aircraft'
         ])
             ->where('flight_date', '>=', now()->toDateString())
-            ->where('flight_status_id', 1)
             ->where('is_active', true)
             ->orderBy('flight_date')
             ->orderBy('created_at')
@@ -112,7 +110,6 @@ class FlightSearchController extends Controller
             ->whereIn('schedules.origin_iata_code', $originIataCodes)
             ->whereIn('schedules.destination_iata_code', $destinationIataCodes)
             ->where('flight_instances.flight_date', $departDate)
-            ->where('flight_instances.flight_status_id', 1) // Scheduled
             ->where('flight_instances.is_active', true)
             ->orderBy('schedules.departure_time_gmt')
             ->select('flight_instances.*')
@@ -152,8 +149,7 @@ class FlightSearchController extends Controller
             'schedule.originAirport',
             'schedule.destinationAirport',
             'schedule.airline',
-            'aircraftInstance.aircraft',
-            'flightStatus'
+            'aircraftInstance.aircraft'
         ])
             ->findOrFail($id);
 

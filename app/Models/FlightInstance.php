@@ -13,7 +13,7 @@ class FlightInstance extends Model
     protected $primaryKey = 'flight_instance_id';
     protected $table = 'flight_instances';
 
-    protected $fillable = ['schedule_id', 'aircraft_instance_id', 'flight_date', 'flight_status_id', 'is_active'];
+    protected $fillable = ['schedule_id', 'aircraft_instance_id', 'flight_date', 'is_active'];
 
     // Tambahkan ini
     protected $dates = ['flight_date'];
@@ -40,11 +40,6 @@ class FlightInstance extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class , 'flight_instance_id', 'flight_instance_id');
-    }
-
-    public function flightStatus()
-    {
-        return $this->belongsTo(FlightStatus::class , 'flight_status_id', 'flight_status_id');
     }
 
     /**

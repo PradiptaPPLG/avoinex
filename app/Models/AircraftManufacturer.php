@@ -12,15 +12,15 @@ class AircraftManufacturer extends Model
     protected $primaryKey = 'aircraft_manufacturer_id';
     protected $table = 'aircraft_manufacturers';
 
-    protected $fillable = ['name', 'country_code', 'founded_year'];
+    protected $fillable = ['name', 'country_code', 'founded_year', 'is_active'];
 
     public function country()
     {
-        return $this->belongsTo(Country::class, 'country_code', 'country_code');
+        return $this->belongsTo(Country::class , 'country_code', 'country_code');
     }
 
     public function aircrafts()
     {
-        return $this->hasMany(Aircraft::class, 'manufacturer_id', 'aircraft_manufacturer_id');
+        return $this->hasMany(Aircraft::class , 'manufacturer_id', 'aircraft_manufacturer_id');
     }
 }
