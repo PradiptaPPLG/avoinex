@@ -21,7 +21,9 @@ class BookingSeat extends Model
         'passenger_date_of_birth',
         'seat_id',
         'price_at_booking',
-        'special_requests'
+        'special_requests',
+        'baggage_weight',
+        'baggage_price'
     ];
 
     public function booking()

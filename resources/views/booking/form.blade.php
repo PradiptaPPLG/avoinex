@@ -130,6 +130,35 @@
                                             <input type="text" class="form-control" name="special_requests[]" placeholder="e.g., Wheelchair assistance">
                                         </div>
                                     </div>
+
+                                    <!-- Checked Baggage Section -->
+                                    <hr class="mt-4 mb-3">
+                                    <h6>Checked Baggage</h6>
+                                    <input type="hidden" name="baggage_weights[]" value="0" class="baggage-weight-input">
+                                    <input type="hidden" name="baggage_prices[]" value="0" class="baggage-price-input">
+                                    
+                                    <div class="row g-2 mt-2 baggage-options" data-passenger-index="{{ $index }}">
+                                        @php
+                                            $baggageOptions = [
+                                                ['weight' => 0, 'price' => 0, 'label' => 'No Extra', 'sub' => 'Included'],
+                                                ['weight' => 20, 'price' => 20, 'label' => '20 kg', 'sub' => '+$20.00'],
+                                                ['weight' => 25, 'price' => 25, 'label' => '25 kg', 'sub' => '+$25.00'],
+                                                ['weight' => 30, 'price' => 30, 'label' => '30 kg', 'sub' => '+$30.00'],
+                                                ['weight' => 40, 'price' => 40, 'label' => '40 kg', 'sub' => '+$40.00'],
+                                                ['weight' => 50, 'price' => 50, 'label' => '50 kg', 'sub' => '+$50.00'],
+                                                ['weight' => 60, 'price' => 60, 'label' => '60 kg', 'sub' => '+$60.00'],
+                                            ];
+                                        @endphp
+                                        @foreach($baggageOptions as $bgIdx => $bg)
+                                        <div class="col-6 col-md-3">
+                                            <input type="radio" class="btn-check baggage-radio" name="baggage_selection_{{ $index }}" id="baggage_{{ $index }}_{{ $bg['weight'] }}" value="{{ $bg['weight'] }}" data-price="{{ $bg['price'] }}" autocomplete="off" {{ $bg['weight'] == 0 ? 'checked' : '' }}>
+                                            <label class="btn btn-outline-primary w-100 text-start p-2 rounded-3 h-100" for="baggage_{{ $index }}_{{ $bg['weight'] }}">
+                                                <div class="fw-bold">{{ $bg['label'] }}</div>
+                                                <div class="small">{{ $bg['sub'] }}</div>
+                                            </label>
+                                        </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                                 @endforeach
                             @else
@@ -196,7 +225,7 @@
                             <tfoot>
                                 <tr>
                                     <th>Total</th>
-                                    <th class="text-end">${{ number_format($totalPrice ?? 0, 2) }}</th>
+                                    <th class="text-end" id="summary-grand-total">${{ number_format($totalPrice ?? 0, 2) }}</th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -308,6 +337,63 @@ document.addEventListener('DOMContentLoaded', function() {
         // Form will submit normally
         return true;
     });
+
+    // --- NEW CODE: Baggage Selection Handling ---
+    const baseTotalPrice = {{ $totalPrice ?? 0 }};
+    const baggageTotals = {};
+    const summaryPrices = document.getElementById('summary-prices');
+    const summaryGrandTotal = document.getElementById('summary-grand-total');
+
+    document.querySelectorAll('.baggage-radio').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                const container = this.closest('.baggage-options');
+                const passengerIndex = container.dataset.passengerIndex;
+                const price = parseFloat(this.dataset.price);
+                const weight = this.value;
+
+                // update hidden inputs
+                const formContainer = this.closest('.passenger-form');
+                formContainer.querySelector('.baggage-weight-input').value = weight;
+                formContainer.querySelector('.baggage-price-input').value = price;
+
+                // update totals object
+                baggageTotals[passengerIndex] = {
+                    weight: weight,
+                    price: price
+                };
+
+                updateSummary();
+            }
+        });
+    });
+
+    function updateSummary() {
+        // Remove old baggage rows
+        document.querySelectorAll('.baggage-summary-row').forEach(el => el.remove());
+
+        let totalBaggageCost = 0;
+
+        Object.keys(baggageTotals).forEach(index => {
+            const item = baggageTotals[index];
+            if (item.price > 0) {
+                totalBaggageCost += item.price;
+                
+                const tr = document.createElement('tr');
+                tr.className = 'baggage-summary-row';
+                tr.innerHTML = `
+                    <td><small class="text-muted">&#8627; Pass ${parseInt(index) + 1} Baggage (${item.weight}kg)</small></td>
+                    <td class="text-end"><small class="text-muted">+$${item.price.toFixed(2)}</small></td>
+                `;
+                summaryPrices.appendChild(tr);
+            }
+        });
+
+        const grandTotal = baseTotalPrice + totalBaggageCost;
+        if (summaryGrandTotal) {
+            summaryGrandTotal.innerHTML = '$' + grandTotal.toFixed(2);
+        }
+    }
 });
 </script>
 @endsection

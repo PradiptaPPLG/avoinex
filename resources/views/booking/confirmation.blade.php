@@ -93,7 +93,7 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Passport</th>
-                                <th>Seat</th>
+                                <th>Seat & Baggage</th>
                                 <th>Price</th>
                             </tr>
                         </thead>
@@ -102,8 +102,18 @@
                             <tr>
                                 <td>{{ $seat->passenger_first_name }} {{ $seat->passenger_last_name }}</td>
                                 <td>{{ $seat->passenger_passport }}</td>
-                                <td>{{ $seat->seat->seat_number ?? 'N/A' }}</td>
-                                <td>${{ number_format($seat->price_at_booking, 2) }}</td>
+                                <td>
+                                    <div>{{ $seat->seat->seat_number ?? 'N/A' }}</div>
+                                    @if($seat->baggage_weight > 0)
+                                    <div class="small text-muted"><i class="bi bi-suitcase"></i> {{ $seat->baggage_weight }} kg</div>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div>${{ number_format($seat->price_at_booking, 2) }}</div>
+                                    @if($seat->baggage_price > 0)
+                                    <div class="small text-muted">+${{ number_format($seat->baggage_price, 2) }}</div>
+                                    @endif
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>

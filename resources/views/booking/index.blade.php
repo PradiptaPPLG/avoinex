@@ -38,7 +38,12 @@
                                     {{ $booking->flightInstance->schedule->destinationAirport->city }} ({{ $booking->flightInstance->schedule->destinationAirport->iata_code }})
                                 </td>
                                 <td>{{ $booking->flightInstance->flight_date->format('d M Y') }}</td>
-                                <td>${{ number_format($booking->total_price_usd, 2) }}</td>
+                                <td>
+                                    <div>${{ number_format($booking->total_price_usd, 2) }}</div>
+                                    @if($booking->bookingSeats->sum('baggage_weight') > 0)
+                                        <div class="small text-muted"><i class="bi bi-suitcase"></i> Includes Baggage</div>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($booking->booking_status === 'confirmed')
                                         <span class="badge bg-success">Confirmed</span>

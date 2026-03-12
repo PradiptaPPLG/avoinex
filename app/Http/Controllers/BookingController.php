@@ -18,7 +18,8 @@ class BookingController extends Controller
             ->where('payment_status', 'paid')
             ->with([
             'flightInstance.schedule.originAirport',
-            'flightInstance.schedule.destinationAirport'
+            'flightInstance.schedule.destinationAirport',
+            'bookingSeats'
         ])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -103,7 +104,9 @@ class BookingController extends Controller
             'special_requests' => 'nullable|array',
             'seat_ids' => 'required|array',
             'seat_numbers' => 'required|array',
-            'seat_prices' => 'required|array'
+            'seat_prices' => 'required|array',
+            'baggage_weights' => 'required|array',
+            'baggage_prices' => 'required|array'
         ]);
 
         \Log::info('Validated data keys:', array_keys($validated));
@@ -158,7 +161,7 @@ class BookingController extends Controller
                 'booking_code' => $bookingCode,
                 'client_id' => $client->client_id,
                 'flight_instance_id' => $flightInstanceId,
-                'total_price_usd' => array_sum($validated['seat_prices']),
+                'total_price_usd' => array_sum($validated['seat_prices']) + array_sum($validated['baggage_prices']),
                 'booking_status' => 'pending',
                 'payment_status' => 'unpaid',
                 'expires_at' => now()->addHours(24)
@@ -236,7 +239,9 @@ class BookingController extends Controller
                     'passenger_date_of_birth' => $validated['passenger_dob'][$index] ?? null,
                     'seat_id' => $seatId,
                     'price_at_booking' => $validated['seat_prices'][$index],
-                    'special_requests' => $validated['special_requests'][$index] ?? null
+                    'special_requests' => $validated['special_requests'][$index] ?? null,
+                    'baggage_weight' => $validated['baggage_weights'][$index] ?? 0,
+                    'baggage_price' => $validated['baggage_prices'][$index] ?? 0
                 ]);
             }
 
