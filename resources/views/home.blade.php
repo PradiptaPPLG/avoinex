@@ -514,11 +514,13 @@
     display:flex; 
     align-items:center; 
     gap:12px; 
-    padding:15px 18px; 
+    padding:0 18px; 
+    height: 56px;
     border-radius:12px; 
     border:1px solid rgba(120,120,120,0.35); 
     background: rgba(255,255,255,0.95);
     transition: all 0.3s ease;
+    box-sizing: border-box;
 }
 .avx-input-wrap:hover {
     border-color: var(--avx-primary);
@@ -540,8 +542,8 @@
     color: #333;
 }
 .avx-input-date input[type="date"]{ 
-    padding:8px 4px; 
-    min-height: 24px;
+    padding:0; 
+    height: 100%;
     width: 100%;
 }
 

@@ -189,6 +189,7 @@ class BookingController extends Controller
                 // Handle prefixed dummy seat IDs: e_3F, b_1A, p_3C, test_1
                 if (is_string($seatId) && preg_match('/^(e|b|p|test)_(.+)$/', $seatId, $matches)) {
                     $seatNumber = $matches[2];
+                    $type = $matches[1];
                     \Log::info('Resolving dummy seat_id', ['raw' => $seatId, 'seat_number' => $seatNumber, 'aircraft_id' => $aircraftId]);
 
                     // Look up the actual seat_id from the seats table
@@ -200,15 +201,28 @@ class BookingController extends Controller
                         $seatId = $actualSeat->seat_id;
                         \Log::info('Resolved to real seat_id: ' . $seatId);
                     }
+                    elseif ($aircraftId) {
+                        $seatClass = 'economy';
+                        if ($type == 'b') $seatClass = 'business';
+                        if ($type == 'p') $seatClass = 'first';
+                        
+                        $actualSeat = \App\Models\Seat::create([
+                            'aircraft_id' => $aircraftId,
+                            'seat_number' => $seatNumber,
+                            'seat_class' => $seatClass
+                        ]);
+                        $seatId = $actualSeat->seat_id;
+                        \Log::info('Created missing seat on-the-fly: ' . $seatId);
+                    }
                     else {
-                        \Log::warning('Could not resolve seat_number', ['seat_number' => $seatNumber, 'aircraft_id' => $aircraftId]);
+                        \Log::warning('Could not resolve seat_number and no aircraft_id', ['seat_number' => $seatNumber]);
                     }
                 }
 
                 // Ensure seat_id is a valid integer
                 if (!is_numeric($seatId)) {
-                    \Log::error('seat_id is not numeric after resolution, skipping', ['seat_id' => $seatId]);
-                    continue;
+                    \Log::error('seat_id is not numeric after resolution, failing', ['seat_id' => $seatId]);
+                    throw new \Exception("Invalid seat selected for passenger $firstName.");
                 }
                 $seatId = intval($seatId);
 

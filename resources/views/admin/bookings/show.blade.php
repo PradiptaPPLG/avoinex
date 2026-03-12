@@ -177,13 +177,19 @@
                                 <td>
                                     @if($seat->seat_id)
                                         <span style="font-family:'JetBrains Mono',monospace; font-weight: 700; font-size: 14px; color: var(--primary); background: var(--primary-light); padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(0,102,204,0.2);">
-                                            {{ $seat->seat_id }}
+                                            {{ $seat->seat->seat_number ?? $seat->seat_id }}
                                         </span>
                                     @else
                                         <span style="color: var(--text-muted); font-size: 13px;">Released</span>
                                     @endif
+                                    
+                                    @if($seat->baggage_weight > 0)
+                                    <div class="mt-2 text-muted" style="font-size: 12px;">
+                                        <i class="bi bi-suitcase"></i> {{ $seat->baggage_weight }} kg (+${{ number_format($seat->baggage_price, 2) }})
+                                    </div>
+                                    @endif
                                 </td>
-                                <td style="font-weight: 700; font-size: 14px;">${{ number_format($seat->price_at_booking, 2) }}</td>
+                                <td style="font-weight: 700; font-size: 14px;">${{ number_format($seat->price_at_booking + $seat->baggage_price, 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>

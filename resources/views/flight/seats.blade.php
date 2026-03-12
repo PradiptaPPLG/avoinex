@@ -469,6 +469,14 @@
 </div>
 
 <style>
+/* CUSTOM PRIMARY COLOR TO MATCH APP.BLADE.PHP (LIGHT BLUE) */
+.bg-primary { background-color: var(--primary, #279ED6) !important; }
+.text-primary { color: var(--primary, #279ED6) !important; }
+.border-primary { border-color: var(--primary, #279ED6) !important; }
+.badge.bg-primary { background-color: var(--primary, #279ED6) !important; }
+.btn-primary { background-color: var(--primary, #279ED6) !important; border-color: var(--primary, #279ED6) !important; }
+.btn-primary:hover { background-color: #1f82b3 !important; border-color: #1f82b3 !important; }
+
 /* AIRCRAFT IMAGES STYLING */
 .aircraft-front-img, .aircraft-back-img {
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
@@ -766,7 +774,7 @@
     transform: translate(-50%, -50%);
     width: 12px;
     height: 12px;
-    background: #007bff;
+    background: var(--primary, #279ED6);
     border-radius: 50%;
     opacity: 0.6;
 }
