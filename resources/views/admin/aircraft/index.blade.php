@@ -77,7 +77,7 @@
                                 <form action="{{ route('admin.aircraft.destroy', $item->aircraft_id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Delete aircraft {{ $item->registration_number }}?')">
+                                    <button type="button" class="btn btn-sm btn-danger" title="Delete" onclick="confirmDelete(event, this.closest('form'), 'Delete aircraft {{ $item->registration_number }}?')">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>

@@ -61,6 +61,25 @@
                 </select>
             </div>
         </div>
+        
+        <div class="row g-4 mt-1">
+            <div class="col-md-4">
+                <label class="form-label">Baggage Capacity (kg)</label>
+                <input type="number" name="baggage_capacity_kg" class="form-control" value="{{ old('baggage_capacity_kg', $aircraft->baggage_capacity_kg ?? 20) }}" min="0" required>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" name="has_meal" id="has_meal" value="1" {{ old('has_meal', $aircraft->has_meal ?? true) ? 'checked' : '' }}>
+                    <label class="form-check-label ms-2" for="has_meal">Meal Included</label>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" name="has_wifi" id="has_wifi" value="1" {{ old('has_wifi', $aircraft->has_wifi ?? false) ? 'checked' : '' }}>
+                    <label class="form-check-label ms-2" for="has_wifi">Free Wi-Fi Available</label>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

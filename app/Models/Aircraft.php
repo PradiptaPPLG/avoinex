@@ -26,11 +26,16 @@ class Aircraft extends Model
         'preferred_zone_enabled',
         'preferred_zone_start_row',
         'preferred_zone_end_row',
+        'baggage_capacity_kg',
+        'has_meal',
+        'has_wifi',
         'is_active',
     ];
 
     protected $casts = [
         'preferred_zone_enabled' => 'boolean',
+        'has_meal' => 'boolean',
+        'has_wifi' => 'boolean',
     ];
 
     public function manufacturer()

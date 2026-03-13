@@ -51,7 +51,7 @@
                                 <form action="{{ route('admin.countries.destroy', $country->country_id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Delete country {{ $country->country_name }}?')">
+                                    <button type="button" class="btn btn-sm btn-danger" title="Delete" onclick="confirmDelete(event, this.closest('form'), 'Delete country {{ $country->country_name }}?')">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>

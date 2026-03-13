@@ -34,6 +34,9 @@ class AircraftController extends Controller
             'preferred_zone_enabled' => 'nullable|boolean',
             'preferred_zone_start_row' => 'nullable|integer|min:1',
             'preferred_zone_end_row' => 'nullable|integer|min:1',
+            'baggage_capacity_kg' => 'required|integer|min:0',
+            'has_meal' => 'nullable|boolean',
+            'has_wifi' => 'nullable|boolean',
         ]);
 
         $totalSeats = $validated['seat_columns'] * $validated['seat_rows'];
@@ -50,6 +53,9 @@ class AircraftController extends Controller
             'preferred_zone_enabled' => $request->boolean('preferred_zone_enabled'),
             'preferred_zone_start_row' => $validated['preferred_zone_start_row'] ?? null,
             'preferred_zone_end_row' => $validated['preferred_zone_end_row'] ?? null,
+            'baggage_capacity_kg' => $validated['baggage_capacity_kg'],
+            'has_meal' => $request->boolean('has_meal'),
+            'has_wifi' => $request->boolean('has_wifi'),
         ]);
 
         // Calculate economy seats
@@ -91,6 +97,9 @@ class AircraftController extends Controller
             'preferred_zone_enabled' => 'nullable|boolean',
             'preferred_zone_start_row' => 'nullable|integer|min:1',
             'preferred_zone_end_row' => 'nullable|integer|min:1',
+            'baggage_capacity_kg' => 'required|integer|min:0',
+            'has_meal' => 'nullable|boolean',
+            'has_wifi' => 'nullable|boolean',
         ]);
 
         $totalSeats = $validated['seat_columns'] * $validated['seat_rows'];
@@ -107,6 +116,9 @@ class AircraftController extends Controller
             'preferred_zone_enabled' => $request->boolean('preferred_zone_enabled'),
             'preferred_zone_start_row' => $validated['preferred_zone_start_row'] ?? null,
             'preferred_zone_end_row' => $validated['preferred_zone_end_row'] ?? null,
+            'baggage_capacity_kg' => $validated['baggage_capacity_kg'],
+            'has_meal' => $request->boolean('has_meal'),
+            'has_wifi' => $request->boolean('has_wifi'),
         ]);
 
         // Calculate economy seats

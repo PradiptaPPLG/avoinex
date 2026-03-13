@@ -62,7 +62,7 @@
                                 <form action="{{ route('admin.schedules.destroy', $schedule->schedule_id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Delete this schedule?')">
+                                    <button type="button" class="btn btn-sm btn-danger" title="Delete" onclick="confirmDelete(event, this.closest('form'), 'Delete this schedule?')">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>

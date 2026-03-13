@@ -62,7 +62,7 @@
                                 <form action="{{ route('admin.airlines.destroy', $airline->airline_id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Delete airline {{ $airline->airline_name }}?')">
+                                    <button type="button" class="btn btn-sm btn-danger" title="Delete" onclick="confirmDelete(event, this.closest('form'), 'Delete airline {{ $airline->airline_name }}?')">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>

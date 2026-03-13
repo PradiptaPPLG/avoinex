@@ -47,7 +47,7 @@
                                 <form action="{{ route('admin.airports.destroy', $airport->airport_id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Delete airport {{ $airport->iata_code }}?')">
+                                    <button type="button" class="btn btn-sm btn-danger" title="Delete" onclick="confirmDelete(event, this.closest('form'), 'Delete airport {{ $airport->iata_code }}?')">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>

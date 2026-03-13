@@ -742,6 +742,58 @@
         updateClock();
         setInterval(updateClock, 1000);
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(event, form, message) {
+            event.preventDefault();
+            
+            let timeLeft = 5;
+            let timerInterval;
+            
+            Swal.fire({
+                title: 'Are you sure you want to delete?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#5A6B82',
+                confirmButtonText: `Wait (${timeLeft}s)`,
+                cancelButtonText: 'Cancel',
+                preConfirm: () => {
+                    if (timeLeft > 0) {
+                        return false;
+                    }
+                    return true;
+                },
+                didOpen: () => {
+                    const b = Swal.getConfirmButton();
+                    b.disabled = true;
+                    b.style.opacity = '0.5';
+                    b.style.cursor = 'not-allowed';
+                    
+                    timerInterval = setInterval(() => {
+                        timeLeft -= 1;
+                        if (timeLeft > 0) {
+                            b.textContent = `Wait (${timeLeft}s)`;
+                        } else {
+                            clearInterval(timerInterval);
+                            b.disabled = false;
+                            b.style.opacity = '1';
+                            b.style.cursor = 'pointer';
+                            b.textContent = 'Yes, delete';
+                        }
+                    }, 1000);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+    </script>
     @stack('scripts')
 </body>
 </html>
