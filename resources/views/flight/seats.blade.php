@@ -979,10 +979,6 @@ function initializeSeatSelection() {
 document.addEventListener('click', function(event) {
     if (event.target.closest('.seat-item')) {
         const seatElement = event.target.closest('.seat-item');
-        // Block clicks on disabled seats
-        if (seatElement.classList.contains('seat-disabled')) {
-            return;
-        }
         handleSeatClick(seatElement);
     }
     if (event.target.closest('#clear-seats')) {
@@ -1009,9 +1005,16 @@ function handleSeatClick(seatElement) {
     } else {
         // Check against required seats limit
         if (selectedSeats.length >= REQUIRED_SEATS) {
-            alert(`You can only select ${REQUIRED_SEATS} seat${REQUIRED_SEATS > 1 ? 's' : ''} for your ${ADULTS + CHILDREN} passenger${(ADULTS + CHILDREN) > 1 ? 's' : ''} (${ADULTS} Adult${ADULTS > 1 ? 's' : ''}${CHILDREN > 0 ? ' + ' + CHILDREN + ' Child' + (CHILDREN > 1 ? 'ren' : '') : ''}).`);
-            return;
+            // Auto-cancel the earliest selected seat
+            const oldestSeat = selectedSeats.shift();
+            const oldestSeatElement = document.querySelector(`.seat-item[data-seat-id="${oldestSeat.id}"]`);
+            if (oldestSeatElement) {
+                oldestSeatElement.classList.remove('selected');
+            }
+            totalPrice -= oldestSeat.price;
+            console.log(`➖ Auto-deselected: ${oldestSeat.number}`);
         }
+        
         seatElement.classList.add('selected');
         selectedSeats.push({
             id: seatId,
@@ -1026,20 +1029,12 @@ function handleSeatClick(seatElement) {
 }
 
 function toggleSeatDisabledState() {
+    // We no longer disable unselected seats when max is reached.
+    // Instead, clicking a new seat will auto-cancel the oldest selection.
     const allSeatItems = document.querySelectorAll('.seat-item');
-    if (selectedSeats.length >= REQUIRED_SEATS) {
-        // Disable all unselected seats
-        allSeatItems.forEach(seat => {
-            if (!seat.classList.contains('selected')) {
-                seat.classList.add('seat-disabled');
-            }
-        });
-    } else {
-        // Re-enable all disabled seats
-        allSeatItems.forEach(seat => {
-            seat.classList.remove('seat-disabled');
-        });
-    }
+    allSeatItems.forEach(seat => {
+        seat.classList.remove('seat-disabled');
+    });
 }
 
 function handleClearSeats() {
