@@ -40,11 +40,11 @@
                         <div class="avx-passenger-class">
                             <button type="button" class="avx-passenger-toggle" id="passengerToggleBtn" aria-haspopup="true" aria-expanded="false">
                                 <svg class="avx-icon-user" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM2 20c0-3 6-5 10-5s10 2 10 5v1H2v-1z"/></svg>
-                                <span class="avx-passenger-text" id="passengerSummaryText">1 Passengers, Economy</span>
+                                <span class="avx-passenger-text" id="passengerSummaryText">1 Penumpang</span>
                                 <svg class="avx-icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
                             </button>
                             
-                            <div class="avx-dropdown avx-pax-dropdown" id="passengerDropdown" aria-hidden="true">
+                            <div class="avx-pax-dropdown" id="passengerDropdown" aria-hidden="true" style="display: none;">
                                 <!-- Adults -->
                                 <div class="avx-pax-row">
                                     <div class="avx-pax-info">
@@ -87,13 +87,27 @@
                                 </div>
                             </div>
                             
-                            <div class="avx-class-select">
-                                <svg class="avx-icon-seat" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 5h14v12H5z"/></svg>
-                                <select name="travel_class" id="travelClassSelect">
-                                    <option value="economy" selected>Ekonomi</option>
-                                    <option value="premium">Premium Economy</option>
-                                    <option value="business">Business</option>
-                                </select>
+                            <div class="avx-class-select-container">
+                                <button type="button" class="avx-class-toggle" id="classToggleBtn" aria-haspopup="true" aria-expanded="false">
+                                    <svg class="avx-icon-seat" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 18v3h3v-3h10v3h3v-6H4v3zm15-8h3v3h-3v-3zM2 10h3v3H2v-3zm15 3H7V5c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2v8z"/></svg>
+                                    <span class="avx-class-text" id="classSummaryText">Ekonomi</span>
+                                    <svg class="avx-icon-arrow" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                                </button>
+                                
+                                <div class="avx-class-dropdown" id="classDropdown" aria-hidden="true" style="display: none;">
+                                    <button type="button" class="avx-class-option active" data-value="economy">
+                                        <div class="avx-class-indicator"></div>
+                                        <span>Ekonomi</span>
+                                    </button>
+                                    <button type="button" class="avx-class-option" data-value="premium">
+                                        <div class="avx-class-indicator"></div>
+                                        <span>Premium Economy</span>
+                                    </button>
+                                    <button type="button" class="avx-class-option" data-value="business">
+                                        <div class="avx-class-indicator"></div>
+                                        <span>Business</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -105,6 +119,7 @@
                     <input type="hidden" name="children" id="hiddenChildren" value="0">
                     <input type="hidden" name="infants" id="hiddenInfants" value="0">
                     <input type="hidden" name="passengers" id="hiddenPassengers" value="1">
+                    <input type="hidden" name="travel_class" id="hiddenTravelClass" value="economy">
                     <div class="avx-search-main">
                         <!-- Dari -->
                         <label class="avx-field" for="from">
@@ -408,89 +423,47 @@
     font-size: 16px;
 }
 
-/* Passenger/class block */
-.avx-passenger-class{ 
+.avx-passenger-class { 
     display:flex; 
-    gap:18px; 
+    gap:14px; 
     align-items:center; 
     flex-wrap: wrap;
+    position: relative;
+    z-index: 100;
 }
-.avx-passenger-toggle{ 
+.avx-passenger-toggle, .avx-class-toggle { 
     display:inline-flex; 
     align-items:center; 
     gap:10px; 
-    padding:12px 20px; 
-    border-radius:12px; 
-    background:rgba(255,255,255,0.95); 
-    border:1px solid rgba(120,120,120,0.3); 
+    padding:0 22px; 
+    height: 48px;
+    border-radius:24px; 
+    background:rgba(255,255,255,0.98); 
+    border:1px solid rgba(120,120,120,0.25); 
     cursor:pointer; 
     white-space: nowrap;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
-.avx-passenger-toggle:hover {
+.avx-passenger-toggle:hover, .avx-class-toggle:hover, .avx-class-toggle:focus-within {
     border-color: var(--avx-primary);
     background: #ffffff;
-    box-shadow: 0 4px 15px rgba(39,158,214,0.1);
+    box-shadow: 0 4px 16px rgba(39,158,214,0.15);
+    transform: translateY(-1px);
 }
 .avx-passenger-toggle .avx-icon-user, 
-.avx-passenger-toggle .avx-icon-arrow{ 
+.avx-passenger-toggle .avx-icon-arrow,
+.avx-class-toggle .avx-icon-seat,
+.avx-class-toggle .avx-icon-arrow { 
     width:18px; 
     height:18px; 
     color:var(--avx-primary); 
 }
-.avx-passenger-text{ 
-    color: var(--avx-primary); 
+.avx-passenger-text, .avx-class-text { 
+    color: #333; 
     font-weight:600; 
-    font-family:'Segoe UI Semibold'; 
-    font-size: 16px;
-}
-
-.avx-dropdown{ 
-    display:none; 
-    position:absolute; 
-    margin-top:10px; 
-    background:#ffffff; 
-    border-radius:12px; 
-    padding:16px 20px; 
-    box-shadow: 0 10px 32px rgba(10,20,30,0.12), 0 0 0 1px rgba(0,0,0,0.06);
-    border: none;
-    z-index: 100;
-    min-width: 300px;
-    width: max-content;
-}
-
-.avx-class-select{ 
-    display:flex; 
-    align-items:center; 
-    gap:10px; 
-    padding:12px 20px; 
-    border-radius:12px; 
-    background:rgba(255,255,255,0.95); 
-    border:1px solid rgba(120,120,120,0.3); 
-    white-space: nowrap;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-}
-.avx-class-select:hover, .avx-class-select:focus-within {
-    border-color: var(--avx-primary);
-    background: #ffffff;
-    box-shadow: 0 4px 15px rgba(39,158,214,0.1);
-}
-.avx-class-select .avx-icon-seat{ 
-    width:18px; 
-    height:18px; 
-    color:var(--avx-primary); 
-}
-.avx-class-select select{ 
-    border:0; 
-    background:transparent; 
-    outline:none; 
-    font-weight:600; 
-    font-family:'Segoe UI Semibold'; 
-    color:var(--avx-primary); 
-    font-size: 16px;
-    min-width: 140px;
+    font-family:'Segoe UI Semibold', sans-serif; 
+    font-size: 15px;
 }
 
 /* ===== BARIS TENGAH: FORM ===== */
@@ -821,7 +794,9 @@
         background-size: 180% auto;
         background-position: center 20%;
     }
-    /* ===== AVAILABLE FLIGHTS STYLES ===== */
+}
+
+/* ===== AVAILABLE FLIGHTS STYLES ===== */
 #available-flights {
     position: relative;
     z-index: 10;
@@ -895,44 +870,45 @@
     position: absolute;
     top: 100%;
     left: 0;
-    margin-top: 8px;
+    margin-top: 12px;
     background: #fff;
-    border-radius: 12px;
-    padding: 16px 20px 16px;
-    box-shadow: 0 10px 32px rgba(10,20,30,0.12), 0 0 0 1px rgba(0,0,0,0.06);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
     border: none;
     z-index: 200;
-    min-width: 300px;
+    min-width: 320px;
 }
 .avx-pax-row {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
     flex-wrap: nowrap;
-    gap: 30px;
+    gap: 24px;
 }
 .avx-pax-row:last-of-type {
     border-bottom: none;
+    padding-bottom: 0;
 }
 .avx-pax-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
     flex: 1 1 auto;
     white-space: nowrap;
 }
 .avx-pax-label {
     font-weight: 700;
-    font-size: 15px;
+    font-size: 16px;
     color: #222;
     font-family: 'Segoe UI Semibold', sans-serif;
 }
 .avx-pax-desc {
-    font-size: 12px;
-    color: #888;
+    font-size: 13px;
+    color: #777;
     font-family: 'Segoe UI', sans-serif;
 }
 .avx-pax-stepper {
@@ -940,49 +916,49 @@
     align-items: center;
     gap: 16px;
     flex-shrink: 0;
+    background: #f8f9fa;
+    padding: 6px 12px;
+    border-radius: 12px;
 }
 .avx-pax-dropdown .avx-pax-btn {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px;
     border-radius: 50% !important;
-    border: 2px solid var(--avx-primary) !important;
-    background: transparent !important;
+    border: none !important;
+    background: #fff !important;
     color: var(--avx-primary) !important;
-    font-size: 20px !important;
-    font-weight: 700;
+    font-size: 18px !important;
+    font-weight: 600;
     cursor: pointer;
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
     line-height: 1;
     padding: 0 !important;
     margin: 0;
     -webkit-appearance: none;
     appearance: none;
     outline: none;
-    box-shadow: none !important;
     text-decoration: none;
 }
 .avx-pax-dropdown .avx-pax-btn:hover:not(:disabled) {
     background: var(--avx-primary) !important;
     color: #fff !important;
-    transform: scale(1.08);
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(39,158,214,0.3) !important;
 }
 .avx-pax-dropdown .avx-pax-btn:disabled {
-    border-color: #ccc !important;
-    color: #ccc !important;
+    background: #f0f0f0 !important;
+    color: #b0b0b0 !important;
+    box-shadow: none !important;
     cursor: not-allowed;
-    opacity: 0.5;
-    background: transparent !important;
-}
-.avx-pax-dropdown .avx-pax-btn:focus {
-    outline: 2px solid rgba(39,158,214,0.3);
-    outline-offset: 2px;
+    opacity: 0.7;
 }
 .avx-pax-count {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: #222;
     min-width: 24px;
@@ -990,30 +966,80 @@
     font-family: 'Segoe UI Semibold', sans-serif;
 }
 .avx-pax-done-row {
-    padding-top: 12px;
+    padding-top: 16px;
     text-align: right;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 8px;
 }
 .avx-pax-done-btn {
     background: var(--avx-primary);
     color: #fff;
     border: none;
-    border-radius: 8px;
-    padding: 10px 0;
+    border-radius: 12px;
+    padding: 12px 24px;
     font-size: 15px;
     font-weight: 600;
     font-family: 'Segoe UI Semibold', sans-serif;
     cursor: pointer;
     transition: all 0.2s ease;
     width: 100%;
-    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(39,158,214,0.25);
 }
-.avx-pax-done-btn:hover {
-    background: #1e8bc8;
-}
-
-/* Passenger toggle container needs relative positioning */
-.avx-passenger-class {
+/* ===== CLASS DROPDOWN ===== */
+.avx-class-select-container {
     position: relative;
+}
+.avx-class-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 12px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
+    border: none;
+    z-index: 200;
+    min-width: 240px;
+    flex-direction: column;
+    gap: 4px;
+}
+.avx-class-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Segoe UI Semibold', sans-serif;
+    font-size: 15px;
+    color: #333;
+    font-weight: 600;
+}
+.avx-class-option:hover {
+    background: #f8f9fa;
+}
+.avx-class-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    transition: all 0.2s ease;
+}
+.avx-class-option.active {
+    background: rgba(39,158,214,0.08);
+    color: var(--avx-primary);
+}
+.avx-class-option.active .avx-class-indicator {
+    border-color: var(--avx-primary);
+    background: var(--avx-primary);
+    box-shadow: inset 0 0 0 2px #fff;
 }
 </style>
 
@@ -1031,10 +1057,18 @@
     var hiddenChildren  = document.getElementById('hiddenChildren');
     var hiddenInfants   = document.getElementById('hiddenInfants');
     var hiddenPassengers = document.getElementById('hiddenPassengers');
-    var travelClassSel  = document.getElementById('travelClassSelect');
+    var hiddenTravelClass = document.getElementById('hiddenTravelClass');
+    
+    // Passenger elements
     var toggle          = document.getElementById('passengerToggleBtn');
     var dropdown        = document.getElementById('passengerDropdown');
     var doneBtn         = document.getElementById('paxDoneBtn');
+
+    // Class elements
+    var classToggle     = document.getElementById('classToggleBtn');
+    var classDropdown   = document.getElementById('classDropdown');
+    var classSummaryText = document.getElementById('classSummaryText');
+    var classOptions    = document.querySelectorAll('.avx-class-option');
 
     // Class label mapping
     var classLabels = { economy: 'Economy', premium: 'Premium Economy', business: 'Business' };
@@ -1042,10 +1076,9 @@
     // ===== CORE: updatePassengerText =====
     function updatePassengerText() {
         var total = pax.adults + pax.children + pax.infants;
-        var classLabel = classLabels[travelClassSel.value] || 'Economy';
 
         // Update summary text
-        summaryTextEl.textContent = total + ' Passengers, ' + classLabel;
+        summaryTextEl.textContent = total + ' Penumpang';
 
         // Update counter displays
         adultsCountEl.textContent = pax.adults;
@@ -1149,29 +1182,79 @@
     });
 
     // ===== TRAVEL CLASS CHANGE =====
-    travelClassSel.addEventListener('change', function() {
-        updatePassengerText();
+    classOptions.forEach(function(opt) {
+        opt.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            // Remove active class from all options
+            classOptions.forEach(function(o) { o.classList.remove('active'); });
+            
+            // Add active class to clicked option
+            this.classList.add('active');
+            
+            // Update hidden input and summary text
+            var value = this.getAttribute('data-value');
+            hiddenTravelClass.value = value;
+            classSummaryText.textContent = classLabels[value] || 'Economy';
+            
+            // Close dropdown
+            classDropdown.style.display = 'none';
+            classToggle.setAttribute('aria-expanded', 'false');
+            classDropdown.setAttribute('aria-hidden', 'true');
+        });
     });
 
-    // ===== DROPDOWN TOGGLE =====
+    // ===== DROPDOWN TOGGLES =====
+    // Passenger Dropdown
     if (toggle && dropdown) {
         toggle.addEventListener('click', function(e) {
             e.stopPropagation();
             var expanded = toggle.getAttribute('aria-expanded') === 'true';
+            
+            // Close class dropdown if open
+            if (classDropdown && classDropdown.style.display === 'flex') {
+                classDropdown.style.display = 'none';
+                classToggle.setAttribute('aria-expanded', 'false');
+            }
+            
             toggle.setAttribute('aria-expanded', String(!expanded));
             dropdown.style.display = expanded ? 'none' : 'block';
             dropdown.setAttribute('aria-hidden', String(expanded));
         });
+    }
 
-        // Click outside closes
-        document.addEventListener('click', function(ev) {
-            if (!toggle.contains(ev.target) && !dropdown.contains(ev.target)) {
+    // Class Dropdown
+    if (classToggle && classDropdown) {
+        classToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var expanded = classToggle.getAttribute('aria-expanded') === 'true';
+            
+            // Close passenger dropdown if open
+            if (dropdown && dropdown.style.display === 'block') {
                 dropdown.style.display = 'none';
                 toggle.setAttribute('aria-expanded', 'false');
-                dropdown.setAttribute('aria-hidden', 'true');
             }
+            
+            classToggle.setAttribute('aria-expanded', String(!expanded));
+            classDropdown.style.display = expanded ? 'none' : 'flex';
+            classDropdown.setAttribute('aria-hidden', String(expanded));
         });
     }
+
+    // Click outside closes both dropdowns
+    document.addEventListener('click', function(ev) {
+        if (toggle && dropdown && !toggle.contains(ev.target) && !dropdown.contains(ev.target)) {
+            dropdown.style.display = 'none';
+            toggle.setAttribute('aria-expanded', 'false');
+            dropdown.setAttribute('aria-hidden', 'true');
+        }
+        
+        if (classToggle && classDropdown && !classToggle.contains(ev.target) && !classDropdown.contains(ev.target)) {
+            classDropdown.style.display = 'none';
+            classToggle.setAttribute('aria-expanded', 'false');
+            classDropdown.setAttribute('aria-hidden', 'true');
+        }
+    });
 
     // Stop propagation inside dropdown
     if (dropdown) {

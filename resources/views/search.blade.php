@@ -30,10 +30,10 @@
                 <div class="col-md-2">
                     <small class="text-muted">PASSENGERS</small>
                     <h5 class="mb-0">
-                        {{ $searchParams['adults'] ?? 1 }} Adult{{ ($searchParams['adults'] ?? 1) > 1 ? 's' : '' }}
-                        @if(($searchParams['children'] ?? 0) > 0)
-                        , {{ $searchParams['children'] }} Child{{ ($searchParams['children'] ?? 0) > 1 ? 'ren' : '' }}
-                        @endif
+                        @php
+                            $totalPax = ($searchParams['adults'] ?? 1) + ($searchParams['children'] ?? 0) + ($searchParams['infants'] ?? 0);
+                        @endphp
+                        {{ $totalPax }} Passenger{{ $totalPax > 1 ? 's' : '' }}
                     </h5>
                 </div>
                 <div class="col-md-2">

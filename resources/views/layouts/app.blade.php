@@ -534,6 +534,7 @@
                     </div>
                 </div>
             </div>
+        @else
             <button class="avx-login-btn" onclick="showModal('login')"><i class="bi bi-box-arrow-in-right me-1"></i>Login</button>
             <button class="avx-signup-btn" onclick="showModal('register')"><i class="bi bi-person-plus-fill me-1"></i>Register</button>
         @endif
