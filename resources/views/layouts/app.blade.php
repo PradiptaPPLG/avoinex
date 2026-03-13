@@ -534,9 +534,8 @@
                     </div>
                 </div>
             </div>
-        @else
-            <button class="avx-login-btn" onclick="showModal('login')">Login</button>
-            <button class="avx-signup-btn" onclick="showModal('register')">Register</button>
+            <button class="avx-login-btn" onclick="showModal('login')"><i class="bi bi-box-arrow-in-right me-1"></i>Login</button>
+            <button class="avx-signup-btn" onclick="showModal('register')"><i class="bi bi-person-plus-fill me-1"></i>Register</button>
         @endif
     </div>
 </header>
@@ -604,7 +603,7 @@
                             <label class="avx-checkbox"><input type="checkbox" name="remember" checked> <span>Remember me</span></label>
                             <a href="#" class="avx-forgot-link">Forgot password?</a>
                         </div>
-                        <button type="submit" class="avx-btn avx-btn-submit">Login to Account</button>
+                        <button type="submit" class="avx-btn avx-btn-submit"><i class="bi bi-airplane-fill me-2" style="transform: rotate(45deg);"></i> Login to Account</button>
                     </form>
                 </div>
 
@@ -703,7 +702,7 @@
                             <label for="terms">I agree to the <a href="#" class="avx-link avx-privacy-link">Terms of Service</a> and <a href="#" class="avx-link avx-privacy-link">Privacy Policy</a></label>
                         </div>
 
-                        <button type="submit" class="avx-btn avx-btn-submit">Create Account</button>
+                        <button type="submit" class="avx-btn avx-btn-submit"><i class="bi bi-airplane-fill me-2" style="transform: rotate(45deg);"></i> Create Account</button>
                     </form>
                 </div>
 

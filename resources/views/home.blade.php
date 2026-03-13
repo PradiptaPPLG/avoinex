@@ -23,9 +23,9 @@
                 <div class="avx-search-header">
                     <!-- Tabs -->
                     <nav class="avx-tabs" role="tablist" aria-label="flight types">
-                        <button class="avx-tab avx-tab-active" data-tab="oneway" type="button">Sekali Jalan</button>
-                        <button class="avx-tab" data-tab="round" type="button">Pulang-Pergi</button>
-                        <button class="avx-tab" data-tab="multi" type="button">Multi-Kota</button>
+                        <button class="avx-tab avx-tab-active" data-tab="oneway" type="button"><i class="bi bi-arrow-right me-1"></i>Sekali Jalan</button>
+                        <button class="avx-tab" data-tab="round" type="button"><i class="bi bi-arrow-left-right me-1"></i>Pulang-Pergi</button>
+                        <button class="avx-tab" data-tab="multi" type="button"><i class="bi bi-signpost-split me-1"></i>Multi-Kota</button>
                     </nav>
                     
                     <!-- Options: Penerbangan Langsung + Passenger + Class -->
@@ -52,9 +52,9 @@
                                         <span class="avx-pax-desc">Usia 12 tahun ke atas</span>
                                     </div>
                                     <div class="avx-pax-stepper">
-                                        <button type="button" class="avx-pax-btn avx-pax-minus" data-target="adults" aria-label="Kurangi dewasa" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">−</button>
+                                        <button type="button" class="avx-pax-btn avx-pax-minus" data-target="adults" aria-label="Kurangi dewasa">−</button>
                                         <span class="avx-pax-count" id="adultsCount">1</span>
-                                        <button type="button" class="avx-pax-btn avx-pax-plus" data-target="adults" aria-label="Tambah dewasa" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">+</button>
+                                        <button type="button" class="avx-pax-btn avx-pax-plus" data-target="adults" aria-label="Tambah dewasa">+</button>
                                     </div>
                                 </div>
                                 <!-- Children -->
@@ -64,9 +64,9 @@
                                         <span class="avx-pax-desc">Usia 2 - 11 tahun</span>
                                     </div>
                                     <div class="avx-pax-stepper">
-                                        <button type="button" class="avx-pax-btn avx-pax-minus" data-target="children" aria-label="Kurangi anak" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">−</button>
+                                        <button type="button" class="avx-pax-btn avx-pax-minus" data-target="children" aria-label="Kurangi anak">−</button>
                                         <span class="avx-pax-count" id="childrenCount">0</span>
-                                        <button type="button" class="avx-pax-btn avx-pax-plus" data-target="children" aria-label="Tambah anak" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">+</button>
+                                        <button type="button" class="avx-pax-btn avx-pax-plus" data-target="children" aria-label="Tambah anak">+</button>
                                     </div>
                                 </div>
                                 <!-- Infants -->
@@ -76,14 +76,14 @@
                                         <span class="avx-pax-desc">Di bawah 2 tahun</span>
                                     </div>
                                     <div class="avx-pax-stepper">
-                                        <button type="button" class="avx-pax-btn avx-pax-minus" data-target="infants" aria-label="Kurangi bayi" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">−</button>
+                                        <button type="button" class="avx-pax-btn avx-pax-minus" data-target="infants" aria-label="Kurangi bayi">−</button>
                                         <span class="avx-pax-count" id="infantsCount">0</span>
-                                        <button type="button" class="avx-pax-btn avx-pax-plus" data-target="infants" aria-label="Tambah bayi" style="width:36px;height:36px;min-width:36px;border-radius:50%;border:2px solid #279ED6;background:transparent;color:#279ED6;font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;line-height:1;">+</button>
+                                        <button type="button" class="avx-pax-btn avx-pax-plus" data-target="infants" aria-label="Tambah bayi">+</button>
                                     </div>
                                 </div>
                                 <!-- Done button -->
                                 <div class="avx-pax-done-row">
-                                    <button type="button" class="avx-pax-done-btn" id="paxDoneBtn" style="background:#279ED6;color:#fff;border:none;border-radius:10px;padding:10px 28px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(39,158,214,0.25);">Selesai</button>
+                                    <button type="button" class="avx-pax-done-btn" id="paxDoneBtn">Selesai</button>
                                 </div>
                             </div>
                             
@@ -128,7 +128,6 @@
                         <label class="avx-field" for="depart">
                             <span class="avx-field-label">Tanggal Pergi</span>
                             <div class="avx-input-wrap avx-input-date">
-                                <svg class="avx-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10h5v5H7z"/></svg>
                                 <input id="depart" name="depart" type="date" required>
                             </div>
                         </label>
@@ -137,21 +136,20 @@
                         <label class="avx-field avx-return-field" for="return" style="display: none;">
                             <span class="avx-field-label">Tanggal Pulang</span>
                             <div class="avx-input-wrap avx-input-date">
-                                <svg class="avx-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10h5v5H7z"/></svg>
                                 <input id="return" name="return" type="date">
                             </div>
                         </label>
 
                         <!-- Tombol Cari Tiket -->
                         <button class="avx-cta" type="submit">
-                            <span>Cari Tiket</span>
+                            <span><i class="bi bi-search me-1"></i> Cari Tiket</span>
                         </button>
                     </div>
                 </form>
             </div>
             
             <!-- BARIS BAWAH: Promo Text (di luar card) -->
-            <h3 class="avx-promo">Harga tiket Pesawat: Selalu Promo di Avoinex - PESAN SEKARANG!</h3>
+            <h3 class="avx-promo"><i class="bi bi-tags-fill me-2" style="color: var(--avx-primary);"></i>Harga tiket Pesawat: Selalu Promo di Avoinex - PESAN SEKARANG!</h3>
         </section>
 
     {{-- flight results card list below hero --}}
@@ -420,18 +418,20 @@
 .avx-passenger-toggle{ 
     display:inline-flex; 
     align-items:center; 
-    gap:8px; 
-    padding:10px 18px; 
-    border-radius:10px; 
-    background:transparent; 
-    border:1px solid rgba(120,120,120,0.25); 
+    gap:10px; 
+    padding:12px 20px; 
+    border-radius:12px; 
+    background:rgba(255,255,255,0.95); 
+    border:1px solid rgba(120,120,120,0.3); 
     cursor:pointer; 
     white-space: nowrap;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 .avx-passenger-toggle:hover {
     border-color: var(--avx-primary);
-    background: rgba(39,158,214,0.05);
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(39,158,214,0.1);
 }
 .avx-passenger-toggle .avx-icon-user, 
 .avx-passenger-toggle .avx-icon-arrow{ 
@@ -449,27 +449,33 @@
 .avx-dropdown{ 
     display:none; 
     position:absolute; 
-    margin-top:8px; 
-    background:white; 
+    margin-top:10px; 
+    background:#ffffff; 
     border-radius:12px; 
-    padding:16px; 
-    box-shadow:0 12px 36px rgba(10,20,30,0.15);
-    border: 1px solid rgba(120,120,120,0.2);
+    padding:16px 20px; 
+    box-shadow: 0 10px 32px rgba(10,20,30,0.12), 0 0 0 1px rgba(0,0,0,0.06);
+    border: none;
     z-index: 100;
+    min-width: 300px;
+    width: max-content;
 }
 
 .avx-class-select{ 
     display:flex; 
     align-items:center; 
-    gap:8px; 
-    padding:10px 18px; 
-    border-radius:10px; 
-    border:1px solid rgba(120,120,120,0.25); 
+    gap:10px; 
+    padding:12px 20px; 
+    border-radius:12px; 
+    background:rgba(255,255,255,0.95); 
+    border:1px solid rgba(120,120,120,0.3); 
     white-space: nowrap;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
-.avx-class-select:hover {
+.avx-class-select:hover, .avx-class-select:focus-within {
     border-color: var(--avx-primary);
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(39,158,214,0.1);
 }
 .avx-class-select .avx-icon-seat{ 
     width:18px; 
@@ -891,19 +897,22 @@
     left: 0;
     margin-top: 8px;
     background: #fff;
-    border-radius: 16px;
-    padding: 20px 24px 16px;
-    box-shadow: 0 16px 48px rgba(10,20,30,0.18), 0 0 0 1px rgba(0,0,0,0.04);
-    border: 1px solid rgba(120,120,120,0.12);
+    border-radius: 12px;
+    padding: 16px 20px 16px;
+    box-shadow: 0 10px 32px rgba(10,20,30,0.12), 0 0 0 1px rgba(0,0,0,0.06);
+    border: none;
     z-index: 200;
     min-width: 300px;
 }
 .avx-pax-row {
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(120,120,120,0.1);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    flex-wrap: nowrap;
+    gap: 30px;
 }
 .avx-pax-row:last-of-type {
     border-bottom: none;
@@ -912,6 +921,8 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+    flex: 1 1 auto;
+    white-space: nowrap;
 }
 .avx-pax-label {
     font-weight: 700;
@@ -927,7 +938,8 @@
 .avx-pax-stepper {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
+    flex-shrink: 0;
 }
 .avx-pax-dropdown .avx-pax-btn {
     width: 36px !important;
@@ -985,19 +997,18 @@
     background: var(--avx-primary);
     color: #fff;
     border: none;
-    border-radius: 10px;
-    padding: 10px 28px;
+    border-radius: 8px;
+    padding: 10px 0;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     font-family: 'Segoe UI Semibold', sans-serif;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(39,158,214,0.25);
+    width: 100%;
+    margin-top: 4px;
 }
 .avx-pax-done-btn:hover {
     background: #1e8bc8;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(39,158,214,0.35);
 }
 
 /* Passenger toggle container needs relative positioning */
