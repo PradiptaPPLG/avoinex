@@ -184,41 +184,55 @@
                 <div class="card-body">
                     @foreach($flights as $flight)
                     <div class="flight-card border rounded p-3 mb-3">
-                        <div class="row align-items-center">
-                            <div class="col-md-2 text-center">
-                                <div class="airline-logo bg-primary text-white rounded-circle p-3 d-inline-block">
-                                    {{ $flight->airline_code ?? 'GA' }}
+                        <div class="row">
+                            <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
+                                @if(isset($flight->schedule->airline->logo_path) && $flight->schedule->airline->logo_path)
+                                    <div class="airline-logo rounded-circle shadow-sm overflow-hidden" style="width: 90px; height: 90px; background-color: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; padding: 0;">
+                                        <img src="{{ asset('logo_maskapai/' . $flight->schedule->airline->logo_path) }}" alt="{{ $flight->airline_name ?? 'Airline' }} Logo" style="width: 100%; height: 100%; object-fit: contain; padding: 5px;">
+                                    </div>
+                                @else
+                                    <div class="airline-logo bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 90px; height: 90px; font-size: 1.5rem; font-weight: bold;">
+                                        {{ $flight->airline_code ?? 'GA' }}
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="col-md-10">
+                                <div class="row mb-2">
+                                    <div class="col-12">
+                                        <h5 class="mb-0 fw-bold">{{ $flight->airline_name ?? 'Garuda Indonesia' }}</h5>
+                                    </div>
                                 </div>
-                                <p class="mt-2 mb-0 fw-bold">{{ $flight->airline_name ?? 'Garuda Indonesia' }}</p>
-                            </div>
-                            <div class="col-md-3">
-                                <h4 class="mb-1">{{ date('H:i', strtotime($flight->schedule->departure_time_gmt)) }}</h4>
-                                <p class="text-muted mb-0">{{ $flight->schedule->originAirport->city }} ({{ $flight->schedule->originAirport->iata_code }})</p>
-                                <small class="text-muted">{{ $flight->flight_date->format('d M') }}</small>
-                            </div>
-                            <div class="col-md-2 text-center">
-                                <p class="mb-1">{{ floor($flight->schedule->duration_minutes / 60) }}h {{ $flight->schedule->duration_minutes % 60 }}m</p>
-                                <div class="border-bottom"></div>
-                                <p class="text-muted small mb-0">Direct</p>
-                            </div>
-                            <div class="col-md-3">
-                                <h4 class="mb-1">{{ date('H:i', strtotime($flight->schedule->arrival_time_gmt)) }}</h4>
-                                <p class="text-muted mb-0">{{ $flight->schedule->destinationAirport->city }} ({{ $flight->schedule->destinationAirport->iata_code }})</p>
-                                <small class="text-muted">{{ $flight->flight_date->format('d M') }}</small>
-                            </div>
-                            <div class="col-md-2 text-end" data-available-seats="{{ $flight->available_seats ?? 0 }}" data-flight-id="{{ $flight->flight_instance_id }}">
-                                <h4 class="text-primary mb-1">${{ number_format($flight->schedule->base_price_usd, 0) }}</h4>
-                                <p class="text-muted small mb-2">per person</p>
+                                <div class="row align-items-center">
+                                    <div class="col-md-3">
+                                        <h4 class="mb-1">{{ date('H:i', strtotime($flight->schedule->departure_time_gmt)) }}</h4>
+                                        <p class="text-muted mb-0">{{ $flight->schedule->originAirport->city }} ({{ $flight->schedule->originAirport->iata_code }})</p>
+                                        <small class="text-muted">{{ $flight->flight_date->format('d M') }}</small>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        <p class="mb-1">{{ floor($flight->schedule->duration_minutes / 60) }}h {{ $flight->schedule->duration_minutes % 60 }}m</p>
+                                        <div class="border-bottom"></div>
+                                        <p class="text-muted small mb-0">Direct</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h4 class="mb-1">{{ date('H:i', strtotime($flight->schedule->arrival_time_gmt)) }}</h4>
+                                        <p class="text-muted mb-0">{{ $flight->schedule->destinationAirport->city }} ({{ $flight->schedule->destinationAirport->iata_code }})</p>
+                                        <small class="text-muted">{{ $flight->flight_date->format('d M') }}</small>
+                                    </div>
+                                    <div class="col-md-3 text-end" data-available-seats="{{ $flight->available_seats ?? 0 }}" data-flight-id="{{ $flight->flight_instance_id }}">
+                                        <h4 class="text-primary mb-1">${{ number_format($flight->schedule->base_price_usd, 0) }}</h4>
+                                        <p class="text-muted small mb-2">per person</p>
 
-                                @php
-                                    $availableSeats = $flight->available_seats ?? 0;
-                                @endphp
+                                        @php
+                                            $availableSeats = $flight->available_seats ?? 0;
+                                        @endphp
 
-                                <a href="{{ route('flight.seats', $flight->flight_instance_id) }}?adults=1&children=0&infants=0" class="btn btn-primary avx-select-btn avx-seat-link" data-seats="{{ $availableSeats }}" data-base-url="{{ route('flight.seats', $flight->flight_instance_id) }}">Select</a>
-                                <button class="btn btn-secondary avx-limited-btn" style="display:none;" disabled title="Not enough seats available">
-                                    <i class="bi bi-exclamation-circle"></i> Limited
-                                </button>
-                                <small class="text-danger d-block mt-1 avx-seats-warning" style="display:none;">Only {{ $availableSeats }} seat{{ $availableSeats != 1 ? 's' : '' }} left</small>
+                                        <a href="{{ route('flight.seats', $flight->flight_instance_id) }}?adults=1&children=0&infants=0" class="btn btn-primary avx-select-btn avx-seat-link" data-seats="{{ $availableSeats }}" data-base-url="{{ route('flight.seats', $flight->flight_instance_id) }}">Select</a>
+                                        <button class="btn btn-secondary avx-limited-btn" style="display:none;" disabled title="Not enough seats available">
+                                            <i class="bi bi-exclamation-circle"></i> Limited
+                                        </button>
+                                        <small class="text-danger d-block mt-1 avx-seats-warning" style="display:none;">Only {{ $availableSeats }} seat{{ $availableSeats != 1 ? 's' : '' }} left</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="row mt-3">
@@ -798,6 +812,21 @@
 
 /* ===== AVAILABLE FLIGHTS STYLES ===== */
 #available-flights {
+    background-color: #f8f9fa;
+    padding-bottom: 60px;
+}
+.flight-card:hover {
+    background-color: #f8f9fa;
+    border-color: #0d6efd;
+    cursor: pointer;
+}
+.airline-logo {
+    width: 70px;
+    height: 70px;
+    line-height: 1;
+    font-weight: bold;
+    font-size: 1.3rem;
+}
     position: relative;
     z-index: 10;
     background: white;

@@ -12,7 +12,7 @@ class Airline extends Model
     protected $primaryKey = 'airline_id';
     protected $table = 'airlines';
 
-    protected $fillable = ['airline_code', 'airline_name', 'country_code', 'website', 'contact_phone', 'is_active'];
+    protected $fillable = ['airline_code', 'airline_name', 'country_code', 'logo_path', 'website', 'contact_phone', 'is_active'];
 
     public function country()
     {

@@ -31,6 +31,20 @@ class AirlineController extends Controller
             'contact_phone' => 'nullable|max:30',
         ]);
 
+        if ($request->filled('cropped_logo')) {
+            $image_parts = explode(";base64,", $request->cropped_logo);
+            if(count($image_parts) == 2) {
+                $image_base64 = base64_decode($image_parts[1]);
+                $fileName = $validated['airline_code'] . '_' . time() . '.png';
+                $fileFolder = public_path('logo_maskapai');
+                if(!file_exists($fileFolder)) {
+                    mkdir($fileFolder, 0755, true);
+                }
+                file_put_contents($fileFolder . '/' . $fileName, $image_base64);
+                $validated['logo_path'] = $fileName;
+            }
+        }
+
         Airline::create($validated);
 
         return redirect()->route('admin.airlines.index')
@@ -55,6 +69,25 @@ class AirlineController extends Controller
             'website' => 'nullable|url|max:255',
             'contact_phone' => 'nullable|max:30',
         ]);
+
+        if ($request->filled('cropped_logo')) {
+            $image_parts = explode(";base64,", $request->cropped_logo);
+            if(count($image_parts) == 2) {
+                $image_base64 = base64_decode($image_parts[1]);
+                $fileName = $validated['airline_code'] . '_' . time() . '.png';
+                $fileFolder = public_path('logo_maskapai');
+                if(!file_exists($fileFolder)) {
+                    mkdir($fileFolder, 0755, true);
+                }
+                file_put_contents($fileFolder . '/' . $fileName, $image_base64);
+                $validated['logo_path'] = $fileName;
+
+                // Optional: Delete old logo
+                if ($airline->logo_path && file_exists(public_path('logo_maskapai/' . $airline->logo_path))) {
+                    @unlink(public_path('logo_maskapai/' . $airline->logo_path));
+                }
+            }
+        }
 
         $airline->update($validated);
 

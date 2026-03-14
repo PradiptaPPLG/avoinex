@@ -28,8 +28,22 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-md-4">
-                    <h5 class="text-primary">{{ $flight->schedule->flight_number }}</h5>
-                    <p class="mb-0">
+                    <div class="d-flex align-items-center mb-2">
+                        @if(isset($flight->schedule->airline->logo_path) && $flight->schedule->airline->logo_path)
+                            <div class="airline-logo rounded-circle shadow-sm overflow-hidden me-3" style="width: 50px; height: 50px; border: 1px solid #dee2e6; background: #fff; display: flex; align-items: center; justify-content: center;">
+                                <img src="{{ asset('logo_maskapai/' . $flight->schedule->airline->logo_path) }}" alt="Airline Logo" style="width: 100%; height: 100%; object-fit: contain; padding: 2px;">
+                            </div>
+                        @else
+                            <div class="airline-logo bg-primary text-white rounded-circle shadow-sm me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-weight: bold; font-size: 1.1rem;">
+                                {{ $flight->airline_code ?? 'GA' }}
+                            </div>
+                        @endif
+                        <div>
+                            <span class="text-muted fw-bold d-block" style="font-size: 0.85rem;">{{ $flight->airline_name ?? 'Airline' }}</span>
+                            <h5 class="text-primary mb-0 mt-1" style="font-weight: 700;">{{ $flight->schedule->flight_number }}</h5>
+                        </div>
+                    </div>
+                    <p class="mb-0 mt-2">
                         <strong>{{ $flight->schedule->originAirport->city }} ({{ $flight->schedule->originAirport->iata_code }})</strong>
                         →
                         <strong>{{ $flight->schedule->destinationAirport->city }} ({{ $flight->schedule->destinationAirport->iata_code }})</strong>

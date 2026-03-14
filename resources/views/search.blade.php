@@ -63,12 +63,17 @@
             @else
                 @foreach($flights as $flight)
                 <div class="flight-card border rounded p-3 mb-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-2 text-center">
-                            <div class="airline-logo bg-primary text-white rounded-circle p-3 d-inline-block">
-                                {{ $flight->airline_code ?? 'GA' }}
-                            </div>
-                            <p class="mt-2 mb-0 fw-bold">{{ $flight->airline_name ?? 'Garuda Indonesia' }}</p>
+                        <div class="col-md-2 d-flex align-items-center gap-3">
+                            @if(isset($flight->schedule->airline->logo_path) && $flight->schedule->airline->logo_path)
+                                <div class="airline-logo rounded-circle shadow-sm overflow-hidden flex-shrink-0" style="background-color: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; padding: 0;">
+                                    <img src="{{ asset('logo_maskapai/' . $flight->schedule->airline->logo_path) }}" alt="{{ $flight->airline_name ?? 'Airline' }} Logo" style="width: 100%; height: 100%; object-fit: contain; padding: 5px;">
+                                </div>
+                            @else
+                                <div class="airline-logo bg-primary text-white rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0">
+                                    {{ $flight->airline_code ?? 'GA' }}
+                                </div>
+                            @endif
+                            <p class="mb-0 fw-bold">{{ $flight->airline_name ?? 'Garuda Indonesia' }}</p>
                         </div>
                         <div class="col-md-3">
                             <h4 class="mb-1">{{ date('H:i', strtotime($flight->schedule->departure_time_gmt)) }}</h4>
@@ -129,11 +134,11 @@
     cursor: pointer;
 }
 .airline-logo {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     line-height: 1;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
 }
 </style>
 @endsection
