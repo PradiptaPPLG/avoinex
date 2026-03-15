@@ -43,11 +43,9 @@ class Aircraft extends Model
         return $this->belongsTo(AircraftManufacturer::class , 'manufacturer_id', 'aircraft_manufacturer_id');
     }
 
-    // TEMPORARY FIX: SIMPLE VERSION
     public function template()
     {
-        // Skip relationship for now
-        return null;
+        return $this->belongsTo(SeatTemplate::class, 'template_id', 'template_id');
     }
 
     public function seats()

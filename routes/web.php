@@ -15,6 +15,8 @@ Route::get('/', [FlightSearchController::class , 'index'])->name('landing');
 Route::get('/search', [FlightSearchController::class , 'search'])->name('flights.search');
 Route::get('/flights', [FlightSearchController::class , 'index'])->name('flights.public');
 Route::get('/flight/{id}', [FlightSearchController::class , 'show'])->name('flight.detail');
+Route::get('/api/airports/autocomplete', [FlightSearchController::class, 'airportAutocomplete'])->name('api.airports.autocomplete');
+
 
 Route::get('/deals', fn() => view('pages.deals'))->name('deals');
 Route::get('/support', fn() => view('pages.support'))->name('support');
@@ -74,6 +76,7 @@ use App\Http\Controllers\Admin\AirportController;
 use App\Http\Controllers\Admin\ManufacturerController;
 use App\Http\Controllers\Admin\CountryController;
 use App\Http\Controllers\Admin\AirlineController;
+use App\Http\Controllers\Admin\HelpController;
 
 Route::prefix('admin')->group(function () {
     Route::get('/', [AuthController::class , 'showLogin'])->name('admin.home');
@@ -82,6 +85,7 @@ Route::prefix('admin')->group(function () {
 
     Route::middleware(['admin.auth'])->group(function () {
             Route::get('/dashboard', [AuthController::class , 'dashboard'])->name('admin.dashboard');
+            Route::get('/help', [HelpController::class, 'index'])->name('admin.help');
             Route::post('/logout', [AuthController::class , 'logout'])->name('admin.logout');
 
             Route::prefix('aircraft')->name('admin.aircraft.')->group(function () {

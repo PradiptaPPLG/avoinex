@@ -63,6 +63,19 @@
                 </div>
             </div>
 
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Status</label>
+                    <select name="is_active" class="form-control" required>
+                        <option value="1" {{ old('is_active', $airport->is_active) == '1' ? 'selected' : '' }}>Active</option>
+                        <option value="0" {{ old('is_active', $airport->is_active) == '0' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                    @error('is_active')
+                        <div class="text-danger" style="font-size: 12px; margin-top: 5px;"><i class="bi bi-exclamation-circle me-1"></i>{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-check-lg me-1"></i> Update Airport

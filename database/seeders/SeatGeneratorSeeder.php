@@ -11,19 +11,34 @@ class SeatGeneratorSeeder extends Seeder
 {
     public function run()
     {
-        $aircrafts = Aircraft::with('template')->get();
+        $aircrafts = Aircraft::all();
         
         foreach ($aircrafts as $aircraft) {
-            if ($aircraft->template) {
-                $this->generateSeatsFromTemplate($aircraft);
-            }
+            $this->generateSeats($aircraft);
         }
     }
     
-    private function generateSeatsFromTemplate($aircraft)
+    private function generateSeats($aircraft)
     {
+        // Restore template relation logic with safe fallback
         $template = $aircraft->template;
-        $seatMap = $template->seat_map; // Sudah array karena casting
+        
+        if ($template) {
+            $seatMap = [
+                'rows' => $template->total_rows,
+                'seats_per_row' => $template->seat_map['seats_per_row'] ?? ['A', 'B', 'C', 'D', 'E', 'F'],
+                'business_rows' => $template->seat_map['business_rows'] ?? [1, 2, 3],
+                'economy_rows' => $template->seat_map['economy_rows'] ?? range(4, $template->total_rows),
+            ];
+        } else {
+            $seatMap = [
+                'rows' => 30,
+                'seats_per_row' => ['A', 'B', 'C', 'D', 'E', 'F'],
+                'business_rows' => [1, 2, 3],
+                'economy_rows' => range(4, 30),
+            ];
+        }
+
         
         // Hapus seats lama jika ada
         Seat::where('aircraft_id', $aircraft->aircraft_id)->delete();
@@ -33,7 +48,7 @@ class SeatGeneratorSeeder extends Seeder
         
         for ($row = 1; $row <= $seatMap['rows']; $row++) {
             foreach ($seatMap['seats_per_row'] as $seatLetter) {
-                $seatClass = $this->determineSeatClass($row, $seatMap);
+                $seatClass = $this->determineSeatClass($row, $aircraft, $seatMap);
                 
                 $seats[] = [
                     'aircraft_id' => $aircraft->aircraft_id,
@@ -55,13 +70,15 @@ class SeatGeneratorSeeder extends Seeder
         $this->command->info("Generated " . count($seats) . " seats for {$aircraft->aircraft_model}");
     }
     
-    private function determineSeatClass($row, $seatMap)
+    private function determineSeatClass($row, $aircraft, $seatMap)
     {
         if (in_array($row, $seatMap['business_rows'] ?? [])) {
             return 'business';
         }
-        if (in_array($row, $seatMap['economy_rows'] ?? [])) {
-            return 'economy';
+        if ($aircraft->preferred_zone_enabled && 
+            $row >= $aircraft->preferred_zone_start_row && 
+            $row <= $aircraft->preferred_zone_end_row) {
+            return 'preferred';
         }
         return 'economy';
     }

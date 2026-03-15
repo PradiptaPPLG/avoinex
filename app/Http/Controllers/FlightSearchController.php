@@ -64,6 +64,35 @@ class FlightSearchController extends Controller
         return $airlines[$code] ?? 'Airlines';
     }
 
+    public function airportAutocomplete(Request $request)
+    {
+        $q = request()->query('q');
+
+        if (!$q || strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $airports = Airport::where('is_active', true)
+            ->where(function ($query) use ($q) {
+                $query->where('iata_code', 'like', "%{$q}%")
+                    ->orWhere('city', 'like', "%{$q}%")
+                    ->orWhere('airport_name', 'like', "%{$q}%");
+            })
+            ->orderByRaw("
+                CASE 
+                    WHEN iata_code LIKE ? THEN 1
+                    WHEN city LIKE ? THEN 2
+                    WHEN airport_name LIKE ? THEN 3
+                    ELSE 4
+                END
+            ", ["{$q}%", "{$q}%", "%{$q}%"])
+            ->select('city', 'iata_code', 'airport_name')
+            ->limit(10)
+            ->get();
+
+        return response()->json($airports);
+    }
+
     public function search(Request $request)
     {
         $request->validate([

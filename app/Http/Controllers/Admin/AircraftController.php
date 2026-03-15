@@ -32,8 +32,31 @@ class AircraftController extends Controller
             'seat_rows' => 'required|integer|min:5|max:80',
             'business_rows' => 'required|integer|min:0|max:20',
             'preferred_zone_enabled' => 'nullable|boolean',
-            'preferred_zone_start_row' => 'nullable|integer|min:1',
-            'preferred_zone_end_row' => 'nullable|integer|min:1',
+            'preferred_zone_start_row' => [
+                'nullable',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->boolean('preferred_zone_enabled') && $value <= $request->input('business_rows')) {
+                        $fail('Preferred zone start row must be greater than business rows.');
+                    }
+                }
+            ],
+            'preferred_zone_end_row' => [
+                'nullable',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->boolean('preferred_zone_enabled')) {
+                        if ($value > $request->input('seat_rows')) {
+                            $fail('Preferred zone end row must be <= total rows.');
+                        }
+                        if ($value < $request->input('preferred_zone_start_row')) {
+                            $fail('Preferred zone end row must be >= start row.');
+                        }
+                    }
+                }
+            ],
             'baggage_capacity_kg' => 'required|integer|min:0',
             'has_meal' => 'nullable|boolean',
             'has_wifi' => 'nullable|boolean',
@@ -95,8 +118,31 @@ class AircraftController extends Controller
             'seat_rows' => 'required|integer|min:5|max:80',
             'business_rows' => 'required|integer|min:0|max:20',
             'preferred_zone_enabled' => 'nullable|boolean',
-            'preferred_zone_start_row' => 'nullable|integer|min:1',
-            'preferred_zone_end_row' => 'nullable|integer|min:1',
+            'preferred_zone_start_row' => [
+                'nullable',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->boolean('preferred_zone_enabled') && $value <= $request->input('business_rows')) {
+                        $fail('Preferred zone start row must be greater than business rows.');
+                    }
+                }
+            ],
+            'preferred_zone_end_row' => [
+                'nullable',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->boolean('preferred_zone_enabled')) {
+                        if ($value > $request->input('seat_rows')) {
+                            $fail('Preferred zone end row must be <= total rows.');
+                        }
+                        if ($value < $request->input('preferred_zone_start_row')) {
+                            $fail('Preferred zone end row must be >= start row.');
+                        }
+                    }
+                }
+            ],
             'baggage_capacity_kg' => 'required|integer|min:0',
             'has_meal' => 'nullable|boolean',
             'has_wifi' => 'nullable|boolean',
@@ -153,10 +199,9 @@ class AircraftController extends Controller
      */
     private function generateSeats(Aircraft $aircraft)
     {
-        // Delete existing seats
-        Seat::where('aircraft_id', $aircraft->aircraft_id)->delete();
-
-        $seats = [];
+        $existingSeats = Seat::where('aircraft_id', $aircraft->aircraft_id)->get()->keyBy('seat_number');
+        $validSeatIds = [];
+        $seatsToInsert = [];
         $letters = $aircraft->seat_letters;
         $totalCols = count($letters);
 
@@ -164,6 +209,11 @@ class AircraftController extends Controller
             // Determine class
             if ($row <= $aircraft->business_rows) {
                 $seatClass = 'business';
+            }
+            elseif ($aircraft->preferred_zone_enabled && 
+                    $row >= $aircraft->preferred_zone_start_row && 
+                    $row <= $aircraft->preferred_zone_end_row) {
+                $seatClass = 'preferred';
             }
             else {
                 $seatClass = 'economy';
@@ -181,21 +231,43 @@ class AircraftController extends Controller
                     $seatType = 'middle';
                 }
 
-                $seats[] = [
-                    'aircraft_id' => $aircraft->aircraft_id,
-                    'seat_number' => $row . $letter,
-                    'seat_class' => $seatClass,
-                    'seat_type' => $seatType,
-                    'is_active' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
+                $seatNumber = $row . $letter;
+
+                if ($existingSeats->has($seatNumber)) {
+                    $seat = $existingSeats->get($seatNumber);
+                    $seat->update([
+                        'seat_class' => $seatClass,
+                        'seat_type' => $seatType,
+                        'is_active' => true,
+                    ]);
+                    $validSeatIds[] = $seat->seat_id;
+                } else {
+                    $seatsToInsert[] = [
+                        'aircraft_id' => $aircraft->aircraft_id,
+                        'seat_number' => $seatNumber,
+                        'seat_class' => $seatClass,
+                        'seat_type' => $seatType,
+                        'is_active' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
             }
         }
 
         // Insert in batches
-        foreach (array_chunk($seats, 100) as $chunk) {
+        foreach (array_chunk($seatsToInsert, 100) as $chunk) {
             Seat::insert($chunk);
+        }
+
+        // Deactivate seats that are no longer in this configuration
+        if (count($validSeatIds) > 0) {
+            Seat::where('aircraft_id', $aircraft->aircraft_id)
+                ->whereNotIn('seat_id', $validSeatIds)
+                ->update(['is_active' => false]);
+        } else {
+            Seat::where('aircraft_id', $aircraft->aircraft_id)
+                ->update(['is_active' => false]);
         }
 
         // Sync flight seat prices for all flights using this aircraft
@@ -227,33 +299,37 @@ class AircraftController extends Controller
                     ->get();
 
                 foreach ($seats as $seat) {
-                    // Skip if already exists
-                    $exists = \App\Models\FlightSeatPrice::where('flight_instance_id', $flight->flight_instance_id)
-                        ->where('seat_id', $seat->seat_id)
-                        ->exists();
-                    if ($exists)
-                        continue;
-
                     // Pricing based on class + preferred zone
                     $row = (int)preg_replace('/[^0-9]/', '', $seat->seat_number);
                     if ($seat->seat_class == 'business') {
                         $price = 250.00;
                     }
-                    elseif ($aircraft->preferred_zone_enabled
+                    elseif ($seat->seat_class == 'preferred' || ($aircraft->preferred_zone_enabled
                     && $row >= ($aircraft->preferred_zone_start_row ?? 0)
-                    && $row <= ($aircraft->preferred_zone_end_row ?? 0)) {
+                    && $row <= ($aircraft->preferred_zone_end_row ?? 0))) {
                         $price = 180.00;
                     }
                     else {
                         $price = 150.00;
                     }
 
-                    \App\Models\FlightSeatPrice::create([
-                        'flight_instance_id' => $flight->flight_instance_id,
-                        'seat_id' => $seat->seat_id,
-                        'price_usd' => $price,
-                        'is_available' => true,
-                    ]);
+                    // Update if already exists, else create
+                    $existingPrice = \App\Models\FlightSeatPrice::where('flight_instance_id', $flight->flight_instance_id)
+                        ->where('seat_id', $seat->seat_id)
+                        ->first();
+                        
+                    if ($existingPrice) {
+                        // Only update if not booked (optional: can leave booked prices unchanged or forcefully update them)
+                        // It's safer to just update the price
+                        $existingPrice->update(['price_usd' => $price, 'is_available' => $existingPrice->is_available]);
+                    } else {
+                        \App\Models\FlightSeatPrice::create([
+                            'flight_instance_id' => $flight->flight_instance_id,
+                            'seat_id' => $seat->seat_id,
+                            'price_usd' => $price,
+                            'is_available' => true,
+                        ]);
+                    }
                 }
             }
         }

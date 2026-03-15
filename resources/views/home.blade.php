@@ -122,21 +122,25 @@
                     <input type="hidden" name="travel_class" id="hiddenTravelClass" value="economy">
                     <div class="avx-search-main">
                         <!-- Dari -->
-                        <label class="avx-field" for="from">
+                        <label class="avx-field" for="from_display" style="position: relative;">
                             <span class="avx-field-label">Dari</span>
                             <div class="avx-input-wrap">
                                 <svg class="avx-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-                                <input id="from" name="from" placeholder="Kota atau Bandara" required>
+                                <input type="hidden" name="from" id="from">
+                                <input id="from_display" name="from_display" placeholder="Kota atau Bandara" autocomplete="off" required>
                             </div>
+                            <div class="avx-autocomplete-dropdown" id="from_dropdown" style="display: none;"></div>
                         </label>
 
                         <!-- Ke -->
-                        <label class="avx-field" for="to">
+                        <label class="avx-field" for="to_display" style="position: relative;">
                             <span class="avx-field-label">Ke</span>
                             <div class="avx-input-wrap">
                                 <svg class="avx-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-                                <input id="to" name="to" placeholder="Kota atau Bandara" required>
+                                <input type="hidden" name="to" id="to">
+                                <input id="to_display" name="to_display" placeholder="Kota atau Bandara" autocomplete="off" required>
                             </div>
+                            <div class="avx-autocomplete-dropdown" id="to_dropdown" style="display: none;"></div>
                         </label>
 
                         <!-- Tanggal Pergi -->
@@ -588,6 +592,50 @@
 /* ===== MODIFIKASI UNTUK TANGGAL PULANG ===== */
 .avx-return-field {
     display: flex !important;
+}
+
+/* ===== AUTOCOMPLETE STYLES ===== */
+.avx-autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border: 1px solid rgba(120,120,120,0.25);
+    border-radius: 12px;
+    margin-top: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+.avx-autocomplete-item {
+    padding: 12px 18px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(120,120,120,0.1);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.avx-autocomplete-item:last-child {
+    border-bottom: none;
+}
+.avx-autocomplete-item:hover {
+    background: rgba(39,158,214,0.1);
+}
+.avx-autocomplete-item:hover .avx-autocomplete-item-city {
+    color: var(--avx-link);
+}
+.avx-autocomplete-item-city {
+    font-weight: 600;
+    font-size: 15px;
+    transition: color 0.2s;
+}
+.avx-autocomplete-item-airport {
+    font-size: 13px;
+    color: var(--avx-muted);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -1329,6 +1377,69 @@
             returnInput.value = this.value;
         }
     });
+
+    // ===== AUTOCOMPLETE =====
+    function setupAutocomplete(inputId, hiddenId, dropdownId) {
+        var input = document.getElementById(inputId);
+        var hidden = document.getElementById(hiddenId);
+        var dropdown = document.getElementById(dropdownId);
+        var timeout = null;
+
+        if (!input || !hidden || !dropdown) return;
+
+        input.addEventListener('input', function() {
+            clearTimeout(timeout);
+            var query = this.value;
+
+            hidden.value = query;
+
+            if (query.length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            timeout = setTimeout(function() {
+                fetch('/api/airports/autocomplete?q=' + encodeURIComponent(query))
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.length > 0) {
+                            dropdown.innerHTML = '';
+                            data.forEach(function(airport) {
+                                var item = document.createElement('div');
+                                item.className = 'avx-autocomplete-item';
+                                item.innerHTML = 
+                                    '<div class="avx-autocomplete-item-city">' + airport.city + ' (' + airport.iata_code + ')</div>' +
+                                    '<div class="avx-autocomplete-item-airport">' + airport.airport_name + '</div>';
+                                
+                                item.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    input.value = airport.city + ' (' + airport.iata_code + ') - ' + airport.airport_name;
+                                    hidden.value = airport.iata_code;
+                                    dropdown.style.display = 'none';
+                                });
+                                dropdown.appendChild(item);
+                            });
+                            dropdown.style.display = 'block';
+                        } else {
+                            dropdown.style.display = 'none';
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error('Autocomplete fetch error:', err);
+                        dropdown.style.display = 'none';
+                    });
+            }, 300);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    }
+
+    setupAutocomplete('from_display', 'from', 'from_dropdown');
+    setupAutocomplete('to_display', 'to', 'to_dropdown');
 
     // ===== INITIAL RENDER =====
     updatePassengerText();

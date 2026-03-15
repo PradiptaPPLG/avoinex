@@ -18,6 +18,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call([
+            \Database\Seeders\AirportSeeder::class,
+        ]);
+
         // 1. Countries
         Country::firstOrCreate(['country_code' => 'ID'], [
             'country_name' => 'Indonesia',
@@ -40,45 +44,34 @@ class DatabaseSeeder extends Seeder
             'continent' => 'Europe'
         ]);
 
-        // 2. Airports
-        Airport::firstOrCreate(['iata_code' => 'CGK'], [
-            'airport_name' => 'Soekarno-Hatta International Airport',
-            'city' => 'Jakarta',
-            'country_code' => 'ID'
-        ]);
-        Airport::firstOrCreate(['iata_code' => 'DPS'], [
-            'airport_name' => 'Ngurah Rai International Airport',
-            'city' => 'Denpasar',
-            'country_code' => 'ID'
-        ]);
-        Airport::firstOrCreate(['iata_code' => 'SIN'], [
-            'airport_name' => 'Changi Airport',
-            'city' => 'Singapore',
-            'country_code' => 'SG'
-        ]);
-        Airport::firstOrCreate(['iata_code' => 'KUL'], [
-            'airport_name' => 'Kuala Lumpur International Airport',
-            'city' => 'Kuala Lumpur',
-            'country_code' => 'MY'
-        ]);
+        // 2. Airports (Delegated to AirportSeeder)
 
         // 4. Airlines
-        Airline::firstOrCreate(['airline_code' => 'GA'], [
-            'airline_name' => 'Garuda Indonesia',
-            'country_code' => 'ID'
-        ]);
-        Airline::firstOrCreate(['airline_code' => 'QZ'], [
-            'airline_name' => 'AirAsia',
-            'country_code' => 'MY'
+        $this->call([
+            \Database\Seeders\AirlineSeeder::class,
         ]);
 
         // 5. Aircraft Manufacturers
-        AircraftManufacturer::firstOrCreate(['name' => 'Boeing'], [
-            'country_code' => 'US'
-        ]);
-        AircraftManufacturer::firstOrCreate(['name' => 'Airbus'], [
-            'country_code' => 'FR'
-        ]);
+        $manufacturers = [
+            ['name' => 'Boeing', 'country_code' => 'US', 'country_name' => 'United States', 'continent' => 'North America'],
+            ['name' => 'Airbus', 'country_code' => 'FR', 'country_name' => 'France', 'continent' => 'Europe'],
+            ['name' => 'Embraer', 'country_code' => 'BR', 'country_name' => 'Brazil', 'continent' => 'South America'],
+            ['name' => 'Bombardier', 'country_code' => 'CA', 'country_name' => 'Canada', 'continent' => 'North America'],
+            ['name' => 'ATR', 'country_code' => 'FR', 'country_name' => 'France', 'continent' => 'Europe'],
+            ['name' => 'COMAC', 'country_code' => 'CN', 'country_name' => 'China', 'continent' => 'Asia'],
+            ['name' => 'Dassault Aviation', 'country_code' => 'FR', 'country_name' => 'France', 'continent' => 'Europe'],
+        ];
+
+        foreach ($manufacturers as $m) {
+            Country::firstOrCreate(['country_code' => $m['country_code']], [
+                'country_name' => $m['country_name'],
+                'continent' => $m['continent']
+            ]);
+            
+            AircraftManufacturer::firstOrCreate(['name' => $m['name']], [
+                'country_code' => $m['country_code']
+            ]);
+        }
 
         // 6. Aircrafts
         $aircraft = Aircraft::first();
@@ -95,17 +88,10 @@ class DatabaseSeeder extends Seeder
         // Pastikan aircraft_id ada
         $aircraftId = $aircraft->aircraft_id;
 
-        // 7. Seats
-        for ($i = 1; $i <= 10; $i++) {
-            Seat::firstOrCreate([
-                'aircraft_id' => $aircraftId,
-                'seat_number' => $i . 'A'
-            ], [
-                'seat_class' => 'economy',
-                'seat_type' => 'window',
-                'is_active' => true
-            ]);
-        }
+        // 7. Generate Seats via Seeder
+        $this->call([
+            \Database\Seeders\SeatGeneratorSeeder::class,
+        ]);
 
         // 8. Schedules
         $schedule = Schedule::firstOrCreate([
@@ -154,8 +140,8 @@ class DatabaseSeeder extends Seeder
         $this->command->info('✅ Database seeded successfully!');
 
         $this->call([
-            FlightDataSeeder::class ,
-            AdminSeeder::class ,
+            \Database\Seeders\AdminSeeder::class,
+            \Database\Seeders\FlightDataSeeder::class,
         ]);
     }
 }

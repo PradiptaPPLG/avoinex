@@ -684,6 +684,15 @@
                 </a>
             </div>
 
+            <div class="nav-section-label">Support</div>
+
+            <div class="nav-item">
+                <a href="{{ route('admin.help') }}" class="nav-link {{ request()->routeIs('admin.help*') ? 'active' : '' }}">
+                    <i class="bi bi-question-circle nav-icon"></i>
+                    Help / Guide
+                </a>
+            </div>
+
             <div class="sidebar-footer">
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf

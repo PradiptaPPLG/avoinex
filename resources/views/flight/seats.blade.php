@@ -20,7 +20,7 @@
     $prefStart = $config['preferred_zone_start_row'] ?? ($businessRows + 1);
     $prefEnd = $config['preferred_zone_end_row'] ?? ($businessRows + 3);
     $totalRows = $config['seat_rows'];
-    $econStart = $prefEnabled ? ($prefEnd + 1) : ($businessRows + 1);
+    $econStart = $businessRows + 1;
 @endphp
 <div class="container mt-4">
     <!-- Flight Info -->
@@ -227,131 +227,35 @@
                 @endif
 
                 {{-- =============================== --}}
-                {{-- PREFERRED ZONE (Extra Legroom)   --}}
-                {{-- =============================== --}}
-                @if($prefEnabled)
-                <div class="preferred-section mb-5">
-                    {{-- Premium Header --}}
-                    <div class="preferred-header mb-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="preferred-icon-badge">
-                                <i class="bi bi-arrows-angle-expand"></i>
-                            </div>
-                            <div>
-                                <h5 class="mb-0 preferred-title">PREFERRED ZONE</h5>
-                                <small class="preferred-subtitle">Rows {{ $prefStart }}-{{ $prefEnd }} • Extra legroom seats</small>
-                            </div>
-                            <span class="preferred-badge ms-auto">
-                                <i class="bi bi-gem"></i> EXTRA LEGROOM
-                            </span>
-                        </div>
-                    </div>
-
-                    {{-- Legroom indicator --}}
-                    <div class="legroom-indicator mb-3">
-                        <div class="d-flex justify-content-center gap-4 align-items-center">
-                            <div class="legroom-item">
-                                <i class="bi bi-arrows-expand text-info"></i>
-                                <span>+8cm legroom</span>
-                            </div>
-                            <div class="legroom-item">
-                                <i class="bi bi-lightning-charge text-info"></i>
-                                <span>Priority boarding</span>
-                            </div>
-                            <div class="legroom-item">
-                                <i class="bi bi-headset text-info"></i>
-                                <span>Premium amenities</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="preferred-seat-area">
-                        @for($row = $prefStart; $row <= $prefEnd; $row++)
-                            <div class="seat-row d-flex justify-content-center align-items-center mb-2">
-                                <div class="row-number me-2 fw-bold preferred-row-num">{{ $row }}</div>
-                                
-                                @foreach($leftLetters as $letter)
-                                    @php
-                                        $seatNumber = $row . $letter;
-                                        $seat = $availableSeats[$seatNumber] ?? null;
-                                        $isAvailable = $seat ? $seat['is_available'] : true;
-                                        $seatId = $seat ? $seat['seat_id'] : 'p_' . $row . $letter;
-                                        $price = $seat ? $seat['price'] : 180.00;
-                                    @endphp
-                                    <div class="seat m-1">
-                                        @if($isAvailable)
-                                            <div class="seat-item preferred-seat" 
-                                                 data-seat-id="{{ $seatId }}"
-                                                 data-seat-number="{{ $seatNumber }}"
-                                                 data-price="{{ $price }}"
-                                                 data-class="preferred">
-                                                <div class="seat-number">{{ $seatNumber }}</div>
-                                                <div class="seat-price">${{ number_format($price, 2) }}</div>
-                                                <div class="legroom-icon"><i class="bi bi-arrows-expand"></i></div>
-                                            </div>
-                                        @else
-                                            <div class="seat-unavailable">
-                                                {{ $seatNumber }}
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                                
-                                <!-- AISLE with premium styling -->
-                                <div class="aisle mx-3 d-flex align-items-center justify-content-center">
-                                    <div class="aisle-preferred">
-                                        <div class="aisle-preferred-line"></div>
-                                        <div class="aisle-preferred-dot"></div>
-                                    </div>
-                                </div>
-                                
-                                @foreach($rightLetters as $letter)
-                                    @php
-                                        $seatNumber = $row . $letter;
-                                        $seat = $availableSeats[$seatNumber] ?? null;
-                                        $isAvailable = $seat ? $seat['is_available'] : true;
-                                        $seatId = $seat ? $seat['seat_id'] : 'p_' . $row . $letter;
-                                        $price = $seat ? $seat['price'] : 180.00;
-                                    @endphp
-                                    <div class="seat m-1">
-                                        @if($isAvailable)
-                                            <div class="seat-item preferred-seat" 
-                                                 data-seat-id="{{ $seatId }}"
-                                                 data-seat-number="{{ $seatNumber }}"
-                                                 data-price="{{ $price }}"
-                                                 data-class="preferred">
-                                                <div class="seat-number">{{ $seatNumber }}</div>
-                                                <div class="seat-price">${{ number_format($price, 2) }}</div>
-                                                <div class="legroom-icon"><i class="bi bi-arrows-expand"></i></div>
-                                            </div>
-                                        @else
-                                            <div class="seat-unavailable">
-                                                {{ $seatNumber }}
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                                
-                                <div class="row-number ms-2 fw-bold preferred-row-num">{{ $row }}</div>
-                            </div>
-                        @endfor
-                    </div>
-                </div>
-                @endif
-
-                {{-- =============================== --}}
-                {{-- ECONOMY CLASS SECTION            --}}
+                {{-- MAIN CABIN (ECONOMY / PREFERRED) --}}
                 {{-- =============================== --}}
                 <div class="economy-section">
                     <h5 class="text-success mb-3">
-                        <i class="bi bi-person-fill"></i> Economy Class
+                        <i class="bi bi-person-fill"></i> Main Cabin
                         <small class="text-muted ms-2">Rows {{ $econStart }}-{{ $totalRows }}</small>
                     </h5>
                     
                     <div class="seat-map">
                         @for($row = $econStart; $row <= $totalRows; $row++)
+                            @php
+                                $isPreferred = $prefEnabled && $row >= $prefStart && $row <= $prefEnd;
+                            @endphp
+
+                            @if($isPreferred && $row == $prefStart)
+                            <div class="preferred-header text-center my-4 mx-auto p-3" style="max-width: 500px; background: rgba(0, 180, 216, 0.08); border-radius: 10px; border: 1px dashed #7ec8e3;">
+                                <h6 class="mb-1 text-info fw-bold"><i class="bi bi-star"></i> PREFERRED ZONE STARTS</h6>
+                                <small class="text-muted">+8cm legroom, priority boarding</small>
+                            </div>
+                            @endif
+
+                            @if($row == $prefEnd + 1 && $prefEnabled)
+                            <div class="text-center my-3 mx-auto" style="max-width: 400px; border-bottom: 1px dashed #ced4da;">
+                                <small class="text-muted">Standard Economy Starts</small>
+                            </div>
+                            @endif
+
                             <div class="seat-row d-flex justify-content-center align-items-center mb-2">
-                                <div class="row-number me-2 fw-bold">{{ $row }}</div>
+                                <div class="row-number me-2 fw-bold {{ $isPreferred ? 'preferred-row-num' : '' }}">{{ $row }}</div>
                                 
                                 {{-- Left side --}}
                                 @foreach($leftLetters as $letter)
@@ -359,18 +263,23 @@
                                         $seatNumber = $row . $letter;
                                         $seat = $availableSeats[$seatNumber] ?? null;
                                         $isAvailable = $seat ? $seat['is_available'] : true;
-                                        $seatId = $seat ? $seat['seat_id'] : 'e_' . $row . $letter;
-                                        $price = $seat ? $seat['price'] : 150.00;
+                                        $seatClassAttr = $isPreferred ? 'preferred' : 'economy';
+                                        $seatId = $seat ? $seat['seat_id'] : ($isPreferred ? 'p_' : 'e_') . $row . $letter;
+                                        $price = $seat ? $seat['price'] : ($isPreferred ? 180.00 : 150.00);
+                                        $seatItemClass = $isPreferred ? 'seat-item preferred-seat' : 'seat-item';
                                     @endphp
                                     <div class="seat m-1">
                                         @if($isAvailable)
-                                            <div class="seat-item" 
+                                            <div class="{{ $seatItemClass }}" 
                                                  data-seat-id="{{ $seatId }}"
                                                  data-seat-number="{{ $seatNumber }}"
                                                  data-price="{{ $price }}"
-                                                 data-class="economy">
+                                                 data-class="{{ $seatClassAttr }}">
                                                 <div class="seat-number">{{ $seatNumber }}</div>
                                                 <div class="seat-price">${{ number_format($price, 2) }}</div>
+                                                @if($isPreferred)
+                                                <div class="legroom-icon"><i class="bi bi-arrows-expand"></i></div>
+                                                @endif
                                             </div>
                                         @else
                                             <div class="seat-unavailable">
@@ -382,7 +291,14 @@
                                 
                                 <!-- AISLE -->
                                 <div class="aisle mx-3 d-flex align-items-center justify-content-center">
+                                    @if($isPreferred)
+                                    <div class="aisle-preferred">
+                                        <div class="aisle-preferred-line"></div>
+                                        <div class="aisle-preferred-dot"></div>
+                                    </div>
+                                    @else
                                     <div class="aisle-line"></div>
+                                    @endif
                                 </div>
                                 
                                 {{-- Right side --}}
@@ -391,18 +307,23 @@
                                         $seatNumber = $row . $letter;
                                         $seat = $availableSeats[$seatNumber] ?? null;
                                         $isAvailable = $seat ? $seat['is_available'] : true;
-                                        $seatId = $seat ? $seat['seat_id'] : 'e_' . $row . $letter;
-                                        $price = $seat ? $seat['price'] : 150.00;
+                                        $seatClassAttr = $isPreferred ? 'preferred' : 'economy';
+                                        $seatId = $seat ? $seat['seat_id'] : ($isPreferred ? 'p_' : 'e_') . $row . $letter;
+                                        $price = $seat ? $seat['price'] : ($isPreferred ? 180.00 : 150.00);
+                                        $seatItemClass = $isPreferred ? 'seat-item preferred-seat' : 'seat-item';
                                     @endphp
                                     <div class="seat m-1">
                                         @if($isAvailable)
-                                            <div class="seat-item" 
+                                            <div class="{{ $seatItemClass }}" 
                                                  data-seat-id="{{ $seatId }}"
                                                  data-seat-number="{{ $seatNumber }}"
                                                  data-price="{{ $price }}"
-                                                 data-class="economy">
+                                                 data-class="{{ $seatClassAttr }}">
                                                 <div class="seat-number">{{ $seatNumber }}</div>
                                                 <div class="seat-price">${{ number_format($price, 2) }}</div>
+                                                @if($isPreferred)
+                                                <div class="legroom-icon"><i class="bi bi-arrows-expand"></i></div>
+                                                @endif
                                             </div>
                                         @else
                                             <div class="seat-unavailable">
@@ -412,7 +333,7 @@
                                     </div>
                                 @endforeach
                                 
-                                <div class="row-number ms-2 fw-bold">{{ $row }}</div>
+                                <div class="row-number ms-2 fw-bold {{ $isPreferred ? 'preferred-row-num' : '' }}">{{ $row }}</div>
                             </div>
                         @endfor
                     </div>
