@@ -67,19 +67,36 @@
                 </div>
                 
                 <div class="col-md-2 text-end">
-                    <h4 class="text-primary mb-1">${{ number_format($flight->schedule->base_price_usd, 0) }}</h4>
-                    <p class="text-muted small mb-2">per person</p>
-                    
                     @php
                         $availableSeats = $flight->available_seats ?? 0;
                         $totalSeats = $flight->aircraftInstance->aircraft->total_seats ?? 180;
                         $isFull = $availableSeats <= 0;
+                        $basePrice = $flight->schedule->base_price_usd;
+                        $hasFlashSale = isset($flight->active_flash_sale);
+                        $displayPrice = $hasFlashSale 
+                            ? $flight->active_flash_sale->getDiscountedPrice($basePrice) 
+                            : $basePrice;
+                        $flashSaleSeats = $hasFlashSale 
+                            ? $flight->active_flash_sale->getRemainingSeats() 
+                            : null;
+                        $displaySeats = $flashSaleSeats ?? $availableSeats;
                     @endphp
+
+                    @if($hasFlashSale)
+                        <div class="mb-1">
+                            <span class="badge bg-danger" style="font-size:10px; letter-spacing:0.5px;">⚡ PROMO</span>
+                        </div>
+                        <span class="text-decoration-line-through text-muted small d-block">${{ number_format($basePrice, 0) }}</span>
+                        <h4 class="text-danger mb-0 fw-bold">${{ number_format($displayPrice, 0) }}</h4>
+                    @else
+                        <h4 class="text-primary mb-1">${{ number_format($basePrice, 0) }}</h4>
+                    @endif
+                    <p class="text-muted small mb-2">per person</p>
                     
                     @if($isFull)
                         <span class="badge bg-danger mb-2">Fully Booked</span>
                     @else
-                        <span class="badge bg-success mb-2">{{ $availableSeats }} seats left</span>
+                        <span class="badge bg-success mb-2">{{ $displaySeats }} {{ $hasFlashSale ? 'promo seats' : 'seats' }} left</span>
                         <a href="{{ route('flight.seats', $flight->flight_instance_id) }}" 
                            class="btn btn-primary btn-sm">Select</a>
                     @endif

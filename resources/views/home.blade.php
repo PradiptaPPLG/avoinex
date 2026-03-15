@@ -357,18 +357,34 @@
                                         <small class="text-muted">{{ $flight->flight_date->format('d M') }}</small>
                                     </div>
                                     <div class="col-md-3 text-end" data-available-seats="{{ $flight->available_seats ?? 0 }}" data-flight-id="{{ $flight->flight_instance_id }}">
-                                        <h4 class="text-primary mb-1">${{ number_format($flight->schedule->base_price_usd, 0) }}</h4>
-                                        <p class="text-muted small mb-2">per person</p>
-
                                         @php
                                             $availableSeats = $flight->available_seats ?? 0;
+                                            $basePrice = $flight->schedule->base_price_usd;
+                                            $hasFlashSale = isset($flight->active_flash_sale);
+                                            $displayPrice = $hasFlashSale 
+                                                ? $flight->active_flash_sale->getDiscountedPrice($basePrice)
+                                                : $basePrice;
+                                            $flashSaleSeats = $hasFlashSale 
+                                                ? $flight->active_flash_sale->getRemainingSeats()
+                                                : null;
                                         @endphp
+
+                                        @if($hasFlashSale)
+                                            <div class="mb-1">
+                                                <span class="badge bg-danger" style="font-size:10px; letter-spacing:0.5px;">⚡ PROMO</span>
+                                            </div>
+                                            <span class="text-decoration-line-through text-muted small d-block">${{ number_format($basePrice, 0) }}</span>
+                                            <h4 class="text-danger mb-0 fw-bold">${{ number_format($displayPrice, 0) }}</h4>
+                                        @else
+                                            <h4 class="text-primary mb-1">${{ number_format($basePrice, 0) }}</h4>
+                                        @endif
+                                        <p class="text-muted small mb-2">per person</p>
 
                                         <a href="{{ route('flight.seats', $flight->flight_instance_id) }}?adults=1&children=0&infants=0" class="btn btn-primary avx-select-btn avx-seat-link" data-seats="{{ $availableSeats }}" data-base-url="{{ route('flight.seats', $flight->flight_instance_id) }}">Select</a>
                                         <button class="btn btn-secondary avx-limited-btn" style="display:none;" disabled title="Not enough seats available">
                                             <i class="bi bi-exclamation-circle"></i> Limited
                                         </button>
-                                        <small class="text-danger d-block mt-1 avx-seats-warning" style="display:none;">Only {{ $availableSeats }} seat{{ $availableSeats != 1 ? 's' : '' }} left</small>
+                                        <small class="text-danger d-block mt-1 avx-seats-warning" style="display:none;">Only {{ $hasFlashSale ? $flashSaleSeats : $availableSeats }} {{ $hasFlashSale ? 'promo seat' : 'seat' }}{{ ($hasFlashSale ? $flashSaleSeats : $availableSeats) != 1 ? 's' : '' }} left</small>
                                     </div>
                                 </div>
                             </div>
@@ -388,7 +404,7 @@
                                     <i class="bi bi-suitcase"></i> 20kg baggage •
                                     <i class="bi bi-utensils"></i> Meal included •
                                     <i class="bi bi-wifi"></i> Free Wi-Fi •
-                                    <span class="badge bg-success">{{ $availableSeats }} seats available</span>
+                                    <span class="badge bg-success">{{ isset($flashSaleSeats) ? $flashSaleSeats . ' promo seats' : $availableSeats . ' seats' }} available</span>
                                 </p>
                                 </div>
                             </div>
@@ -420,7 +436,9 @@
 /* SI GAMBARNYA FULL NGGA DI CROP */
 .avx-hero{ 
     position:relative; 
-    min-height:100vh; 
+    min-height: 580px;
+    max-height: 580px;
+    overflow: hidden;
     font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial;
     background-color: #f0f0f0;
 }
@@ -686,13 +704,12 @@
 .avx-white-bg {
     position: absolute;
     width: 100%;
-    height: 60%;
+    height: 100%;
     background: #ffffff;
     border-radius: 0; 
-    top: 40%;
+    top: 60%;
     left: 0;
     z-index: 2;
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.05);
 }
 
 /* Main center area */
@@ -702,7 +719,7 @@
     display:flex; 
     align-items:center; 
     justify-content:center; 
-    padding: 80px 24px 160px;
+    padding: 40px 24px 40px;
 }
 
 /* PERUBAHAN: Card transparan dipusatkan */
@@ -714,7 +731,7 @@
     border-radius:50px; 
     background: var(--rongga); 
     z-index: 6;
-    top: 29%;
+    top: 25%;
     left: 50%;
     transform: translateX(-50%);
     filter: blur(0.2px); 
@@ -728,7 +745,7 @@
     display:flex; 
     flex-direction: column;
     align-items: center;
-    margin-top: 300px;
+    margin-top: 190px;
 }
 
 /* Search card - PERUBAHAN: Card dipusatkan */

@@ -93,14 +93,26 @@
                             <small class="text-muted">{{ $flight->flight_date->format('d M') }}</small>
                         </div>
                         <div class="col-md-3 text-end">
-                            <h4 class="text-primary mb-1">${{ number_format($flight->schedule->base_price_usd, 0) }}</h4>
-                            <p class="text-muted small mb-2">per person</p>
-                            
                             @php
                                 $availableSeats = $flight->available_seats ?? 0;
                                 $passengerCount = ($searchParams['adults'] ?? 1) + ($searchParams['children'] ?? 0);
                                 $hasEnoughSeats = $availableSeats >= $passengerCount;
+                                $basePrice = $flight->schedule->base_price_usd;
+                                $displayPrice = isset($flight->active_flash_sale) 
+                                    ? $flight->active_flash_sale->getDiscountedPrice($basePrice)
+                                    : $basePrice;
                             @endphp
+
+                            @if(isset($flight->active_flash_sale))
+                                <div class="mb-1">
+                                    <span class="badge bg-danger" style="font-size:10px; letter-spacing:0.5px;">⚡ PROMO</span>
+                                </div>
+                                <span class="text-decoration-line-through text-muted small d-block">${{ number_format($basePrice, 0) }}</span>
+                                <h4 class="text-danger mb-0 fw-bold">${{ number_format($displayPrice, 0) }}</h4>
+                            @else
+                                <h4 class="text-primary mb-1">${{ number_format($basePrice, 0) }}</h4>
+                            @endif
+                            <p class="text-muted small mb-2">per person</p>
                             
                             @if($hasEnoughSeats)
                                 <a href="{{ route('flight.seats', $flight->flight_instance_id) }}?adults={{ $searchParams['adults'] ?? 1 }}&children={{ $searchParams['children'] ?? 0 }}&infants={{ $searchParams['infants'] ?? 0 }}" class="btn btn-primary px-4">Select</a>
@@ -111,6 +123,7 @@
                                 <small class="text-danger d-block mt-1">Only {{ $availableSeats }} seat{{ $availableSeats != 1 ? 's' : '' }} left</small>
                             @endif
                         </div>
+
                         </div>
                     </div>
                     
@@ -127,7 +140,12 @@
                                 <i class="bi bi-suitcase me-1"></i> 20kg baggage &bull;
                                 <i class="bi bi-utensils ms-2 me-1"></i> Meal included &bull;
                                 <i class="bi bi-wifi ms-2 me-1"></i> Free Wi-Fi 
-                                <span class="badge bg-success ms-3">{{ $availableSeats }} seats available</span>
+                                @php
+                                    $flashSaleSeatsRemaining = isset($flight->active_flash_sale) 
+                                        ? $flight->active_flash_sale->getRemainingSeats() 
+                                        : null;
+                                @endphp
+                                <span class="badge bg-success ms-3">{{ isset($flashSaleSeatsRemaining) ? $flashSaleSeatsRemaining . ' promo seats' : $availableSeats . ' seats' }} available</span>
                             </p>
                             </div>
                         </div>

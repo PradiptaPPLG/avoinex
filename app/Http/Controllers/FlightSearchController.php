@@ -21,7 +21,9 @@ class FlightSearchController extends Controller
         $flights = FlightInstance::with([
             'schedule.originAirport',
             'schedule.destinationAirport',
-            'aircraftInstance.aircraft'
+            'schedule.airline',
+            'aircraftInstance.aircraft',
+            'flashSale'
         ])
             ->where('flight_date', '>=', now()->toDateString())
             ->where('is_active', true)
@@ -46,6 +48,12 @@ class FlightSearchController extends Controller
             $flightNumber = $flight->schedule->flight_number ?? 'GA-201';
             $airlineCode = explode('-', $flightNumber)[0] ?? 'GA';
             $flight->airline_code = $airlineCode;
+
+            // Check for active flash sale and attach it
+            $activeFlashSale = $flight->flashSale()->active()->first();
+            if ($activeFlashSale) {
+                $flight->active_flash_sale = $activeFlashSale;
+            }
         }
         // Fetch Flash Sales for Hero Section (Only 1 most worthy/biggest discount)
         $heroFlashSales = FlashSale::with([
