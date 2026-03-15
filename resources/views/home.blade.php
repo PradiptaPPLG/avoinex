@@ -284,8 +284,10 @@
                                         'from' => $deal->flightInstance->schedule->originAirport->iata_code,
                                         'to' => $deal->flightInstance->schedule->destinationAirport->iata_code,
                                         'depart' => $deal->flightInstance->flight_date->format('Y-m-d'),
-                                        'adults' => 1
-                                    ]) }}" class="btn avx-btn-light-blue fw-bold rounded-pill px-4">Gunakan</a>
+                                        'adults' => 1,
+                                        'children' => 0,
+                                        'infants' => 0
+                                    ]) }}" class="btn avx-btn-light-blue fw-bold rounded-pill px-4 avx-kupon-btn">Gunakan</a>
                             </div>
                         </div>
                     @endforeach
@@ -438,7 +440,7 @@
     position:relative; 
     min-height: 580px;
     max-height: 580px;
-    overflow: hidden;
+    /* Removed overflow: hidden so dropdown can be displayed */
     font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial;
     background-color: #f0f0f0;
 }
@@ -704,7 +706,8 @@
 .avx-white-bg {
     position: absolute;
     width: 100%;
-    height: 100%;
+    /* Gunakan height 40% agar tidak tumpah bila overflow di-remove dari avx-hero (100% - 60% top = 40%) */
+    height: 40%;
     background: #ffffff;
     border-radius: 0; 
     top: 60%;
@@ -1721,6 +1724,19 @@
             var baseUrl = link.getAttribute('data-base-url');
             if (baseUrl) {
                 link.href = baseUrl + '?adults=' + pax.adults + '&children=' + pax.children + '&infants=' + pax.infants;
+            }
+        });
+
+        // Update kupon links with current passenger counts
+        document.querySelectorAll('.avx-kupon-btn').forEach(function(btn) {
+            try {
+                var url = new URL(btn.href);
+                url.searchParams.set('adults', pax.adults);
+                url.searchParams.set('children', pax.children);
+                url.searchParams.set('infants', pax.infants);
+                btn.href = url.toString();
+            } catch (e) {
+                console.error("Invalid URL in kupon link", e);
             }
         });
     }
