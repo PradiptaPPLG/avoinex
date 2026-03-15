@@ -72,6 +72,7 @@ use App\Http\Controllers\Admin\AircraftController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\FlightController as AdminFlightController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
+use App\Http\Controllers\Admin\FlashSaleController;
 use App\Http\Controllers\Admin\AirportController;
 use App\Http\Controllers\Admin\ManufacturerController;
 use App\Http\Controllers\Admin\CountryController;
@@ -122,6 +123,16 @@ Route::prefix('admin')->group(function () {
                 Route::prefix('bookings')->name('admin.bookings.')->group(function () {
                     Route::get('/', [AdminBookingController::class , 'index'])->name('index');
                     Route::get('/{id}', [AdminBookingController::class , 'show'])->name('show');
+                }
+                );
+
+                Route::prefix('flash-sales')->name('admin.flash_sales.')->group(function () {
+                    Route::get('/', [FlashSaleController::class , 'index'])->name('index');
+                    Route::get('/create', [FlashSaleController::class , 'create'])->name('create');
+                    Route::post('/', [FlashSaleController::class , 'store'])->name('store');
+                    Route::get('/{id}/edit', [FlashSaleController::class , 'edit'])->name('edit');
+                    Route::put('/{id}', [FlashSaleController::class , 'update'])->name('update');
+                    Route::delete('/{id}', [FlashSaleController::class , 'destroy'])->name('destroy');
                 }
                 );
 

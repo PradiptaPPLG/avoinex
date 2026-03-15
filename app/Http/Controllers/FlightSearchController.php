@@ -9,6 +9,7 @@ use App\Models\FlightInstance;
 use App\Models\Booking;
 use App\Models\BookingSeat;
 use Carbon\Carbon;
+use App\Models\FlashSale;
 
 class FlightSearchController extends Controller
 {
@@ -46,8 +47,34 @@ class FlightSearchController extends Controller
             $airlineCode = explode('-', $flightNumber)[0] ?? 'GA';
             $flight->airline_code = $airlineCode;
         }
+        // Fetch Flash Sales for Hero Section (Only 1 most worthy/biggest discount)
+        $heroFlashSales = FlashSale::with([
+            'flightInstance.schedule.originAirport',
+            'flightInstance.schedule.destinationAirport',
+            'flightInstance.schedule.airline'
+        ])
+            ->active()
+            ->orderBy('priority', 'desc')
+            ->orderBy('discount_value', 'desc')
+            ->latest()
+            ->limit(1)
+            ->get();
 
-        return view('home', compact('airports', 'flights'));
+        // Fetch remaining Flash Sales for Deals Section
+        $secondaryFlashSales = FlashSale::with([
+            'flightInstance.schedule.originAirport',
+            'flightInstance.schedule.destinationAirport',
+            'flightInstance.schedule.airline'
+        ])
+            ->active()
+            ->orderBy('priority', 'desc')
+            ->latest()
+            ->take(10)
+            ->get();
+
+        $serverTime = now()->toIso8601String();
+
+        return view('home', compact('airports', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime'));
     }
     private function getAirlineName($code)
     {
@@ -129,18 +156,27 @@ class FlightSearchController extends Controller
         $destinationIataCodes = $destinationAirports->pluck('iata_code')->toArray();
 
         // Search for flights
-        $flights = FlightInstance::with([
+        $flightsQuery = FlightInstance::with([
             'schedule.originAirport',
             'schedule.destinationAirport',
             'schedule.airline',
-            'aircraftInstance.aircraft'
+            'aircraftInstance.aircraft',
+            'flashSale'
         ])
             ->join('schedules', 'flight_instances.schedule_id', '=', 'schedules.schedule_id')
             ->whereIn('schedules.origin_iata_code', $originIataCodes)
             ->whereIn('schedules.destination_iata_code', $destinationIataCodes)
             ->where('flight_instances.flight_date', $departDate)
-            ->where('flight_instances.is_active', true)
-            ->orderBy('schedules.departure_time_gmt')
+            ->where('flight_instances.is_active', true);
+
+        // Filter by promo if the tab is selected
+        if ($request->input('tab') === 'promo') {
+            $flightsQuery->whereHas('flashSale', function ($query) {
+                $query->active();
+            });
+        }
+
+        $flights = $flightsQuery->orderBy('schedules.departure_time_gmt')
             ->select('flight_instances.*')
             ->get();
 
@@ -159,7 +195,21 @@ class FlightSearchController extends Controller
             // Only include flights with enough seats
             if ($availableSeats >= $passengers) {
                 $flight->available_seats = $availableSeats;
-                $flight->price = $flight->schedule->base_price_usd * $passengers;
+                
+                // Calculate original and discounted prices
+                $basePrice = $flight->schedule->base_price_usd;
+                $flight->original_price = $basePrice * $passengers;
+                $flight->price = $basePrice * $passengers;
+
+                // Check for active flash sale and apply manually because we might not have eager loaded scope correctly
+                // Eager loaded flashSale might be active or not
+                $activeFlashSale = $flight->flashSale()->active()->first();
+                if ($activeFlashSale) {
+                    $discountedBase = $activeFlashSale->getDiscountedPrice($basePrice);
+                    $flight->price = $discountedBase * $passengers;
+                    $flight->active_flash_sale = $activeFlashSale;
+                }
+
                 $availableFlights[] = $flight;
             }
         }

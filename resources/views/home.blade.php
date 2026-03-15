@@ -14,7 +14,58 @@
         <div class="avx-white-bg" aria-hidden="true"></div>
         
         <!-- Card transparan (rongga) DI ATAS -->
-        <div class="avx-rongga" aria-hidden="true"></div>
+        <div class="avx-rongga" aria-hidden="true">
+            @if(isset($heroFlashSales) && $heroFlashSales->count() > 0)
+            <!-- FLASH SALE HERO BANNER -->
+            <div class="avx-flash-hero-container px-4">
+                @foreach($heroFlashSales as $flashSale)
+                    @php
+                        $basePrice = $flashSale->flightInstance->schedule->base_price_usd;
+                        $discountedPrice = $flashSale->getDiscountedPrice($basePrice);
+                        $remainingSeats = $flashSale->getRemainingSeats();
+                        $seatsClaimed = $flashSale->seats_sold;
+                        $totalSeats = $flashSale->max_seats;
+                        $percentage = $totalSeats > 0 ? min(100, round(($seatsClaimed / $totalSeats) * 100)) : 0;
+                        
+                        $seatColorClass = 'text-success';
+                        if ($remainingSeats < 10) $seatColorClass = 'text-warning';
+                        if ($remainingSeats < 5) $seatColorClass = 'text-danger fw-bold';
+                    @endphp
+                    <div class="avx-flash-card w-100 flex-row justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-4">
+                            <div class="avx-flash-badge mb-0">
+                                <span class="pulse-dot"></span> FLASH SALE
+                            </div>
+                            <div class="avx-flash-route text-truncate mb-0" style="font-size: 24px;">
+                                {{ $flashSale->flightInstance->schedule->originAirport->iata_code }} &rarr; {{ $flashSale->flightInstance->schedule->destinationAirport->iata_code }}
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-5">
+                            <div class="avx-flash-prices text-end">
+                                <span class="avx-flash-original d-block mb-1" style="font-size: 16px;">${{ number_format($basePrice, 0) }}</span>
+                                <span class="avx-flash-discounted d-block" style="font-size: 32px;">${{ number_format($discountedPrice, 0) }}</span>
+                            </div>
+                            <div class="text-center">
+                                <div class="avx-flash-timer avx-countdown mb-2 px-4 py-2" data-endtime="{{ $flashSale->end_time->toIso8601String() }}">
+                                    <!-- JS WILL FILL THIS -->
+                                </div>
+                                <div class="avx-flash-seats w-100">
+                                    <div class="avx-seat-text justify-content-center {{ $seatColorClass }}">
+                                        @if($remainingSeats < 10) <i class="bi bi-fire"></i> Selling Fast! @endif
+                                        {{ $remainingSeats }} seats left
+                                    </div>
+                                    <div class="avx-progress-wrap mx-auto" style="width: 80%;" title="{{ $seatsClaimed }} / {{ $totalSeats }} claimed">
+                                        <div class="avx-progress-bar bg-danger" style="width: {{ $percentage }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            @endif
+        </div>
 
         <section class="avx-search-wrap" role="region" aria-label="Search flights">
             <!-- Card utama DI BAWAH rongga -->
@@ -26,6 +77,7 @@
                         <button class="avx-tab avx-tab-active" data-tab="oneway" type="button"><i class="bi bi-arrow-right me-1"></i>Sekali Jalan</button>
                         <button class="avx-tab" data-tab="round" type="button"><i class="bi bi-arrow-left-right me-1"></i>Pulang-Pergi</button>
                         <button class="avx-tab" data-tab="multi" type="button"><i class="bi bi-signpost-split me-1"></i>Multi-Kota</button>
+                        <button class="avx-tab text-danger" style="font-weight:700;" data-tab="promo" type="button"><i class="bi bi-tags-fill me-1"></i>Promo</button>
                     </nav>
                     
                     <!-- Options: Penerbangan Langsung + Passenger + Class -->
@@ -115,6 +167,7 @@
 
                 <!-- BARIS TENGAH: Form Input -->
                 <form class="avx-search-form" action="{{ route('flights.search') }}" method="GET">
+                    <input type="hidden" name="tab" id="hiddenSearchTab" value="oneway">
                     <input type="hidden" name="adults" id="hiddenAdults" value="1">
                     <input type="hidden" name="children" id="hiddenChildren" value="0">
                     <input type="hidden" name="infants" id="hiddenInfants" value="0">
@@ -167,8 +220,6 @@
                 </form>
             </div>
             
-            <!-- BARIS BAWAH: Promo Text (di luar card) -->
-            <h3 class="avx-promo"><i class="bi bi-tags-fill me-2" style="color: var(--avx-primary);"></i>Harga tiket Pesawat: Selalu Promo di Avoinex - PESAN SEKARANG!</h3>
         </section>
 
     {{-- flight results card list below hero --}}
@@ -176,9 +227,91 @@
     </main>
 </div>
 
+@if(isset($secondaryFlashSales) && $secondaryFlashSales->count() > 0)
+    <div class="avx-kupon-wrapper mt-5">
+        <section id="avoinex-deals" class="container py-5">
+            <h3 class="fw-bold mb-4 avx-kupon-title">Kupon Terbatas, SPESIAL UNTUKMU!</h3>
+            
+            <div class="avx-kupon-pills mb-4">
+                <span class="avx-kupon-pill">Semua Promosi</span>
+                <span class="avx-kupon-pill">Penerbangan Domestik</span>
+                <span class="avx-kupon-pill">Penerbangan Internasional</span>
+            </div>
+
+            <div class="avx-kupon-scroll-container position-relative">
+                <div class="avx-kupon-track d-flex gap-4 overflow-auto pb-4 pt-2 px-2" style="scrollbar-width: none;">
+                    @foreach($secondaryFlashSales as $deal)
+                        @php
+                            $basePrice = $deal->flightInstance->schedule->base_price_usd;
+                            $discountedPrice = $deal->getDiscountedPrice($basePrice);
+                        @endphp
+                        <div class="avx-kupon-card flex-shrink-0">
+                            <div class="avx-kupon-top position-relative p-4">
+                                <!-- Airline info -->
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    @if(isset($deal->flightInstance->schedule->airline->logo_path))
+                                        <img src="{{ asset('logo_maskapai/' . $deal->flightInstance->schedule->airline->logo_path) }}" height="24" alt="Airline">
+                                    @else
+                                        <span class="badge bg-primary">{{ $deal->flightInstance->schedule->airline_code }}</span>
+                                    @endif
+                                    <span class="fw-semibold small text-muted">{{ $deal->flightInstance->schedule->airline->name ?? 'Airlines' }}</span>
+                                </div>
+                                
+                                <h5 class="fw-bold mb-1 text-dark">
+                                    {{ $deal->flightInstance->schedule->originAirport->city }} &rarr; {{ $deal->flightInstance->schedule->destinationAirport->city }}
+                                </h5>
+                                <p class="text-muted small mb-3">{{ $deal->flightInstance->flight_date->format('d M Y') }}</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="badge bg-danger-subtle text-danger px-2 py-1 border-0"><i class="bi bi-clock-history"></i> <span class="avx-countdown" data-endtime="{{ $deal->end_time->toIso8601String() }}"></span></span>
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border-0"><i class="bi bi-fire"></i> {{ $deal->getRemainingSeats() }} Seats Left</span>
+                                </div>
+                            </div>
+                            
+                            <div class="avx-kupon-divider">
+                                <div class="avx-kupon-cutout-left shadow-inner"></div>
+                                <div class="avx-kupon-line"></div>
+                                <div class="avx-kupon-cutout-right shadow-inner"></div>
+                            </div>
+                            
+                            <div class="avx-kupon-bottom p-4 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-decoration-line-through text-muted small d-block" style="font-size: 0.85rem;">${{ number_format($basePrice, 0) }}</span>
+                                    <span class="text-primary fw-bold fs-5">${{ number_format($discountedPrice, 0) }}</span>
+                                </div>
+                                <a href="{{ route('flights.search', [
+                                        'tab' => 'promo',
+                                        'from' => $deal->flightInstance->schedule->originAirport->iata_code,
+                                        'to' => $deal->flightInstance->schedule->destinationAirport->iata_code,
+                                        'depart' => $deal->flightInstance->flight_date->format('Y-m-d'),
+                                        'adults' => 1
+                                    ]) }}" class="btn avx-btn-light-blue fw-bold rounded-pill px-4">Gunakan</a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                
+                @if($secondaryFlashSales->count() > 3)
+                <button class="avx-kupon-nav-right shadow-sm" aria-label="Next deals">
+                    <i class="bi bi-chevron-right text-primary fw-bold"></i>
+                </button>
+                @endif
+            </div>
+        </section>
+    </div>
+@endif
+
 @if(isset($flights) && $flights->count())
     <section id="available-flights" class="flight-list-container">
-        <div class="container mt-4">
+        <!-- BARIS ATAS: Promo Text dipindah ke atas Available Flights -->
+        <a href="#available-flights" class="text-decoration-none avx-hover-link mb-3 mx-auto" style="max-width: 1400px; padding: 0 24px;">
+            <div class="avx-promo shadow-sm">
+                <i class="bi bi-tags-fill avx-promo-icon me-2" style="color: var(--avx-primary); font-size: 1.25rem;"></i>
+                <span class="mb-0">Harga tiket Pesawat: Selalu Promo di Avoinex - PESAN SEKARANG!</span>
+            </div>
+        </a>
+
+        <div class="container mt-2">
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">
@@ -187,8 +320,9 @@
                 </div>
                 <div class="card-body">
                     @foreach($flights as $flight)
-                    <div class="flight-card border rounded p-3 mb-3">
-                        <div class="row">
+                    <div class="flight-card ticket-card">
+                        <div class="ticket-top p-3">
+                            <div class="row">
                             <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
                                 @if(isset($flight->schedule->airline->logo_path) && $flight->schedule->airline->logo_path)
                                     <div class="airline-logo rounded-circle shadow-sm overflow-hidden" style="width: 90px; height: 90px; background-color: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; padding: 0;">
@@ -238,15 +372,25 @@
                                     </div>
                                 </div>
                             </div>
+                            </div>
                         </div>
-                        <div class="row mt-3">
-                            <div class="col-md-12">
+                        
+                        <div class="ticket-divider">
+                            <div class="ticket-cutout-left"></div>
+                            <div class="ticket-line"></div>
+                            <div class="ticket-cutout-right"></div>
+                        </div>
+                        
+                        <div class="ticket-bottom p-3">
+                            <div class="row">
+                                <div class="col-md-12">
                                 <p class="mb-0">
                                     <i class="bi bi-suitcase"></i> 20kg baggage •
                                     <i class="bi bi-utensils"></i> Meal included •
                                     <i class="bi bi-wifi"></i> Free Wi-Fi •
                                     <span class="badge bg-success">{{ $availableSeats }} seats available</span>
                                 </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -281,6 +425,243 @@
     background-color: #f0f0f0;
 }
 
+/* FLASH SALE HERO STYLES */
+.avx-flash-hero-container {
+    display: flex;
+    z-index: 25;
+    position: relative;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    align-items: flex-start; /* Align top so it's not hidden behind search form */
+    justify-content: center;
+    padding-top: 24px;
+}
+
+.avx-flash-card {
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 50px;
+    padding: 16px 40px;
+    display: flex;
+    color: white;
+    width: 100%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.avx-flash-card:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.avx-flash-badge {
+    background: #ff3b3b;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 1px;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.avx-flash-route {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.avx-flash-prices {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.avx-flash-original {
+    font-size: 14px;
+    text-decoration: line-through;
+    color: rgba(255,255,255,0.6);
+}
+
+.avx-flash-discounted {
+    font-size: 24px;
+    font-weight: 800;
+    color: #ffd700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.avx-flash-timer {
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    background: rgba(0,0,0,0.3);
+    padding: 8px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.avx-flash-seats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.avx-seat-text {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.avx-progress-wrap {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.avx-progress-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+/* Deal Card CSS - REDESIGNED KUPON LAYOUT */
+.avx-kupon-wrapper {
+    background-color: #f0fdf4; /* Pale green requested directly from template */
+    width: 100%;
+}
+.avx-kupon-title {
+    color: #1f2937;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+}
+.avx-kupon-pills {
+    display: flex;
+    gap: 12px;
+}
+.avx-kupon-pill {
+    background-color: #dbeafe; /* Light blue */
+    color: #60a5fa; /* Primary light blue text */
+    padding: 8px 24px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.avx-kupon-pill:hover {
+    background-color: #bfdbfe;
+    color: #3b82f6;
+}
+.avx-kupon-scroll-container {
+    position: relative;
+    padding-right: 20px;
+}
+.avx-kupon-track::-webkit-scrollbar {
+    display: none;
+}
+.avx-kupon-card {
+    width: 320px;
+    background: transparent;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+}
+.avx-kupon-top {
+    background: #ffffff;
+    border-radius: 16px 16px 0 0;
+}
+.avx-kupon-divider {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: #ffffff;
+}
+.avx-kupon-line {
+    flex-grow: 1;
+    border-top: 2px dashed #e5e7eb;
+    margin: 0 24px;
+    z-index: 1;
+}
+.avx-kupon-cutout-left,
+.avx-kupon-cutout-right {
+    width: 15px;
+    height: 30px;
+    background-color: #f0fdf4; /* Match wrapper background */
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    box-shadow: none; /* remove shadow */
+    z-index: 2;
+}
+.avx-kupon-cutout-left {
+    left: 0;
+    border-radius: 0 30px 30px 0;
+}
+.avx-kupon-cutout-right {
+    right: 0;
+    border-radius: 30px 0 0 30px;
+}
+
+.avx-kupon-bottom {
+    background: #ffffff;
+    border-radius: 0 0 16px 16px;
+}
+.avx-btn-light-blue {
+    background-color: #dbeafe;
+    color: #3b82f6;
+    border: none;
+    transition: all 0.2s;
+}
+.avx-btn-light-blue:hover {
+    background-color: #bfdbfe;
+    color: #2563eb;
+}
+.avx-kupon-nav-right {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.2s;
+}
+.avx-kupon-nav-right:hover {
+    transform: translateY(-50%) scale(1.05);
+}
+
 /* REVISI UDAH BENER BANGET BANGET POKONYAMAH YANG TERAKHIRRR */
 .avx-hero-bg{ 
     position:absolute; 
@@ -305,11 +686,9 @@
 .avx-white-bg {
     position: absolute;
     width: 100%;
-    /* cut the white background shorter so flight cards aren't pushed so far down */
     height: 60%;
     background: #ffffff;
     border-radius: 0; 
-    /* move up slightly so the white area begins earlier */
     top: 40%;
     left: 0;
     z-index: 2;
@@ -335,7 +714,6 @@
     border-radius:50px; 
     background: var(--rongga); 
     z-index: 6;
-    /* PERUBAHAN: Dipusatkan secara horizontal dan vertikal */
     top: 29%;
     left: 50%;
     transform: translateX(-50%);
@@ -349,7 +727,7 @@
     width:100%; 
     display:flex; 
     flex-direction: column;
-    align-items: center; /* PERUBAHAN: Semua konten di tengah */
+    align-items: center;
     margin-top: 300px;
 }
 
@@ -439,6 +817,37 @@
     font-weight:600; 
     font-family:'Segoe UI Semibold'; 
     font-size: 16px;
+}
+
+.avx-promo {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 16px 20px;
+    color: #222;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    transition: all 0.2s ease;
+    border: 1px solid #e5e7eb;
+}
+.avx-hover-link:hover .avx-promo {
+    border-color: var(--avx-primary);
+    box-shadow: 0 4px 12px rgba(39, 158, 214, 0.1);
+}
+.avx-hover-link {
+    display: block;
+    width: 100%;
+    transition: transform 0.2s ease;
+}
+.avx-hover-link:hover {
+    transform: translateY(-2px);
+}
+.avx-promo-icon {
+    transform: rotate(45deg); /* Slight angle for the tag icon to match screenshot */
+    display: inline-block;
 }
 
 .avx-passenger-class { 
@@ -734,7 +1143,7 @@
 
 @media (max-width: 768px) {
     .avx-main {
-        padding: 40px 16px 120px;
+        padding: 40px 16px 30px;
     }
     
     .avx-search-main {
@@ -780,7 +1189,6 @@
     .avx-promo {
         font-size: 16px;
         padding: 14px 20px;
-        /* Di mobile, text bisa center untuk readability yang lebih baik */
         text-align: center;
         width: calc(100% - 40px);
         margin-left: 20px;
@@ -792,7 +1200,6 @@
         height: 70%;
     }
     
-    /* PERUBAHAN: Card transparan untuk mobile */
     .avx-rongga {
         height: 320px;
         top: 28%;
@@ -810,7 +1217,7 @@
 
 @media (max-width: 480px) {
     .avx-main {
-        padding: 30px 12px 100px;
+        padding: 30px 12px 20px;
     }
     
     .avx-search-card {
@@ -845,7 +1252,6 @@
         height: 75%;
     }
     
-    /* PERUBAHAN: Card transparan untuk mobile kecil */
     .avx-rongga {
         top: 25%;
         height: 300px;
@@ -875,6 +1281,7 @@
     font-weight: bold;
     font-size: 1.3rem;
 }
+.flight-list-container > .container {
     position: relative;
     z-index: 10;
     background: white;
@@ -883,6 +1290,77 @@
     /* pull the flight list even higher so it's clearly visible under hero */
     margin-top: -250px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.flight-card.ticket-card {
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    border: none;
+    box-shadow: none !important;
+    transition: none !important;
+    margin-bottom: 24px;
+}
+.flight-card.ticket-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+    cursor: default;
+}
+.ticket-top {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+}
+.ticket-bottom {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+}
+.ticket-divider {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: transparent;
+}
+.ticket-divider::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #ffffff;
+    border-left: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+    z-index: 1;
+}
+.ticket-line {
+    flex-grow: 1;
+    border-top: 2px dashed #dee2e6;
+    margin: 0 16px;
+    z-index: 2;
+}
+.ticket-cutout-left,
+.ticket-cutout-right {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 30px;
+    background-color: #ffffff; /* Matches container white bg */
+    z-index: 3;
+    border: 1px solid #dee2e6;
+}
+.ticket-cutout-left {
+    left: -1px;
+    border-left: none;
+    border-radius: 0 30px 30px 0;
+}
+.ticket-cutout-right {
+    right: -1px;
+    border-right: none;
+    border-radius: 30px 0 0 30px;
 }
 
 .dotted-line {
@@ -905,9 +1383,8 @@
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    transition: transform 0.3s ease;
-    box-shadow: 0 10px 20px rgba(39, 158, 214, 0.15) !important;
+    transform: none;
+    box-shadow: none !important;
 }
 
 .bi {
@@ -1357,13 +1834,52 @@
             btn.classList.add('avx-tab-active');
 
             var target = btn.getAttribute('data-tab');
-            if (target === 'oneway') {
+            document.getElementById('hiddenSearchTab').value = target;
+
+            if (target === 'oneway' || target === 'promo') {
                 document.getElementById('return').required = false;
             } else {
                 document.getElementById('return').required = true;
             }
         });
     });
+
+    // ===== FLASH SALE COUNTDOWN =====
+    var serverTimeStr = "{{ $serverTime ?? now()->toIso8601String() }}";
+    var serverTime = new Date(serverTimeStr).getTime();
+    var clientTimeAtLoad = new Date().getTime();
+    
+    function updateCountdowns() {
+        var nowClient = new Date().getTime();
+        var elapsed = nowClient - clientTimeAtLoad;
+        var currentServerTime = serverTime + elapsed;
+        
+        document.querySelectorAll('.avx-countdown').forEach(function(el) {
+            var endStr = el.getAttribute('data-endtime');
+            if(!endStr) return;
+            var endTime = new Date(endStr).getTime();
+            var diff = endTime - currentServerTime;
+            
+            if (diff <= 0) {
+                el.innerHTML = "EXPIRED";
+                // possibly hide the card if it's in the hero section
+                var card = el.closest('.avx-flash-card');
+                if (card) card.style.display = 'none';
+                return;
+            }
+            
+            var h = Math.floor(diff / (1000 * 60 * 60));
+            var m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            var s = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            el.innerHTML = (h < 10 ? "0"+h : h) + " : " + (m < 10 ? "0"+m : m) + " : " + (s < 10 ? "0"+s : s);
+        });
+    }
+    
+    if (document.querySelectorAll('.avx-countdown').length > 0) {
+        updateCountdowns();
+        setInterval(updateCountdowns, 1000);
+    }
 
     // ===== DATE VALIDATION =====
     var today = new Date().toISOString().split('T')[0];
@@ -1443,6 +1959,16 @@
 
     // ===== INITIAL RENDER =====
     updatePassengerText();
+
+    // ===== KUPON HORIZONTAL SCROLL =====
+    var kuponNavBtn = document.querySelector('.avx-kupon-nav-right');
+    var kuponTrack = document.querySelector('.avx-kupon-track');
+    if(kuponNavBtn && kuponTrack) {
+        kuponNavBtn.addEventListener('click', function() {
+            // Scroll by roughly the width of one card + gap
+            kuponTrack.scrollBy({ left: 340, behavior: 'smooth' });
+        });
+    }
 })();
 </script>
 

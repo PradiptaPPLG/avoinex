@@ -654,6 +654,13 @@
                 </a>
             </div>
 
+            <div class="nav-item">
+                <a href="{{ route('admin.flash_sales.index') }}" class="nav-link {{ request()->routeIs('admin.flash_sales.*') ? 'active' : '' }}">
+                    <i class="bi bi-lightning-charge-fill text-warning nav-icon"></i>
+                    Flash Sales
+                </a>
+            </div>
+
             <div class="nav-section-label">Master Data</div>
 
             <div class="nav-item">

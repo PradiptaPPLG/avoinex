@@ -86,25 +86,27 @@ class FlightController extends Controller
 
             // Format data untuk view
             $availableSeats = [];
+            $flashSale = \App\Models\FlashSale::where('flight_id', $id)->active()->first();
+
             foreach ($allSeats as $seat) {
                 $seatId = $seat->seat_id;
                 $isBooked = in_array($seatId, $bookedSeatIds);
 
                 // Tentukan harga
                 if (isset($seatPrices[$seatId])) {
-                    $price = $seatPrices[$seatId]->price_usd;
+                    $basePrice = $seatPrices[$seatId]->price_usd;
                     $isAvailable = !$isBooked && $seatPrices[$seatId]->is_available;
                 }
                 else {
                     // Harga default berdasarkan kelas
                     if ($seat->seat_class == 'business') {
-                        $price = 250.00;
+                        $basePrice = 250.00;
                     }
                     elseif ($seat->seat_class == 'first') {
-                        $price = 400.00;
+                        $basePrice = 400.00;
                     }
                     else {
-                        $price = 150.00;
+                        $basePrice = 150.00;
                     }
                     $isAvailable = !$isBooked;
 
@@ -113,7 +115,7 @@ class FlightController extends Controller
                         FlightSeatPrice::create([
                             'flight_instance_id' => $id,
                             'seat_id' => $seatId,
-                            'price_usd' => $price,
+                            'price_usd' => $basePrice,
                             'currency' => 'USD',
                             'is_available' => $isAvailable
                         ]);
@@ -123,13 +125,18 @@ class FlightController extends Controller
                     }
                 }
 
+                $finalPrice = $basePrice;
+                if ($flashSale) {
+                    $finalPrice = $flashSale->getDiscountedPrice($basePrice);
+                }
+
                 $availableSeats[$seat->seat_number] = [
                     'seat_id' => $seatId,
                     'seat_number' => $seat->seat_number,
                     'seat_class' => $seat->seat_class,
                     'seat_type' => $seat->seat_type,
                     'is_available' => $isAvailable,
-                    'price' => $price
+                    'price' => $finalPrice
                 ];
             }
 

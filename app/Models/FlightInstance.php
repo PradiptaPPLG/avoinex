@@ -42,6 +42,19 @@ class FlightInstance extends Model
         return $this->hasMany(Booking::class , 'flight_instance_id', 'flight_instance_id');
     }
 
+    public function flashSale()
+    {
+        return $this->hasOne(FlashSale::class, 'flight_id', 'flight_instance_id');
+    }
+
+    public function flightInstanceCode()
+    {
+        if ($this->schedule) {
+            return $this->schedule->airline_code . $this->schedule->flight_number;
+        }
+        return 'FLIGHT-' . $this->flight_instance_id;
+    }
+
     /**
      * Boot the model and ensure related records are removed when a
      * flight instance is deleted. This prevents foreign-key violations

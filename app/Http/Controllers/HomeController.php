@@ -8,6 +8,7 @@ use App\Models\Airport;
 use App\Models\FlightInstance;
 use App\Models\BookingSeat;
 use App\Models\Booking;
+use App\Models\FlashSale;
 
 class HomeController extends Controller
 {
@@ -50,6 +51,33 @@ class HomeController extends Controller
             $flight->airline_name = $this->getAirlineName($airlineCode);
         }
 
+        // Fetch Flash Sales for Hero Section (Only 1 most worthy/biggest discount)
+        $heroFlashSales = FlashSale::with([
+            'flightInstance.schedule.originAirport',
+            'flightInstance.schedule.destinationAirport',
+            'flightInstance.schedule.airline'
+        ])
+            ->active()
+            ->orderBy('priority', 'desc')
+            ->orderBy('discount_value', 'desc')
+            ->latest()
+            ->limit(1)
+            ->get();
+
+        // Fetch remaining Flash Sales for Deals Section
+        $secondaryFlashSales = FlashSale::with([
+            'flightInstance.schedule.originAirport',
+            'flightInstance.schedule.destinationAirport',
+            'flightInstance.schedule.airline'
+        ])
+            ->active()
+            ->orderBy('priority', 'desc')
+            ->latest()
+            ->take(10)
+            ->get();
+
+        $serverTime = now()->toIso8601String();
+
         // If client is logged in, load client data
         if (session('client_id')) {
             $clientId = session('client_id');
@@ -57,10 +85,10 @@ class HomeController extends Controller
             $clientEmail = session('client_email');
             $client = Client::find($clientId);
 
-            return view('home', compact('client', 'airports', 'clientName', 'clientEmail', 'flights'));
+            return view('home', compact('client', 'airports', 'clientName', 'clientEmail', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime'));
         }
 
-        return view('home', compact('airports', 'flights'));
+        return view('home', compact('airports', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime'));
     }
 
     public function dashboard()
