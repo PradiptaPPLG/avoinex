@@ -1032,7 +1032,7 @@ function handleContinueBooking() {
         params.set('children', CHILDREN);
         params.set('infants', INFANTS);
 
-        const redirectUrl = '{{ route("booking.form") }}?' + params.toString();
+        const redirectUrl = '{{ route("booking.auth") }}?' + params.toString();
         console.log('🔗 Redirect URL:', redirectUrl);
 
         window.location.href = redirectUrl;

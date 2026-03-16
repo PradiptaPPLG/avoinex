@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Booking;
+use App\Mail\BookingConfirmationMail;
 
 class PaymentController extends Controller
 {
@@ -114,6 +116,28 @@ class PaymentController extends Controller
             }
 
             \DB::commit();
+
+            // Send E-Ticket confirmation email (fail silently if SMTP is not configured)
+            try {
+                $booking->load([
+                    'client',
+                    'flightInstance.schedule.originAirport',
+                    'flightInstance.schedule.destinationAirport',
+                    'flightInstance.schedule',
+                    'bookingSeats.seat'
+                ]);
+
+                $recipientEmail = $booking->client->email ?? null;
+                if ($recipientEmail) {
+                    Mail::to($recipientEmail)->send(new BookingConfirmationMail($booking));
+                    \Log::info('E-ticket email sent to: ' . $recipientEmail, ['booking_code' => $booking->booking_code]);
+                }
+            } catch (\Exception $mailEx) {
+                \Log::warning('E-ticket email failed (booking still confirmed): ' . $mailEx->getMessage(), [
+                    'booking_id' => $booking->booking_id,
+                    'booking_code' => $booking->booking_code
+                ]);
+            }
 
             return redirect()->route('booking.confirmation', $booking->booking_id);
             

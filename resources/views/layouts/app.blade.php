@@ -478,7 +478,7 @@
     <div class="avx-right">
         @if(session('client_id'))
             <!-- Bantuan Link -->
-            <a href="#" class="avx-help-link">Bantuan</a>
+            <a href="{{ route('support') }}" class="avx-help-link">Bantuan</a>
             
             <!-- IDR | ID untuk user login dengan bendera -->
             <div class="avx-currency-login">

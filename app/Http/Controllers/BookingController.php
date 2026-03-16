@@ -330,4 +330,95 @@ class BookingController extends Controller
 
         return view('booking.confirmation', compact('booking'));
     }
+
+    /**
+     * Auth Gate — check if user is logged in before proceeding to booking form.
+     */
+    public function authGate(Request $request)
+    {
+        // If already logged in, go straight to booking form
+        if (session('client_logged_in')) {
+            return redirect()->route('booking.form', $request->query());
+        }
+
+        // Load flight info for the summary card
+        $flight = null;
+        $flightId = $request->input('flight_id');
+        if ($flightId) {
+            $flight = FlightInstance::with([
+                'schedule.originAirport',
+                'schedule.destinationAirport'
+            ])->find($flightId);
+        }
+
+        // Store seat data in session so it persists through login/register
+        if ($request->has('seats')) {
+            Session::put('pending_booking_query', $request->query());
+        }
+
+        return view('booking.auth', compact('flight'));
+    }
+
+    /**
+     * Guest Continue — set guest flag and redirect to booking form.
+     */
+    public function guestContinue(Request $request)
+    {
+        session(['booking_guest' => true]);
+
+        // Rebuild query params from the form hidden fields
+        $query = [];
+        foreach (['seats', 'total', 'flight_id', 'adults', 'children', 'infants'] as $key) {
+            if ($request->has($key)) {
+                $query[$key] = $request->input($key);
+            }
+        }
+
+        // Also check session for pending booking query (from login/register redirect)
+        if (empty($query) || !isset($query['seats'])) {
+            $query = Session::get('pending_booking_query', $query);
+        }
+
+        return redirect()->route('booking.form', $query);
+    }
+
+    /**
+     * Find Booking Form — display the search form.
+     */
+    public function findForm()
+    {
+        return view('booking.find');
+    }
+
+    /**
+     * Find Booking — search by booking code + email.
+     */
+    public function findBooking(Request $request)
+    {
+        $request->validate([
+            'booking_code' => 'required|string',
+            'email' => 'required|email',
+        ]);
+
+        $booking = Booking::where('booking_code', $request->booking_code)
+            ->whereHas('client', function ($query) use ($request) {
+                $query->where('email', $request->email);
+            })
+            ->with([
+                'client',
+                'flightInstance.schedule.originAirport',
+                'flightInstance.schedule.destinationAirport',
+                'flightInstance.schedule',
+                'bookingSeats.seat'
+            ])
+            ->first();
+
+        if (!$booking) {
+            return back()
+                ->withInput()
+                ->with('error', 'Booking not found. Please check your booking code and email.');
+        }
+
+        return view('booking.find', compact('booking'));
+    }
 }

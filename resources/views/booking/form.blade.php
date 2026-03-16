@@ -178,7 +178,7 @@
 
         <!-- Order Summary -->
         <div class="col-md-4">
-            <div class="card sticky-top" style="top: 20px;">
+            <div class="card sticky-top" style="top: 90px; z-index: 10;">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Order Summary</h5>
                 </div>
