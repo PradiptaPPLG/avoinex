@@ -88,6 +88,22 @@
         </td>
     </tr>
 
+    <!-- Booking Contact -->
+    <tr>
+        <td style="padding:20px 40px 0;">
+            <p style="margin:0 0 12px; font-size:14px; font-weight:700; color:#222; text-transform:uppercase; letter-spacing:1px;">Booking Contact</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa; border-left:4px solid #279ED6; padding:12px 16px;">
+                <tr>
+                    <td>
+                        <p style="margin:0; font-size:13px; color:#555;">Name: <strong style="color:#222;">{{ $booking->client->first_name }} {{ $booking->client->last_name }}</strong></p>
+                        <p style="margin:4px 0; font-size:13px; color:#555;">Email: <strong style="color:#222;">{{ $booking->client->email }}</strong></p>
+                        <p style="margin:0; font-size:13px; color:#555;">Phone: <strong style="color:#222;">{{ $booking->client->phone }}</strong></p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
     <!-- Passenger Details -->
     <tr>
         <td style="padding:20px 40px;">

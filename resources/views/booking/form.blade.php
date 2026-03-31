@@ -64,34 +64,54 @@
                     <form id="bookingForm" action="{{ route('booking.store') }}" method="POST">
                         @csrf
                         
-                        <!-- Contact Person -->
-                        <h6 class="border-bottom pb-2">Contact Person</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label">First Name *</label>
-                                <input type="text" class="form-control" name="contact_first_name" required>
+                        <!-- Data Pemesan -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3 border-bottom pb-2">Data Pemesan</h5>
+                            
+                            <div class="alert alert-warning d-flex align-items-start p-3 mb-3" style="background-color: #fffde7; border-color: #ffe082; border-left: 4px solid #ffc107; border-radius: 8px;">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2 mt-1" style="font-size: 1.2rem;"></i>
+                                <div style="color: #424242; font-size: 0.95rem;">
+                                    <strong style="color: #666;">Penting</strong><br>
+                                    Orang di bawah ini yang akan menerima e-tiket, dan akan menjadi kontak untuk permintaan refund atau reschedule.
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Last Name *</label>
-                                <input type="text" class="form-control" name="contact_last_name" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Email *</label>
-                                <input type="email" class="form-control" name="contact_email" required>
-                            </div>
-                        </div>
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Phone Number *</label>
-                                <input type="tel" class="form-control" name="contact_phone" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Country</label>
-                                <select class="form-select" name="contact_country">
-                                    <option value="ID">Indonesia</option>
-                                    <option value="SG">Singapore</option>
-                                    <option value="MY">Malaysia</option>
-                                </select>
+                            
+                            <div class="card shadow-sm border-light mb-4 rounded-3">
+                                <div class="card-body p-4">
+                                    <div class="row mb-3 gx-4">
+                                        <div class="col-md-6 mb-3 mb-md-0">
+                                            <label class="form-label text-muted small mb-0">Nama Depan *</label>
+                                            <input type="text" class="form-control border-top-0 border-end-0 border-start-0 rounded-0 shadow-none px-0" name="contact_first_name" required style="border-bottom: 1.5px solid #e0e0e0; transition: border-color 0.2s;" onfocus="this.style.borderColor='#279ED6'" onblur="this.style.borderColor='#e0e0e0'">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted small mb-0">Nama Belakang *</label>
+                                            <input type="text" class="form-control border-top-0 border-end-0 border-start-0 rounded-0 shadow-none px-0" name="contact_last_name" required style="border-bottom: 1.5px solid #e0e0e0; transition: border-color 0.2s;" onfocus="this.style.borderColor='#279ED6'" onblur="this.style.borderColor='#e0e0e0'">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-4 gx-4">
+                                        <div class="col-md-4 mb-3 mb-md-0">
+                                            <label class="form-label text-muted small mb-0">Kode Negara</label>
+                                            <select class="form-select border-top-0 border-end-0 border-start-0 rounded-0 shadow-none px-0" name="contact_country" style="border-bottom: 1.5px solid #e0e0e0; cursor: pointer;">
+                                                <option value="ID">+62 (Indonesia)</option>
+                                                <option value="SG">+65 (Singapura)</option>
+                                                <option value="MY">+60 (Malaysia)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label class="form-label text-muted small mb-0">No. Handphone *</label>
+                                            <input type="tel" class="form-control border-top-0 border-end-0 border-start-0 rounded-0 shadow-none px-0" name="contact_phone" required style="border-bottom: 1.5px solid #e0e0e0; transition: border-color 0.2s;" onfocus="this.style.borderColor='#279ED6'" onblur="this.style.borderColor='#e0e0e0'">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label class="form-label small mb-0" style="color: #279ED6; font-weight: 500;">Email *</label>
+                                            <input type="email" class="form-control border-top-0 border-end-0 border-start-0 rounded-0 shadow-none px-0" name="contact_email" placeholder="Contoh: email@example.com" required style="border-bottom: 1.5px solid #279ED6;">
+                                            <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>E-tiket akan dikirim kepada alamat email ini.</small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

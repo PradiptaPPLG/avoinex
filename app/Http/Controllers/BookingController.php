@@ -127,29 +127,53 @@ class BookingController extends Controller
         try {
             \Log::info('Starting booking process for flight: ' . $flightInstanceId);
 
-            // 1. Cari atau buat Client
+            // 1. Cari Client berdasarkan Email
             \Log::info('Looking for client with email: ' . $validated['contact_email']);
-
             $client = Client::where('email', $validated['contact_email'])->first();
 
-            if (!$client) {
-                $client = Client::create([
-                    'first_name' => $validated['contact_first_name'],
-                    'last_name' => $validated['contact_last_name'],
-                    'phone' => $validated['contact_phone'],
-                    'email' => $validated['contact_email'],
-                    'passport' => $validated['passenger_passport'][0] ?? 'UNKNOWN',
-                    'iata_country_code' => $validated['contact_country'] ?? 'ID'
-                ]);
-                \Log::info('New client created:', ['client_id' => $client->client_id]);
+            // Jika tidak ditemukan dari email, coba cari dari Passport penumpang pertama 
+            // (menghindari error Integrity constraint violation unique passport)
+            if (!$client && !empty($validated['passenger_passport'][0])) {
+                $client = Client::where('passport', $validated['passenger_passport'][0])->first();
             }
-            else {
+
+            if (!$client) {
+                // Jika masih tidak ada, coba buat baru sambil men-catch error duplicate yang langka
+                try {
+                    $client = Client::create([
+                        'first_name' => $validated['contact_first_name'],
+                        'last_name' => $validated['contact_last_name'],
+                        'phone' => $validated['contact_phone'],
+                        'email' => $validated['contact_email'],
+                        'passport' => $validated['passenger_passport'][0] ?? 'UNKNOWN-' . uniqid(),
+                        'iata_country_code' => $validated['contact_country'] ?? 'ID'
+                    ]);
+                    \Log::info('New client created:', ['client_id' => $client->client_id]);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    // Jika tetap bentrok passport (e.g. gara2 race condition atau UNKNOWN duplicate), generate random passport
+                    if ($e->errorInfo[1] == 1062) {
+                        $client = Client::create([
+                            'first_name' => $validated['contact_first_name'],
+                            'last_name' => $validated['contact_last_name'],
+                            'phone' => $validated['contact_phone'],
+                            'email' => $validated['contact_email'],
+                            'passport' => 'PASS-' . substr(md5(uniqid()), 0, 8),
+                            'iata_country_code' => $validated['contact_country'] ?? 'ID'
+                        ]);
+                        \Log::info('Client created with generated passport string due to collision');
+                    } else {
+                        throw $e;
+                    }
+                }
+            } else {
+                // Jika ditemukan (baik dari email atau passport), perbarui datanya dengan kontak terbaru
                 $client->update([
                     'first_name' => $validated['contact_first_name'],
                     'last_name' => $validated['contact_last_name'],
-                    'phone' => $validated['contact_phone']
+                    'phone' => $validated['contact_phone'],
+                    'email' => $validated['contact_email']
                 ]);
-                \Log::info('Existing client found:', ['client_id' => $client->client_id]);
+                \Log::info('Existing client updated:', ['client_id' => $client->client_id]);
             }
 
             // 2. Buat Booking
