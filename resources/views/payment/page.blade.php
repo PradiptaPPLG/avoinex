@@ -88,8 +88,17 @@
                             <i class="bi bi-info-circle"></i> This is a demo payment. No real transaction will be processed.
                         </div>
 
-                        <button type="submit" class="btn btn-success btn-lg w-100">
-                            <i class="bi bi-lock"></i> Pay Now ${{ number_format($booking->total_price_usd, 2) }}
+                        @if(!session('client_logged_in'))
+                        <div class="alert alert-warning mb-4 shadow-sm border-warning" style="background-color: #fff3cd;">
+                            <h6 class="alert-heading fw-bold text-dark"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Guest Alert</h6>
+                            <p class="mb-0 text-dark small">
+                                Anda melakukan pemesanan sebagai Tamu (Guest). Harap simpan atau catat Nomor Booking dan Nama Pemesan Anda, karena Anda tidak dapat melihat riwayat pesanan setelah halaman ini ditutup.
+                            </p>
+                        </div>
+                        @endif
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
+                            <i class="bi bi-lock me-2"></i> Pay Now ${{ number_format($booking->total_price_usd, 2) }}
                         </button>
                     </form>
                 </div>

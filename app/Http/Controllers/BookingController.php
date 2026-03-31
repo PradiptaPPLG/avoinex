@@ -294,7 +294,7 @@ class BookingController extends Controller
 
     public function cancel($bookingId)
     {
-        $booking = Booking::with(['flightInstance', 'bookingSeats'])
+        $booking = Booking::with(['flightInstance', 'bookingSeats', 'bookingSeats.flightSeatPrice'])
             ->where('booking_id', $bookingId)
             ->where('client_id', session('client_id'))
             ->first();
@@ -308,15 +308,85 @@ class BookingController extends Controller
                 ->with('error', 'Only confirmed bookings can be cancelled.');
         }
 
-        if ($booking->flightInstance->flight_date->isPast()) {
+        // Logika: Hanya bisa dibatalkan sampai akhir hari penerbangan (tidak boleh lewat / expired)
+        $flightDate = \Carbon\Carbon::parse($booking->flightInstance->flight_date)->endOfDay();
+        
+        if (now()->isAfter($flightDate)) {
             return redirect()->route('booking.index')
                 ->with('error', 'Cannot cancel past flights.');
         }
 
-        $booking->update(['booking_status' => 'cancelled']);
+        // Kembalikan kuota Flash Sale jika pesanan menggunakan promo
+        $flashSale = \App\Models\FlashSale::where('flight_id', $booking->flight_instance_id)->first();
+        if ($flashSale) {
+            $passengerCount = $booking->bookingSeats->count();
+            $isPromoBooking = false;
+            foreach ($booking->bookingSeats as $seat) {
+                if ($seat->price_at_booking < ($seat->flightSeatPrice->price_usd ?? 0)) {
+                    $isPromoBooking = true;
+                    break;
+                }
+            }
+            // Jika membooking promo, restorasi kuota yang sudah dipesan
+            if ($isPromoBooking && $flashSale->seats_sold >= $passengerCount) {
+                $flashSale->decrement('seats_sold', $passengerCount);
+            }
+        }
+
+        $booking->update([
+            'booking_status' => 'cancelled',
+            'payment_status' => 'refunded'
+        ]);
 
         return redirect()->route('booking.index')
-            ->with('success', 'Booking successfully cancelled.');
+            ->with('success', 'Booking successfully cancelled. Refund will be processed in 3-5 business days.');
+    }
+
+    public function cancelGuest(Request $request, $bookingId)
+    {
+        $request->validate(['email' => 'required|email']);
+        
+        $booking = Booking::with(['flightInstance', 'bookingSeats', 'bookingSeats.flightSeatPrice', 'client'])
+            ->where('booking_id', $bookingId)
+            ->first();
+
+        // Verifikasi kepemilikan
+        if (!$booking || $booking->client->email !== $request->email) {
+            abort(403, 'Unauthorized actions. Email does not match.');
+        }
+
+        if ($booking->booking_status !== 'confirmed') {
+            return back()->with('error', 'Only confirmed bookings can be cancelled.');
+        }
+
+        $flightDate = \Carbon\Carbon::parse($booking->flightInstance->flight_date)->endOfDay();
+        
+        if (now()->isAfter($flightDate)) {
+            return back()->with('error', 'Cannot cancel past flights.');
+        }
+
+        // Restorasi Flash Sale Kuota
+        $flashSale = \App\Models\FlashSale::where('flight_id', $booking->flight_instance_id)->first();
+        if ($flashSale) {
+            $passengerCount = $booking->bookingSeats->count();
+            $isPromoBooking = false;
+            foreach ($booking->bookingSeats as $seat) {
+                if ($seat->price_at_booking < ($seat->flightSeatPrice->price_usd ?? 0)) {
+                    $isPromoBooking = true;
+                    break;
+                }
+            }
+            if ($isPromoBooking && $flashSale->seats_sold >= $passengerCount) {
+                $flashSale->decrement('seats_sold', $passengerCount);
+            }
+        }
+
+        $booking->update([
+            'booking_status' => 'cancelled',
+            'payment_status' => 'refunded'
+        ]);
+
+        return back()->with('success', 'Booking successfully cancelled. Refund will be processed in 3-5 business days.');
     }
 
     public function confirmation($id)

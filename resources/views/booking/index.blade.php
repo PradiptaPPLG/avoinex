@@ -52,17 +52,23 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('booking.confirmation', $booking->booking_id) }}" class="btn btn-sm btn-primary">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                    @if($booking->booking_status === 'confirmed' && $booking->flightInstance->flight_date->isFuture())
-                                        <form action="{{ route('booking.cancel', $booking->booking_id) }}" method="POST" style="display: inline;">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to cancel this booking?')">
-                                                <i class="bi bi-x-circle"></i> Cancel
-                                            </button>
-                                        </form>
-                                    @endif
+                                    <div class="d-flex flex-column gap-2" style="min-width: 90px;">
+                                        <a href="{{ route('booking.confirmation', $booking->booking_id) }}" class="btn btn-sm btn-primary w-100">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        @php
+                                            // Kita longgarkan logic: Selama belum berganti hari dari flight date
+                                            $canCancel = \Carbon\Carbon::parse($booking->flightInstance->flight_date)->endOfDay()->isFuture();
+                                        @endphp
+                                        @if($booking->booking_status === 'confirmed' && $canCancel)
+                                            <form action="{{ route('booking.cancel', $booking->booking_id) }}" method="POST" class="m-0">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Are you sure you want to cancel this booking? Refund applies according to T&C.')">
+                                                    <i class="bi bi-x-circle"></i> Cancel
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach

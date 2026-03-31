@@ -78,10 +78,23 @@
                                         'cancelled' => '#dc3545',
                                         default => '#6c757d'
                                     };
+                                    $canCancel = \Carbon\Carbon::parse($booking->flightInstance->flight_date)->endOfDay()->isFuture();
                                 @endphp
-                                <span class="badge rounded-pill px-3 py-2" style="background:{{ $statusColor }}; font-size:13px;">
-                                    {{ ucfirst($booking->booking_status) }}
-                                </span>
+                                <div class="text-end">
+                                    <span class="badge rounded-pill px-3 py-2 mb-2" style="background:{{ $statusColor }}; font-size:13px;">
+                                        {{ ucfirst($booking->booking_status) }}
+                                    </span>
+                                    
+                                    @if($booking->booking_status === 'confirmed' && $canCancel)
+                                        <form action="{{ route('booking.guest.cancel', $booking->booking_id) }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="email" value="{{ request('email') }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger mt-1" onclick="return confirm('Are you sure you want to cancel this booking as guest? Refund processing requires matching details.')">
+                                                <i class="bi bi-x-circle"></i> Cancel Booking
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -45,6 +45,7 @@ Route::post('/flight/{id}/book', [FlightController::class , 'storeBooking'])->na
 // Booking form and process
 Route::get('/my-bookings', [BookingController::class , 'index'])->name('booking.index');
 Route::post('/my-bookings/{booking}/cancel', [BookingController::class , 'cancel'])->name('booking.cancel');
+Route::post('/booking/guest-cancel/{booking}', [BookingController::class , 'cancelGuest'])->name('booking.guest.cancel');
 Route::get('/booking/auth', [BookingController::class , 'authGate'])->name('booking.auth');
 Route::post('/booking/guest', [BookingController::class , 'guestContinue'])->name('booking.guest');
 Route::get('/booking/find', [BookingController::class , 'findForm'])->name('booking.find.form');
