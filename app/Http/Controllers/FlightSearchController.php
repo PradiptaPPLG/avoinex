@@ -85,7 +85,11 @@ class FlightSearchController extends Controller
 
         $serverTime = now()->toIso8601String();
 
-        return view('home', compact('airports', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime'));
+        $featuredDestinations = \App\Models\FeaturedDestination::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('home', compact('airports', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime', 'featuredDestinations'));
     }
     private function getAirlineName($code)
     {

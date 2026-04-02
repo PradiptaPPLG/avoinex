@@ -310,6 +310,60 @@
     </div>
 @endif
 
+@if(isset($featuredDestinations) && $featuredDestinations->count() > 0)
+    <div class="avx-featured-wrapper mt-5">
+        <section id="avoinex-featured" class="container py-2">
+            
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                @foreach($featuredDestinations as $dest)
+                <div class="col">
+                    <div class="avx-featured-card h-100 position-relative bg-white border border-light-subtle shadow-sm flex-column" style="border-radius: 16px; overflow: hidden; display: flex;">
+                        
+                        <!-- Image Area -->
+                        <div class="position-relative" style="height: 180px;">
+                            <img src="{{ asset($dest->image_path) }}" alt="{{ $dest->title }}" class="w-100 h-100 object-fit-cover" style="object-fit: cover;">
+                            <!-- Dark Gradient Top for Title text visibility -->
+                            <div class="position-absolute top-0 w-100 p-3 d-flex justify-content-between align-items-center" style="background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);">
+                                <h4 class="mb-0 text-white fw-bold" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">{{ $dest->title }}</h4>
+                                <a href="{{ route('flights.search', ['from' => $dest->origin_iata, 'to' => $dest->destination_iata, 'tab' => 'promo']) }}" class="badge bg-light text-primary text-decoration-none px-3 py-2 rounded-pill fw-bold" style="font-size: 11px;">Jelajahi Penerbangan</a>
+                            </div>
+                        </div>
+
+                        <!-- Card Body Content -->
+                        <div class="p-3 bg-white" style="flex: 1;">
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <span class="d-block text-dark fw-bold small">{{ $dest->origin_iata }}</span>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span class="d-block text-dark fw-bold small">{{ $dest->destination_iata }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Dashed Divider -->
+                            <div class="position-relative d-flex align-items-center my-3" style="height: 2px;">
+                                <div class="w-100 border-top" style="border-top-style: dashed !important; border-top-color: #dee2e6 !important;"></div>
+                            </div>
+                            
+                            <div class="row align-items-center">
+                                <div class="col-5">
+                                    <span class="text-muted small" style="font-size: 0.8rem;">{{ $dest->date_range }}</span>
+                                </div>
+                                <div class="col-7 text-end">
+                                    <span class="text-muted small me-1">Mulai dari</span>
+                                    <span class="text-warning fw-bold">USD {{ number_format($dest->starting_price_usd, 0) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            
+        </section>
+    </div>
+@endif
+
 @if(isset($flights) && $flights->count())
     <section id="available-flights" class="flight-list-container">
         <!-- BARIS ATAS: Promo Text dipindah ke atas Available Flights -->

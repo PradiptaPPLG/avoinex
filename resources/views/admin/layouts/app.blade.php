@@ -661,6 +661,13 @@
                 </a>
             </div>
 
+            <div class="nav-item">
+                <a href="{{ route('admin.featured_destinations.index') }}" class="nav-link {{ request()->routeIs('admin.featured_destinations.*') ? 'active' : '' }}">
+                    <i class="bi bi-star-fill text-primary nav-icon"></i>
+                    Destinasi Populer
+                </a>
+            </div>
+
             <div class="nav-section-label">Master Data</div>
 
             <div class="nav-item">

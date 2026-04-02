@@ -80,6 +80,10 @@ class HomeController extends Controller
 
         $serverTime = now()->toIso8601String();
 
+        $featuredDestinations = \App\Models\FeaturedDestination::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
         // If client is logged in, load client data
         if (session('client_id')) {
             $clientId = session('client_id');
@@ -87,10 +91,10 @@ class HomeController extends Controller
             $clientEmail = session('client_email');
             $client = Client::find($clientId);
 
-            return view('home', compact('client', 'airports', 'clientName', 'clientEmail', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime'));
+            return view('home', compact('client', 'airports', 'clientName', 'clientEmail', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime', 'featuredDestinations'));
         }
 
-        return view('home', compact('airports', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime'));
+        return view('home', compact('airports', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime', 'featuredDestinations'));
     }
 
     public function dashboard()

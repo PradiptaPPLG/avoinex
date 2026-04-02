@@ -78,6 +78,7 @@ use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\FlightController as AdminFlightController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\FlashSaleController;
+use App\Http\Controllers\Admin\FeaturedDestinationController;
 use App\Http\Controllers\Admin\AirportController;
 use App\Http\Controllers\Admin\ManufacturerController;
 use App\Http\Controllers\Admin\CountryController;
@@ -138,6 +139,16 @@ Route::prefix('admin')->group(function () {
                     Route::get('/{id}/edit', [FlashSaleController::class , 'edit'])->name('edit');
                     Route::put('/{id}', [FlashSaleController::class , 'update'])->name('update');
                     Route::delete('/{id}', [FlashSaleController::class , 'destroy'])->name('destroy');
+                }
+                );
+
+                Route::prefix('featured-destinations')->name('admin.featured_destinations.')->group(function () {
+                    Route::get('/', [FeaturedDestinationController::class , 'index'])->name('index');
+                    Route::get('/create', [FeaturedDestinationController::class , 'create'])->name('create');
+                    Route::post('/', [FeaturedDestinationController::class , 'store'])->name('store');
+                    Route::get('/{featuredDestination}/edit', [FeaturedDestinationController::class , 'edit'])->name('edit');
+                    Route::put('/{featuredDestination}', [FeaturedDestinationController::class , 'update'])->name('update');
+                    Route::delete('/{featuredDestination}', [FeaturedDestinationController::class , 'destroy'])->name('destroy');
                 }
                 );
 
