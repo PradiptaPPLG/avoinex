@@ -51,7 +51,6 @@ class HomeController extends Controller
             $flight->airline_name = $this->getAirlineName($airlineCode);
         }
 
-        // Fetch Flash Sales for Hero Section (Only 1 most worthy/biggest discount)
         $heroFlashSales = FlashSale::with([
             'flightInstance.schedule.originAirport',
             'flightInstance.schedule.destinationAirport',
@@ -64,6 +63,8 @@ class HomeController extends Controller
             ->limit(1)
             ->get();
 
+        $heroIds = $heroFlashSales->pluck('id')->toArray();
+
         // Fetch remaining Flash Sales for Deals Section
         $secondaryFlashSales = FlashSale::with([
             'flightInstance.schedule.originAirport',
@@ -71,6 +72,7 @@ class HomeController extends Controller
             'flightInstance.schedule.airline'
         ])
             ->active()
+            ->whereNotIn('id', $heroIds)
             ->orderBy('priority', 'desc')
             ->latest()
             ->take(10)

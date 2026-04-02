@@ -68,6 +68,8 @@ class FlightSearchController extends Controller
             ->limit(1)
             ->get();
 
+        $heroIds = $heroFlashSales->pluck('id')->toArray();
+
         // Fetch remaining Flash Sales for Deals Section
         $secondaryFlashSales = FlashSale::with([
             'flightInstance.schedule.originAirport',
@@ -75,6 +77,7 @@ class FlightSearchController extends Controller
             'flightInstance.schedule.airline'
         ])
             ->active()
+            ->whereNotIn('id', $heroIds)
             ->orderBy('priority', 'desc')
             ->latest()
             ->take(10)
