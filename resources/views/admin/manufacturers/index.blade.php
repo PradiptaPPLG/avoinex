@@ -29,7 +29,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($manufacturers as $mfr)
+                    @forelse($manufacturers as $mfr)    
                     <tr>
                         <td>
                             <div style="display: flex; align-items: center; gap: 10px;">
