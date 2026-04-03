@@ -5,8 +5,11 @@
 @section('content')
 <!-- Dashboard Hero + Search -->
 <div class="avx-hero">
-    <!-- wallpaper alam FULL tanpa crop -->
-    <div class="avx-hero-bg" aria-hidden="true"></div>
+    <!-- Cinematic Video Background -->
+    <video autoplay loop muted playsinline class="avx-hero-bg-video" aria-hidden="true" style="pointer-events: none;">
+        <source src="{{ asset('videos/cinematic-bg.mp4') }}" type="video/mp4">
+    </video>
+    <div class="avx-hero-bg-overlay" aria-hidden="true"></div>
 
     <!-- Main content area -->
     <main class="avx-main">
@@ -480,6 +483,21 @@
     </section>
 @endif
 
+<!-- ===== PARTNER MASKAPAI SECTION ===== -->
+<section class="container mt-5 mb-5 avx-reveal">
+    <div style="background: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+        <div style="border-bottom: 1px solid #f0f0f0; padding-bottom: 24px; margin-bottom: 30px;">
+            <h2 style="font-weight: 800; font-family: 'Segoe UI', sans-serif; color: #111827; font-size: 28px; letter-spacing: -0.5px; margin-bottom: 16px;">
+                Partner Maskapai Avoinex: Lengkap, Resmi, Terpercaya
+            </h2>
+            
+        </div>
+        
+        <div style="text-align: center;">
+            <img src="{{ asset('images/maskapai.png') }}" class="img-fluid" style="max-width: 100%; border-radius: 8px;" alt="Partner Maskapai Avoinex">
+        </div>
+    </div>
+</section>
 
 <!-- ===== SCROLL REVEAL ANIMATIONS ===== -->
 <style>
@@ -539,6 +557,7 @@
 
 .avx-flash-card {
     -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     border-radius: 50px;
     padding: 16px 40px;
     display: flex;
@@ -547,6 +566,8 @@
     background: transparent;
     border: none;
     box-shadow: none;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .avx-flash-card:hover {
@@ -770,24 +791,27 @@
     transform: translateY(-50%) scale(1.05);
 }
 
-/* REVISI UDAH BENER BANGET BANGET POKONYAMAH YANG TERAKHIRRR */
-.avx-hero-bg{ 
-    position:absolute; 
-    inset:0; 
-    background-image: url('{{ asset('images/wallpaperalam_01.png') }}'); 
-    background-size: 100%;
-    background-position: center -250px;
-    background-repeat: no-repeat;
-    background-color: #f0f0f0;
-    z-index:1;
+/* REVISI CINEMATIC VIDEO BACKGROUND */
+.avx-hero-bg-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform;
 }
 
-/* POKOKNYAMAH YANG INI UDAH TRANSPARENT BANGET NGET NGETTTT */
-.avx-hero-bg::after{ 
-    content:''; 
-    position:absolute; 
-    inset:0; 
-    background: rgba(120,120,120,0.20);
+.avx-hero-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25); /* Dark overlay to make search form pop */
+    z-index: 1;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 /* PERUBAHAN 2: Background putih diperbesar dan diturunkan ke bawah */
@@ -822,10 +846,10 @@
     border-radius:50px; 
     background: var(--rongga); 
     z-index: 6;
-    top: 20%; 
+    top: 250px; /* Was 20% + shifted down for video visibility */
     left: 50%;
-    transform: translateX(-50%);
-    filter: blur(0.2px); 
+    transform: translateX(-50%) translateZ(0);
+    backface-visibility: hidden;
 }
 
 /* Search wrap - PERUBAHAN: Diubah menjadi center untuk semua konten */
@@ -836,7 +860,7 @@
     display:flex; 
     flex-direction: column;
     align-items: center;
-    margin-top: 190px;
+    margin-top: 340px; /* Was 310px, shifted down 30px to separate from flash sale */
 }
 
 /* Search card - PERUBAHAN: Card dipusatkan */
@@ -1204,7 +1228,7 @@
     .avx-rongga {
         width: calc(100% - 100px);
         max-width: 1400px;
-        top: 35%;
+        top: 320px; /* Was 35% + shifted down */
     }
     
     /* PERUBAHAN: Promo text sama dengan card transparan */
@@ -1246,7 +1270,7 @@
     }
     
     .avx-rongga {
-        top: 32%;
+        top: 300px; /* Was 32% + shifted down */
     }
 }
 
@@ -1355,7 +1379,7 @@
     }
     
     .avx-search-wrap {
-        margin-top: 50px;
+        margin-top: 100px; /* Push down slightly for mobile too */
     }
     
     .avx-rongga {
@@ -1422,10 +1446,7 @@
         display: none;
     }
     
-    .avx-hero-bg {
-        background-size: cover;
-        background-position: center bottom;
-    }
+
 
     .flight-list-container > .container {
         margin-top: -80px;

@@ -231,7 +231,7 @@
             100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
         }
 
-        main{ min-height: calc(100vh - 72px); padding-top: 92px; }
+        main{ min-height: calc(100vh - 72px); padding-top: 72px; }
         a{ color:inherit; text-decoration: none; }
         button{ font:inherit; }
 
