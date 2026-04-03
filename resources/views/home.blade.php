@@ -2080,7 +2080,7 @@
             }
 
             timeout = setTimeout(function() {
-                var apiUrl = '/avoinex/public/api/airports?query=' + encodeURIComponent(query);
+                var apiUrl = '{{ url('api/airports') }}?query=' + encodeURIComponent(query);
                 console.log("Autocomplete Fetching:", apiUrl);
                 
                 fetch(apiUrl)

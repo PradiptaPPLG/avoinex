@@ -465,7 +465,7 @@
 
 <header class="avx-topbar">
     <div class="avx-left">
-        <a href="/">
+        <a href="/" id="avoinex-logo-link">
             <img src="{{ asset('images/logotext.png') }}" class="avx-logo">
         </a>
         @if(!session('client_id'))
@@ -959,6 +959,60 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     });
 })();
+</script>
+
+<script>
+// Hidden Admin Trigger: 7 clicks on logo -> Type "123" -> Press "Enter"
+document.addEventListener('DOMContentLoaded', function() {
+    const logoLink = document.getElementById('avoinex-logo-link');
+    if (!logoLink) return;
+
+    let logoClickCount = 0;
+    let logoClickTimer;
+    let isSecretModeReady = false;
+    let secretTyped = "";
+
+    logoLink.addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent immediate home navigation
+        logoClickCount++;
+        
+        clearTimeout(logoClickTimer);
+        
+        if (logoClickCount >= 7) {
+            // Activate secret mode listening
+            isSecretModeReady = true;
+            secretTyped = "";
+            logoClickCount = 0;
+            console.log("Secret Mode Ready...");
+        } else {
+            // If they stop clicking, and it hasn't reached 7, do normal navigation after a short delay
+            logoClickTimer = setTimeout(() => {
+                if (logoClickCount > 0 && !isSecretModeReady) {
+                    window.location.href = '/'; 
+                }
+                logoClickCount = 0;
+            }, 350); 
+        }
+    });
+
+    window.addEventListener('keydown', function(e) {
+        if (!isSecretModeReady) return;
+        
+        if (e.key === 'Enter') {
+            if (secretTyped === '123') {
+                window.location.href = '/admin/login';
+            }
+            // Reset after pressing enter
+            isSecretModeReady = false;
+            secretTyped = "";
+        } else {
+            // Only capture single characters to avoid modifier keys
+            if (e.key.length === 1) {
+                secretTyped += e.key;
+            }
+        }
+    });
+});
 </script>
 
 @include('chatbot')

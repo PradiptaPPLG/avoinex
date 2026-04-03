@@ -36,7 +36,7 @@
             color: var(--text-primary);
         }
 
-        /* ── LEFT PANEL (brand) ──────────────────────────── */
+        /* ── LEFT PANEL (ambient gradient orbs) ──────────────────────────── */
         .login-left {
             width: 420px;
             display: flex;
@@ -47,24 +47,72 @@
             position: relative;
             overflow: hidden;
             flex-shrink: 0;
+            background-color: #030A1A; /* In-depth dark blue */
         }
 
-        .login-left::before {
-            content: '';
+        .orb {
             position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 350px; height: 350px;
+            background: #0066CC; /* Brand Blue */
             top: -100px; left: -100px;
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(0,102,204,0.3) 0%, transparent 70%);
-            pointer-events: none;
+            animation: moveOrb1 18s ease-in-out infinite alternate;
         }
 
-        .login-left::after {
-            content: '';
-            position: absolute;
-            bottom: -80px; right: -80px;
+        .orb-2 {
+            width: 400px; height: 400px;
+            background: #0DAF7A; /* Teal/Success */
+            bottom: -150px; right: -150px;
+            animation: moveOrb2 22s ease-in-out infinite alternate;
+        }
+
+        .orb-3 {
+            width: 300px; height: 300px;
+            background: #8338EC; /* Purple Accent */
+            top: 30%; left: -50px;
+            animation: moveOrb3 20s ease-in-out infinite alternate;
+        }
+
+        .orb-4 {
             width: 250px; height: 250px;
-            background: radial-gradient(circle, rgba(0,194,168,0.2) 0%, transparent 70%);
-            pointer-events: none;
+            background: #3A86FF; /* Bright Blue */
+            bottom: 20%; left: 30%;
+            animation: moveOrb4 16s ease-in-out infinite alternate;
+        }
+
+        @keyframes moveOrb1 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(200px, 250px) scale(1.2); }
+            66% { transform: translate(350px, 50px) scale(0.8); }
+            100% { transform: translate(150px, 350px) scale(1.1); }
+        }
+
+        @keyframes moveOrb2 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-250px, -200px) scale(1.1); }
+            66% { transform: translate(-400px, 100px) scale(1.3); }
+            100% { transform: translate(-150px, -400px) scale(0.9); }
+        }
+
+        @keyframes moveOrb3 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(150px, -250px) scale(1.4); }
+            66% { transform: translate(250px, 150px) scale(0.7); }
+            100% { transform: translate(50px, -150px) scale(1.2); }
+        }
+
+        @keyframes moveOrb4 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-150px, 200px) scale(1.3); }
+            66% { transform: translate(150px, -150px) scale(0.8); }
+            100% { transform: translate(-100px, -200px) scale(1.1); }
         }
 
         .brand-block {
@@ -140,6 +188,49 @@
             justify-content: center;
             background: var(--surface-2);
             padding: 48px;
+            position: relative;
+        }
+
+        .back-home-btn {
+            position: absolute;
+            top: 32px;
+            right: 48px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .back-home-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,102,204,0.15);
+            transform: translateX(-3px);
+        }
+
+        @keyframes cardEntrance3D {
+            0% {
+                opacity: 0;
+                transform: perspective(1000px) translateY(40px) rotateX(-10deg) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: perspective(1000px) translateY(0) rotateX(0deg) scale(1);
+            }
+        }
+
+        @keyframes fadeUpStagger {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         .login-card {
@@ -150,7 +241,46 @@
             border-radius: var(--radius);
             box-shadow: var(--shadow-lg);
             padding: 40px;
+            opacity: 0;
+            animation: cardEntrance3D 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: 0.1s;
         }
+
+        .login-card h2, 
+        .login-card .subtitle, 
+        .login-card .alert,
+        .login-card .mb-3, 
+        .login-card .mb-4, 
+        .login-card .btn-login, 
+        .login-card .login-footer {
+            opacity: 0;
+            animation: fadeUpStagger 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .login-card h2 { animation-delay: 0.3s; }
+        .login-card .subtitle { animation-delay: 0.4s; }
+        .login-card .alert { animation-delay: 0.45s; }
+        .login-card .mb-3 { animation-delay: 0.5s; }
+        .login-card .mb-4 { animation-delay: 0.55s; }
+        .login-card .btn-login { animation-delay: 0.6s; }
+        .login-card .login-footer { animation-delay: 0.75s; }
+
+        /* Left Panel Staggered Animation */
+        .brand-icon-lg, 
+        .brand-block h1, 
+        .brand-block p, 
+        .brand-feature {
+            opacity: 0;
+            animation: fadeUpStagger 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .brand-icon-lg { animation-delay: 0.2s; }
+        .brand-block h1 { animation-delay: 0.3s; }
+        .brand-block p { animation-delay: 0.4s; }
+        .brand-feature:nth-child(1) { animation-delay: 0.5s; }
+        .brand-feature:nth-child(2) { animation-delay: 0.6s; }
+        .brand-feature:nth-child(3) { animation-delay: 0.7s; }
+        .brand-feature:nth-child(4) { animation-delay: 0.8s; }
 
         .login-card h2 {
             font-size: 22px;
@@ -267,6 +397,7 @@
             .login-left { width: 100%; padding: 32px 24px; }
             .brand-features { display: none; }
             .login-right { padding: 32px 24px; }
+            .back-home-btn { top: 16px; right: 16px; }
         }
     </style>
 </head>
@@ -274,6 +405,12 @@
 
     <!-- LEFT BRAND PANEL -->
     <div class="login-left">
+        <!-- Ambient Orbs -->
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="orb orb-4"></div>
+
         <div class="brand-block">
             <div class="brand-icon-lg">
                 <i class="bi bi-airplane-fill"></i>
@@ -304,6 +441,12 @@
 
     <!-- RIGHT LOGIN FORM -->
     <div class="login-right">
+        
+        <!-- Back to Website Button -->
+        <a href="{{ url('/') }}" class="back-home-btn">
+            <i class="bi bi-arrow-left"></i> Back to Website
+        </a>
+
         <div class="login-card">
             <h2>Welcome back</h2>
             <p class="subtitle">Sign in to access the admin panel</p>

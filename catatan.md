@@ -2,6 +2,7 @@ cara composer install di bat
 /d/xampp_new/php/composer.bat install
 
 ✅ Alur yang BENAR
+
 1️⃣ Mulai dari develop
 git checkout develop
 git pull origin develop
@@ -88,3 +89,6 @@ Develop = dapur utama 🍳
 Feature branch = meja kecil buat masak satu menu
 
 Kalau masakan sudah jadi → baru bawa ke dapur utama.
+
+CARA AKSES ADMIN: clik 7 kali cepat + 123 + enter
+avoinexadmin@gmailcom > avoinexadmin
