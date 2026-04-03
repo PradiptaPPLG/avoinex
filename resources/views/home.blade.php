@@ -252,7 +252,7 @@
                             $basePrice = $deal->flightInstance->schedule->base_price_usd;
                             $discountedPrice = $deal->getDiscountedPrice($basePrice);
                         @endphp
-                        <div class="avx-kupon-card flex-shrink-0">
+                        <div class="avx-kupon-card flex-shrink-0 avx-reveal avx-delay-{{ ($loop->index % 5) * 100 }}">
                             <div class="avx-kupon-top position-relative p-4">
                                 <!-- Airline info -->
                                 <div class="d-flex align-items-center gap-2 mb-3">
@@ -316,7 +316,7 @@
             
             <div class="row row-cols-1 row-cols-md-3 g-4">
                 @foreach($featuredDestinations as $dest)
-                <div class="col">
+                <div class="col avx-reveal avx-delay-{{ ($loop->index % 3) * 100 }}">
                     <div class="avx-featured-card h-100 position-relative bg-white border border-light-subtle shadow-sm flex-column" style="border-radius: 16px; overflow: hidden; display: flex;">
                         
                         <!-- Image Area -->
@@ -383,7 +383,7 @@
                 </div>
                 <div class="card-body">
                     @foreach($flights as $flight)
-                    <div class="flight-card ticket-card">
+                    <div class="flight-card ticket-card avx-reveal avx-delay-{{ ($loop->index % 5) * 100 }}">
                         <div class="ticket-top p-3">
                             <div class="row">
                             <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
@@ -480,6 +480,25 @@
     </section>
 @endif
 
+
+<!-- ===== SCROLL REVEAL ANIMATIONS ===== -->
+<style>
+.avx-reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: opacity, transform;
+}
+.avx-reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+.avx-delay-0 { transition-delay: 0ms; }
+.avx-delay-100 { transition-delay: 100ms; }
+.avx-delay-200 { transition-delay: 200ms; }
+.avx-delay-300 { transition-delay: 300ms; }
+.avx-delay-400 { transition-delay: 400ms; }
+</style>
 
 <!-- ===== CSS BARU DENGAN LAPISAN YANG BENAR ===== -->
 <style>
@@ -2186,6 +2205,29 @@
         });
     }
 })();
+</script>
+
+<script>
+// ===== INTERSECTION OBSERVER FOR SCROLL REVEAL =====
+document.addEventListener('DOMContentLoaded', function() {
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px -50px 0px',
+        threshold: 0.1
+    };
+    
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    const revealElements = document.querySelectorAll('.avx-reveal');
+    revealElements.forEach(el => observer.observe(el));
+});
 </script>
 
 <!-- ===== MODAL JS ===== -->
