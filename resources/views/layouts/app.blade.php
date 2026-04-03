@@ -437,6 +437,17 @@
         .avx-privacy-note a:hover, .avx-switch-action:hover { text-decoration: underline !important; }
 
         /* responsive */
+        @media (max-width: 768px) {
+            .avx-topbar { padding: 12px 16px; }
+            .avx-currency-block { display: none !important; }
+            .avx-currency-login { display: none !important; }
+            .avx-topbar .avx-left { gap: 8px; }
+            .avx-topbar .avx-right { gap: 8px; }
+            .avx-login-btn, .avx-signup-btn { padding: 8px 10px; font-size: 13px; }
+            .avx-user-name { display: none; }
+            .avx-help-link { display: none; }
+        }
+
         @media (max-width: 520px) {
             .avx-modal-container { width: 96vw; }
             .avx-modal-card { border-radius:48px; } /* smaller on mobile */
@@ -446,16 +457,14 @@
             .avx-btn-primary.avx-email-btn { width: 88%; max-width: 360px; }
             
             .avx-user-profile-wrapper {
-                max-width: 200px;
+                max-width: unset;
+                padding: 2px 6px 2px 2px;
+                border: none;
+                background: transparent;
             }
-            
-            .avx-user-name {
-                max-width: 100px;
-            }
-            
-            .avx-help-link {
-                display: none;
-            }
+            .avx-user-name { display: none; }
+            .avx-help-link { display: none; }
+            .avx-login-btn span, .avx-signup-btn span { display: none; } /* Hide text on very small screens, keep icons */
         }
     </style>
 

@@ -519,8 +519,7 @@
 .avx-hero{ 
     position:relative; 
     min-height: 580px;
-    max-height: 580px;
-    /* Removed overflow: hidden so dropdown can be displayed */
+    height: auto;
     font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial;
     background-color: #f0f0f0;
 }
@@ -661,16 +660,25 @@
 .avx-kupon-pills {
     display: flex;
     gap: 12px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 8px; /* Give room in case of tight scrolls */
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+.avx-kupon-pills::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Saf/Edge */
 }
 .avx-kupon-pill {
     background-color: #dbeafe; /* Light blue */
     color: #60a5fa; /* Primary light blue text */
-    padding: 8px 24px;
+    padding: 6px 18px;
     border-radius: 99px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 .avx-kupon-pill:hover {
     background-color: #bfdbfe;
@@ -814,7 +822,7 @@
     border-radius:50px; 
     background: var(--rongga); 
     z-index: 6;
-    top: 20%; /* Digeser keatas dari 25% */
+    top: 20%; 
     left: 50%;
     transform: translateX(-50%);
     filter: blur(0.2px); 
@@ -865,6 +873,7 @@
 /* Tabs */
 .avx-tabs{ 
     display:flex; 
+    flex-wrap: wrap;
     gap:10px; 
     margin:0;
 }
@@ -1261,14 +1270,13 @@
         margin-right: 40px;
     }
     
-    /* PERUBAHAN: Sesuaikan untuk tablet */
     .avx-rongga {
-        top: 30%;
-        height: 360px;
+        top: 40px;
+        max-height: 100%;
+        height: 100%;
         width: calc(100% - 80px);
     }
     
-    /* PERUBAHAN: Promo text untuk tablet */
     .avx-promo {
         width: calc(100% - 80px);
         margin-left: 40px;
@@ -1277,7 +1285,7 @@
     }
     
     .avx-hero-bg {
-        background-size: 120% auto;
+        background-size: cover;
     }
 }
 
@@ -1325,7 +1333,6 @@
         font-size: 14px;
     }
     
-    /* PERUBAHAN: Card untuk mobile */
     .avx-search-card {
         max-width: calc(100% - 40px);
         padding: 24px 28px 28px;
@@ -1347,18 +1354,30 @@
         height: 70%;
     }
     
-    .avx-rongga {
-        height: 320px;
-        top: 28%;
-        width: calc(100% - 40px);
+    .avx-search-wrap {
+        margin-top: 50px;
     }
     
-    .avx-search-wrap {
-        margin-top: 20px;
+    .avx-rongga {
+        display: none;
     }
     
     .avx-hero-bg {
-        background-size: 150% auto;
+        background-size: cover;
+    }
+
+    .flight-list-container > .container {
+        margin-top: -120px;
+    }
+
+    .ticket-bottom p {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .col-md-3.text-center {
+        margin: 15px 0;
     }
 }
 
@@ -1400,14 +1419,16 @@
     }
     
     .avx-rongga {
-        top: 25%;
-        height: 300px;
-        width: calc(100% - 24px);
+        display: none;
     }
     
     .avx-hero-bg {
-        background-size: 180% auto;
-        background-position: center 20%;
+        background-size: cover;
+        background-position: center bottom;
+    }
+
+    .flight-list-container > .container {
+        margin-top: -80px;
     }
 }
 
