@@ -9,18 +9,102 @@
         --chatbot-font: 'Poppins', sans-serif;
     }
 
-    /* Floating Widget Button */
-    .chatbot-widget-btn {
+    /* Floating Widget Wrapper */
+    .chatbot-widget-wrapper {
         position: fixed;
         bottom: 30px;
         right: 30px;
+        z-index: 9999;
+    }
+
+    @media (max-width: 768px) {
+        .chatbot-widget-wrapper {
+            bottom: 20px;
+            right: 20px;
+        }
+    }
+
+    /* Vanessa Speech Bubble */
+    .vanessa-speech-bubble {
+        position: absolute;
+        bottom: 85px;
+        right: -5px;
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.06);
+        box-shadow: 0 10px 24px rgba(0,0,0,0.1);
+        border-radius: 16px;
+        padding: 8px 14px;
+        font-family: var(--chatbot-font);
+        font-size: 12.5px;
+        font-weight: 500;
+        color: #2b3a4a;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        
+        /* Posisi awal sembunyi: mengecil tepat di ekor bubble (tengah atas Vanessa) */
+        transform: translateY(15px) scale(0);
+        transform-origin: calc(100% - 37px) 100%; 
+        
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+        pointer-events: none;
+        z-index: 10000;
+    }
+
+    /* Ujung tajam agak belok */
+    .vanessa-speech-bubble::after {
+        content: '';
+        position: absolute;
+        bottom: -7px;
+        right: 30px;
+        width: 14px;
+        height: 14px;
+        background: #ffffff;
+        border-right: 1px solid rgba(0,0,0,0.06);
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+        border-bottom-right-radius: 4px;
+        transform: rotate(45deg);
+    }
+
+    .vanessa-speech-bubble.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        /* Trigger animasi bounce */
+        animation: bubbleBounce 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes bubbleBounce {
+        0% { opacity: 0; transform: translateY(20px) scale(0.2); }
+        50% { opacity: 1; transform: translateY(-8px) scale(1.08); }
+        75% { transform: translateY(2px) scale(0.95); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .vanessa-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 14px;
+        background-color: #2b3a4a;
+        vertical-align: text-bottom;
+        margin-left: 2px;
+        animation: blink 1s step-end infinite;
+    }
+    
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+    }
+
+    /* Floating Widget Button */
+    .chatbot-widget-btn {
+        position: relative;
         width: 80px;
         height: 80px;
         border-radius: 50%;
         background-color: transparent;
         box-shadow: var(--chatbot-shadow);
         cursor: grab;
-        z-index: 9999;
         transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
         display: flex;
         align-items: center;
@@ -34,8 +118,6 @@
         .chatbot-widget-btn {
             width: 68px;
             height: 68px;
-            bottom: 20px;
-            right: 20px;
         }
     }
 
@@ -319,14 +401,22 @@
     }
 </style>
 
-<!-- Widget Button -->
-<div class="chatbot-widget-btn" id="chatbotWidgetBtn" aria-label="Open AI Assistant">
-    <div class="chatbot-badge" id="chatbotBadge"></div>
-    <!-- Preload images to avoid flickering -->
-    <link rel="preload" href="{{ asset('images/vanessa.png') }}" as="image">
-    <link rel="preload" href="{{ asset('images/vanessa02.png') }}" as="image">
-    <!-- Main avatar image for the widget button -->
-    <img src="{{ asset('images/vanessa.png') }}" alt="Vanessa Assistant" id="chatbotAvatarBtn">
+<!-- Widget Wrapper -->
+<div class="chatbot-widget-wrapper" id="chatbotWidgetWrapper">
+    <!-- Vanessa Speech Bubble -->
+    <div class="vanessa-speech-bubble" id="vanessaSpeechBubble">
+        <span id="vanessaSpeechText"></span><span class="vanessa-cursor" id="vanessaCursor"></span>
+    </div>
+
+    <!-- Widget Button -->
+    <div class="chatbot-widget-btn" id="chatbotWidgetBtn" aria-label="Open AI Assistant">
+        <div class="chatbot-badge" id="chatbotBadge"></div>
+        <!-- Preload images to avoid flickering -->
+        <link rel="preload" href="{{ asset('images/vanessa.png') }}" as="image">
+        <link rel="preload" href="{{ asset('images/vanessa02.png') }}" as="image">
+        <!-- Main avatar image for the widget button -->
+        <img src="{{ asset('images/vanessa.png') }}" alt="Vanessa Assistant" id="chatbotAvatarBtn">
+    </div>
 </div>
 
 <!-- Chat Window -->
@@ -383,6 +473,7 @@
         let isOpen = false;
         
         // DOM Elements
+        const widgetWrapper = document.getElementById('chatbotWidgetWrapper');
         const widgetBtn = document.getElementById('chatbotWidgetBtn');
         const chatWindow = document.getElementById('chatbotWindow');
         
@@ -429,10 +520,10 @@
         if (savedPos) {
             try {
                 const pos = JSON.parse(savedPos);
-                widgetBtn.style.bottom = 'auto';
-                widgetBtn.style.right = 'auto';
-                widgetBtn.style.left = pos.left;
-                widgetBtn.style.top = pos.top;
+                widgetWrapper.style.bottom = 'auto';
+                widgetWrapper.style.right = 'auto';
+                widgetWrapper.style.left = pos.left;
+                widgetWrapper.style.top = pos.top;
             } catch(e) {}
         }
 
@@ -447,12 +538,12 @@
                 initialY = e.clientY;
             }
             
-            const rect = widgetBtn.getBoundingClientRect();
+            const rect = widgetWrapper.getBoundingClientRect();
             startX = rect.left;
             startY = rect.top;
             
             isDragging = false;
-            widgetBtn.style.transition = 'none'; // Disable transition for smooth dragging
+            widgetWrapper.style.transition = 'none'; // Disable transition for smooth dragging
             
             document.addEventListener('mousemove', drag);
             document.addEventListener('touchmove', drag, {passive: false});
@@ -477,20 +568,20 @@
                 isDragging = true;
                 if(e.type === "touchmove") e.preventDefault();
                 
-                widgetBtn.style.bottom = 'auto';
-                widgetBtn.style.right = 'auto';
+                widgetWrapper.style.bottom = 'auto';
+                widgetWrapper.style.right = 'auto';
                 
                 let newLeft = startX + dx;
                 let newTop = startY + dy;
                 
                 // Bounds keeping
-                const maxX = window.innerWidth - widgetBtn.offsetWidth;
-                const maxY = window.innerHeight - widgetBtn.offsetHeight;
+                const maxX = window.innerWidth - widgetWrapper.offsetWidth;
+                const maxY = window.innerHeight - widgetWrapper.offsetHeight;
                 newLeft = Math.max(0, Math.min(newLeft, maxX));
                 newTop = Math.max(0, Math.min(newTop, maxY));
 
-                widgetBtn.style.left = newLeft + 'px';
-                widgetBtn.style.top = newTop + 'px';
+                widgetWrapper.style.left = newLeft + 'px';
+                widgetWrapper.style.top = newTop + 'px';
                 
                 // Keep window near the button
                 if (isOpen) {
@@ -513,7 +604,7 @@
         }
 
         function dragEnd(e) {
-            widgetBtn.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease';
+            widgetWrapper.style.transition = 'none';
             document.removeEventListener('mousemove', drag);
             document.removeEventListener('touchmove', drag);
             document.removeEventListener('mouseup', dragEnd);
@@ -521,8 +612,8 @@
             
             if (isDragging) {
                 localStorage.setItem('avoinex_vanessa_pos', JSON.stringify({
-                    left: widgetBtn.style.left,
-                    top: widgetBtn.style.top
+                    left: widgetWrapper.style.left,
+                    top: widgetWrapper.style.top
                 }));
             }
         }
@@ -559,11 +650,11 @@
             // Adjust chat position relative to custom widget placement
             const savedPos = localStorage.getItem('avoinex_vanessa_pos');
             if (savedPos) {
-                 const rect = widgetBtn.getBoundingClientRect();
+                 const rect = widgetWrapper.getBoundingClientRect();
                  const newLeft = rect.left;
                  const newTop = rect.top;
                  if (newLeft > window.innerWidth / 2) {
-                     chatWindow.style.right = (window.innerWidth - newLeft - widgetBtn.offsetWidth) + 'px';
+                     chatWindow.style.right = (window.innerWidth - newLeft - widgetWrapper.offsetWidth) + 'px';
                      chatWindow.style.left = 'auto';
                  } else {
                      chatWindow.style.left = newLeft + 'px';
@@ -573,7 +664,7 @@
                      chatWindow.style.bottom = (window.innerHeight - newTop + 10) + 'px';
                      chatWindow.style.top = 'auto';
                  } else {
-                     chatWindow.style.top = (newTop + widgetBtn.offsetHeight + 10) + 'px';
+                     chatWindow.style.top = (newTop + widgetWrapper.offsetHeight + 10) + 'px';
                      chatWindow.style.bottom = 'auto';
                  }
             }
@@ -699,6 +790,99 @@
                 }
             }
         }
+        // --- Vanessa Speech Bubble Animation ---
+        const vanessaPhrases = [
+            "Hai! Butuh bantuan cari tiket pesawat? ✈️",
+            "Ada promo penerbangan menarik hari ini! ✨",
+            "Halo, aku Vanessa. Mau terbang ke mana? 🌍",
+            "Punya rencana liburan? Sini aku bantu! 🏖️",
+            "Klik aku ya kalau ada pertanyaan! 😊",
+            "Halo, aku Vanessa. Mau terbang ke mana? 🌍",
+            "Dunia itu terlalu luas kalau cuma dilihat dari jendela rumah. Yuk, terbang! ☁️",
+            "Cari tiket pesawat nggak perlu pusing, biarkan aku jadi kompasmu. 🧭",
+            "Ada cerita baru yang menunggumu di balik awan. Siap berangkat? ✨",
+            "Bentangkan sayapmu, biarkan aku yang carikan rute terbaiknya. 🕊️",
+            "Jarak bukan masalah, asalkan tiket murah sudah di tangan! 🗺️",
+            "Psst! Ada kursi kosong dengan harga miring, lho. Cek yuk? 📉",
+            "Jangan cuma disimpan di wishlist, nanti keburu diambil orang! 🏃‍♂️",
+            "Promo hari ini manis banget, semanis kenangan liburanmu nanti. 🍯",
+            "Siap-siap packing! Harga tiket ke destinasi impianmu lagi terjun bebas. 📉",
+            "Kerja terus, liburannya kapan? Sini aku bantu cari tiket pelarian! 🏃‍♀️",
+            "Lagi pengen 'healing' atau emang mau kabur dari cucian piring? 🌊",
+            "Beli tiket sekarang, bahagianya sampai tahun depan! 😊",
+            "Dompet aman, hati senang, terbang pun tenang. Tanya aku aja! 💳",
+            "Cari rute tercepat atau harga termurah? Aku punya keduanya. ⚡",
+            "Vanessa di sini! Siap buat rencana perjalananmu jadi lebih simpel. 📋",
+            "Input destinasi tujuanmu, dan biarkan aku bekerja untukmu. 🔍",
+            "Rindu itu berat, biar ongkos kirim dirimu aja yang aku ringankan. ✨",
+            "Setiap tiket adalah awal dari sebuah cerita baru. Mari tulis ceritamu! 📖",
+            "Awan tidak pernah memihak, tapi aku memihak dompetmu. Yuk, terbang murah! ☁️",
+            "Jangan biarkan paspormu kesepian. Beri dia stempel baru hari ini! 🛂",
+            "Menabung kenangan jauh lebih berharga daripada sekadar menabung barang. 📸",
+            "Status: Ready for Take-off. Masukkan destinasi impianmu di sini! 🛫",
+            "Gak perlu turbulence dalam mencari harga. Aku carikan yang paling stabil. 📉",
+            "Lupakan delay dalam rencana. Eksekusi liburanmu sekarang juga! ⚡",
+            "Mode hemat: ON. Aku sudah siapkan daftar kursi paling ekonomis. 💸",
+            "Satu klik menuju boarding gate. Mau ke mana kita hari ini? 🎫",
+            "Self-reward paling ampuh? Ya beli tiket pesawat, lah! 💅",
+            "Gak usah nunggu 'kapan-kapan', nanti malah jadi 'nggak jadi-jadi'. 🏃‍♂️",
+            "Capek scroll doang? Mending langsung landing di tempat impian! 🏝️",
+            "Vanessa punya kunci gerbang dunia, kamu tinggal pilih mau lewat mana. 🔑",
+            "Hidup cuma sekali, sayang kalau cuma di satu kota terus. 🌍",
+            "Jangan biarkan FOMO mengalahkan budget. Aku bantu carikan yang pas! 💰",
+            "Koleksi foto liburan lebih keren daripada koleksi drama Korea. ✈️",
+            "Cuma butuh 3 detik buat scroll IG, tapi butuh waktu lama buat liburan. Yuk, percepat! ⚡",
+            "Tiket promo itu kayak jodoh, datangnya tiba-tiba. Jangan sampai kehabisan! 🏃",
+            "Mimpi ke luar negeri itu gratis, tapi tiketnya harus dibeli. Sini aku bantu urus! 💳"
+        ];
         
+        const speechBubble = document.getElementById('vanessaSpeechBubble');
+        const speechText = document.getElementById('vanessaSpeechText');
+        let bubbleTimer;
+        let typeWriterTimeout;
+        
+        function hideVanessaBubble() {
+            if(speechBubble) {
+                speechBubble.classList.remove('show');
+                clearTimeout(typeWriterTimeout);
+            }
+        }
+
+        function typeWriter(text, i, cb) {
+            if (i < text.length) {
+                speechText.innerHTML = text.substring(0, i+1);
+                let speed = Math.random() * 40 + 40; 
+                typeWriterTimeout = setTimeout(function() {
+                    typeWriter(text, i + 1, cb);
+                }, speed);
+            } else {
+                if(cb) cb();
+            }
+        }
+
+        function triggerVanessaBubble() {
+            if (!speechBubble || !widgetBtn) return;
+            if (isOpen || isDragging || widgetBtn.matches(':hover') || speechBubble.classList.contains('show')) {
+                return; 
+            }
+            const randPhrase = vanessaPhrases[Math.floor(Math.random() * vanessaPhrases.length)];
+            speechText.innerHTML = '';
+            speechBubble.classList.add('show');
+            
+            clearTimeout(typeWriterTimeout);
+            typeWriter(randPhrase, 0, function() {
+                setTimeout(hideVanessaBubble, 4500);
+            });
+        }
+
+        setTimeout(triggerVanessaBubble, 3000);
+        setInterval(triggerVanessaBubble, 30000);
+        
+        // Hide if user interacts
+        if(widgetBtn) {
+            widgetBtn.addEventListener('mouseenter', hideVanessaBubble);
+            widgetBtn.addEventListener('mousedown', hideVanessaBubble);
+            widgetBtn.addEventListener('touchstart', hideVanessaBubble, {passive: true});
+        }
     });
 </script>
