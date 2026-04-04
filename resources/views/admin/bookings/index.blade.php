@@ -54,7 +54,7 @@
                         </td>
                         <td style="color: var(--text-secondary); font-size: 13px;">{{ $booking->created_at->format('d M Y') }}</td>
                         <td>
-                            <span style="font-weight: 700; font-size: 14px;">${{ number_format($booking->total_price_usd, 2) }}</span>
+                            <span style="font-weight: 700; font-size: 14px;">Rp {{ number_format($booking->total_price_usd, 0, ',', '.') }}</span>
                         </td>
                         <td>
                             @if($booking->booking_status == 'confirmed')

@@ -18,7 +18,7 @@ class PaymentController extends Controller
                     'client',
                     'flightInstance.schedule.originAirport',
                     'flightInstance.schedule.destinationAirport',
-                    'bookingSeats'
+                    'bookingSeats.seat'
                 ])
                 ->findOrFail($bookingId);
 
@@ -90,7 +90,9 @@ class PaymentController extends Controller
                     }
 
                     if ($totalAdditional > 0) {
-                        $booking->total_price_usd += $totalAdditional;
+                        $taxRate = 0.10;
+                        $taxOnAdditional = $totalAdditional * $taxRate;
+                        $booking->total_price_usd += ($totalAdditional + $taxOnAdditional);
                         $booking->save();
                         
                         \DB::commit(); // Save the reverted price

@@ -40,4 +40,12 @@ class BookingSeat extends Model
     {
         return $this->belongsTo(Seat::class, 'seat_id', 'seat_id');
     }
+
+    /**
+     * Accessor: full passenger name.
+     */
+    public function getPassengerNameAttribute()
+    {
+        return trim(($this->passenger_first_name ?? '') . ' ' . ($this->passenger_last_name ?? ''));
+    }
 }

@@ -181,11 +181,19 @@ class BookingController extends Controller
 
             \Log::info('Creating booking with code: ' . $bookingCode);
 
+            // Calculate base price dynamically (seats + baggage)
+            $subtotal = array_sum($validated['seat_prices']) + array_sum($validated['baggage_prices']);
+            $taxRate = 0.10;
+            $serviceFee = 5.00;
+            
+            // Calculate final grand total with tax and service fee
+            $grandTotal = $subtotal + ($subtotal * $taxRate) + $serviceFee;
+
             $booking = Booking::create([
                 'booking_code' => $bookingCode,
                 'client_id' => $client->client_id,
                 'flight_instance_id' => $flightInstanceId,
-                'total_price_usd' => array_sum($validated['seat_prices']) + array_sum($validated['baggage_prices']),
+                'total_price_usd' => $grandTotal,
                 'booking_status' => 'pending',
                 'payment_status' => 'unpaid',
                 'expires_at' => now()->addHours(24)
@@ -514,5 +522,23 @@ class BookingController extends Controller
         }
 
         return view('booking.find', compact('booking'));
+    }
+
+    /**
+     * Download the E-Ticket as PDF.
+     */
+    public function downloadTicket($id)
+    {
+        $booking = Booking::with([
+            'client',
+            'flightInstance.schedule.originAirport',
+            'flightInstance.schedule.destinationAirport',
+            'flightInstance.schedule.airline',
+            'bookingSeats.seat',
+            'payment'
+        ])->findOrFail($id);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ticket', compact('booking'));
+        return $pdf->stream('E-Ticket-' . $booking->booking_code . '.pdf');
     }
 }

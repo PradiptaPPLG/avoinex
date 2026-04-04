@@ -8,7 +8,9 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProfileController;
 
 /* |-------------------------------------------------------------------------- | PUBLIC ROUTES (Landing Page - Before Login) |-------------------------------------------------------------------------- */
 Route::get('/', [FlightSearchController::class , 'index'])->name('landing');
@@ -37,6 +39,17 @@ Route::get('/auth/google/callback', [GoogleController::class , 'callback'])->nam
 Route::get('/home', [HomeController::class , 'index'])->name('home');
 Route::get('/dashboard', [HomeController::class , 'index'])->name('dashboard');
 
+/* |-------------------------------------------------------------------------- | USER PROFILE |-------------------------------------------------------------------------- */
+Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+Route::post('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
+
+/* |-------------------------------------------------------------------------- | FORGOT PASSWORD |-------------------------------------------------------------------------- */
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showForm'])->name('password.forgot');
+Route::post('/forgot-password/send', [ForgotPasswordController::class, 'sendResetCode'])->name('password.send-code');
+Route::get('/reset-password', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset.form');
+Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.reset.process');
+
 /* |-------------------------------------------------------------------------- | BOOKING & PAYMENT |-------------------------------------------------------------------------- */
 // Flight seat selection
 Route::get('/flight/{flightInstanceId}/seats', [FlightController::class , 'seats'])->name('flight.seats');
@@ -45,6 +58,7 @@ Route::post('/flight/{id}/book', [FlightController::class , 'storeBooking'])->na
 // Booking form and process
 Route::get('/my-bookings', [BookingController::class , 'index'])->name('booking.index');
 Route::post('/my-bookings/{booking}/cancel', [BookingController::class , 'cancel'])->name('booking.cancel');
+Route::get('/booking/{id}/ticket', [BookingController::class, 'downloadTicket'])->name('booking.ticket');
 Route::post('/booking/guest-cancel/{booking}', [BookingController::class , 'cancelGuest'])->name('booking.guest.cancel');
 Route::get('/booking/auth', [BookingController::class , 'authGate'])->name('booking.auth');
 Route::post('/booking/guest', [BookingController::class , 'guestContinue'])->name('booking.guest');
@@ -53,6 +67,7 @@ Route::post('/booking/find', [BookingController::class , 'findBooking'])->name('
 Route::get('/booking/form', [BookingController::class , 'create'])->name('booking.form');
 Route::post('/booking/store', [BookingController::class , 'store'])->name('booking.store');
 Route::get('/booking/{id}/confirmation', [BookingController::class , 'confirmation'])->name('booking.confirmation');
+Route::get('/booking/{id}/ticket', [BookingController::class , 'downloadTicket'])->name('booking.ticket');
 
 // Payment
 Route::get('/payment/{booking}', [PaymentController::class , 'create'])->name('payment.page');
@@ -72,6 +87,7 @@ Route::get('/test-login', function () {
 
 /* |-------------------------------------------------------------------------- | ADMIN ROUTES |-------------------------------------------------------------------------- */
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\AdminForgotPasswordController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AircraftController;
 use App\Http\Controllers\Admin\ScheduleController;
@@ -84,16 +100,26 @@ use App\Http\Controllers\Admin\ManufacturerController;
 use App\Http\Controllers\Admin\CountryController;
 use App\Http\Controllers\Admin\AirlineController;
 use App\Http\Controllers\Admin\HelpController;
+use App\Http\Controllers\Admin\SiteSettingController;
 
 Route::prefix('admin')->group(function () {
     Route::get('/', [AuthController::class , 'showLogin'])->name('admin.home');
     Route::get('/login', [AuthController::class , 'showLogin'])->name('admin.login');
     Route::post('/login', [AuthController::class , 'login'])->name('admin.login.submit');
 
+    Route::get('/forgot-password', [AdminForgotPasswordController::class, 'showForm'])->name('admin.password.forgot');
+    Route::post('/forgot-password/send', [AdminForgotPasswordController::class, 'sendResetCode'])->name('admin.password.send-code');
+    Route::get('/reset-password', [AdminForgotPasswordController::class, 'showResetForm'])->name('admin.password.reset.form');
+    Route::post('/reset-password', [AdminForgotPasswordController::class, 'reset'])->name('admin.password.reset.process');
+
     Route::middleware(['admin.auth'])->group(function () {
             Route::get('/dashboard', [AuthController::class , 'dashboard'])->name('admin.dashboard');
             Route::get('/help', [HelpController::class, 'index'])->name('admin.help');
             Route::post('/logout', [AuthController::class , 'logout'])->name('admin.logout');
+
+            // Site Settings
+            Route::get('/settings', [SiteSettingController::class, 'index'])->name('admin.settings.index');
+            Route::put('/settings', [SiteSettingController::class, 'update'])->name('admin.settings.update');
 
             Route::prefix('aircraft')->name('admin.aircraft.')->group(function () {
                     Route::get('/', [AircraftController::class , 'index'])->name('index');

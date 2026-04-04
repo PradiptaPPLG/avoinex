@@ -86,10 +86,10 @@
                         <div class="mb-1">
                             <span class="badge bg-danger" style="font-size:10px; letter-spacing:0.5px;">⚡ PROMO</span>
                         </div>
-                        <span class="text-decoration-line-through text-muted small d-block">${{ number_format($basePrice, 0) }}</span>
-                        <h4 class="text-danger mb-0 fw-bold">${{ number_format($displayPrice, 0) }}</h4>
+                        <span class="text-decoration-line-through text-muted small d-block">Rp {{ number_format($basePrice, 0, ',', '.') }}</span>
+                        <h4 class="text-danger mb-0 fw-bold">Rp {{ number_format($displayPrice, 0, ',', '.') }}</h4>
                     @else
-                        <h4 class="text-primary mb-1">${{ number_format($basePrice, 0) }}</h4>
+                        <h4 class="text-primary mb-1">Rp {{ number_format($basePrice, 0, ',', '.') }}</h4>
                     @endif
                     <p class="text-muted small mb-2">per person</p>
                     

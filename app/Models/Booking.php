@@ -37,4 +37,9 @@ class Booking extends Model
     {
         return $this->hasMany(BookingSeat::class, 'booking_id', 'booking_id');
     }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'booking_id', 'booking_id');
+    }
 }

@@ -478,7 +478,10 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">Password</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label mb-0">Password</label>
+                        <a href="{{ route('admin.password.forgot') }}" style="font-size: 11.5px; color: var(--primary); text-decoration: none; font-weight: 600;">Lupa Password?</a>
+                    </div>
                     <div class="input-icon-wrap">
                         <i class="bi bi-lock"></i>
                         <input type="password" name="password" class="form-control" placeholder="Enter your password" required>

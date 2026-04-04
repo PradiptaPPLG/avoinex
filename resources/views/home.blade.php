@@ -46,8 +46,8 @@
 
                         <div class="d-flex align-items-center gap-5">
                             <div class="avx-flash-prices text-end">
-                                <span class="avx-flash-original d-block mb-1" style="font-size: 16px;">${{ number_format($basePrice, 0) }}</span>
-                                <span class="avx-flash-discounted d-block" style="font-size: 32px;">${{ number_format($discountedPrice, 0) }}</span>
+                                <span class="avx-flash-original d-block mb-1" style="font-size: 16px;">Rp {{ number_format($basePrice, 0, ',', '.') }}</span>
+                                <span class="avx-flash-discounted d-block" style="font-size: 32px;">Rp {{ number_format($discountedPrice, 0, ',', '.') }}</span>
                             </div>
                             <div class="text-center">
                                 <div class="avx-flash-timer avx-countdown mb-2 px-4 py-2" data-endtime="{{ $flashSale->end_time->toIso8601String() }}">
@@ -286,8 +286,8 @@
                             
                             <div class="avx-kupon-bottom p-4 d-flex justify-content-between align-items-center">
                                 <div>
-                                    <span class="text-decoration-line-through text-muted small d-block" style="font-size: 0.85rem;">${{ number_format($basePrice, 0) }}</span>
-                                    <span class="text-primary fw-bold fs-5">${{ number_format($discountedPrice, 0) }}</span>
+                                    <span class="text-decoration-line-through text-muted small d-block" style="font-size: 0.85rem;">Rp {{ number_format($basePrice, 0, ',', '.') }}</span>
+                                    <span class="text-primary fw-bold fs-5">Rp {{ number_format($discountedPrice, 0, ',', '.') }}</span>
                                 </div>
                                 <a href="{{ route('flights.search', [
                                         'tab' => 'promo',
@@ -354,7 +354,7 @@
                                 </div>
                                 <div class="col-7 text-end">
                                     <span class="text-muted small me-1">Mulai dari</span>
-                                    <span class="text-warning fw-bold">USD {{ number_format($dest->starting_price_usd, 0) }}</span>
+                                    <span class="text-warning fw-bold">Rp {{ number_format($dest->starting_price_usd, 0, ',', '.') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -439,10 +439,10 @@
                                             <div class="mb-1">
                                                 <span class="badge bg-danger" style="font-size:10px; letter-spacing:0.5px;">⚡ PROMO</span>
                                             </div>
-                                            <span class="text-decoration-line-through text-muted small d-block">${{ number_format($basePrice, 0) }}</span>
-                                            <h4 class="text-danger mb-0 fw-bold">${{ number_format($displayPrice, 0) }}</h4>
+                                            <span class="text-decoration-line-through text-muted small d-block">Rp {{ number_format($basePrice, 0, ',', '.') }}</span>
+                                            <h4 class="text-danger mb-0 fw-bold">Rp {{ number_format($displayPrice, 0, ',', '.') }}</h4>
                                         @else
-                                            <h4 class="text-primary mb-1">${{ number_format($basePrice, 0) }}</h4>
+                                            <h4 class="text-primary mb-1">Rp {{ number_format($basePrice, 0, ',', '.') }}</h4>
                                         @endif
                                         <p class="text-muted small mb-2">per person</p>
 

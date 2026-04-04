@@ -60,7 +60,7 @@
                     </div>
                     <div style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 4px;">
                         <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 4px;">Total Amount</div>
-                        <div style="font-size: 28px; font-weight: 800; color: var(--primary);">${{ number_format($booking->total_price_usd, 2) }}</div>
+                        <div style="font-size: 28px; font-weight: 800; color: var(--primary);">Rp {{ number_format($booking->total_price_usd, 0, ',', '.') }}</div>
                     </div>
                 </div>
             </div>
@@ -185,11 +185,11 @@
                                     
                                     @if($seat->baggage_weight > 0)
                                     <div class="mt-2 text-muted" style="font-size: 12px;">
-                                        <i class="bi bi-suitcase"></i> {{ $seat->baggage_weight }} kg (+${{ number_format($seat->baggage_price, 2) }})
+                                        <i class="bi bi-suitcase"></i> {{ $seat->baggage_weight }} kg (+Rp {{ number_format($seat->baggage_price, 0, ',', '.') }})
                                     </div>
                                     @endif
                                 </td>
-                                <td style="font-weight: 700; font-size: 14px;">${{ number_format($seat->price_at_booking + $seat->baggage_price, 2) }}</td>
+                                <td style="font-weight: 700; font-size: 14px;">Rp {{ number_format($seat->price_at_booking + $seat->baggage_price, 0, ',', '.') }}</td>
                             </tr>
                             @endforeach
                         </tbody>

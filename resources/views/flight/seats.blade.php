@@ -177,7 +177,7 @@
                                                  data-price="{{ $price }}"
                                                  data-class="business">
                                                 <div class="seat-number">{{ $seatNumber }}</div>
-                                                <div class="seat-price">${{ number_format($price, 2) }}</div>
+                                                <div class="seat-price">Rp {{ number_format($price, 0, ',', '.') }}</div>
                                             </div>
                                         @else
                                             <div class="seat-unavailable">
@@ -209,7 +209,7 @@
                                                  data-price="{{ $price }}"
                                                  data-class="business">
                                                 <div class="seat-number">{{ $seatNumber }}</div>
-                                                <div class="seat-price">${{ number_format($price, 2) }}</div>
+                                                <div class="seat-price">Rp {{ number_format($price, 0, ',', '.') }}</div>
                                             </div>
                                         @else
                                             <div class="seat-unavailable">
@@ -276,7 +276,7 @@
                                                  data-price="{{ $price }}"
                                                  data-class="{{ $seatClassAttr }}">
                                                 <div class="seat-number">{{ $seatNumber }}</div>
-                                                <div class="seat-price">${{ number_format($price, 2) }}</div>
+                                                <div class="seat-price">Rp {{ number_format($price, 0, ',', '.') }}</div>
                                                 @if($isPreferred)
                                                 <div class="legroom-icon"><i class="bi bi-arrows-expand"></i></div>
                                                 @endif
@@ -320,7 +320,7 @@
                                                  data-price="{{ $price }}"
                                                  data-class="{{ $seatClassAttr }}">
                                                 <div class="seat-number">{{ $seatNumber }}</div>
-                                                <div class="seat-price">${{ number_format($price, 2) }}</div>
+                                                <div class="seat-price">Rp {{ number_format($price, 0, ',', '.') }}</div>
                                                 @if($isPreferred)
                                                 <div class="legroom-icon"><i class="bi bi-arrows-expand"></i></div>
                                                 @endif
@@ -380,7 +380,7 @@
             </div>
 <div class="d-flex justify-content-between align-items-center">
     <div>
-        <h4>Total: <span id="total-price" class="text-primary fw-bold">$0.00</span></h4>
+        <h4>Total: <span id="total-price" class="text-primary fw-bold">Rp 0</span></h4>
         <p class="text-muted mb-0"><small>Prices include all taxes and fees</small></p>
     </div>
     <div>
@@ -929,7 +929,7 @@ function handleSeatClick(seatElement) {
     const seatNumber = seatElement.dataset.seatNumber;
     const price = parseFloat(seatElement.dataset.price);
     
-    console.log(`🪑 Seat clicked: ${seatNumber} ($${price})`);
+    console.log(`🪑 Seat clicked: ${seatNumber} (Rp ${price})`);
     
     if (seatElement.classList.contains('selected')) {
         // Deselect
@@ -1046,7 +1046,7 @@ function updateUI() {
     // Update total price display
     const totalElement = document.getElementById('total-price');
     if (totalElement) {
-        totalElement.textContent = '$' + totalPrice.toFixed(2);
+        totalElement.textContent = 'Rp ' + totalPrice.toLocaleString('id-ID');
     }
     
     // Update seat counter badge
@@ -1114,7 +1114,7 @@ function updateSeatList() {
                             <div class="small text-muted">Passenger ${index + 1}</div>
                         </div>
                         <div class="text-end">
-                            <span class="text-primary fw-bold">$${seat.price.toFixed(2)}</span>
+                            <span class="text-primary fw-bold">Rp ${seat.price.toLocaleString('id-ID')}</span>
                         </div>
                     </div>
                 </div>

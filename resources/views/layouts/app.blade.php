@@ -522,6 +522,10 @@
                         <svg class="avx-dropdown-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
                         Home
                     </a>
+                    <a href="{{ route('profile') }}" class="avx-dropdown-item">
+                        <svg class="avx-dropdown-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        My Profile
+                    </a>
                     <a href="{{ route('booking.index') }}" class="avx-dropdown-item">
                         <svg class="avx-dropdown-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                         My Bookings
@@ -612,7 +616,7 @@
                         </div>
                         <div class="avx-form-options">
                             <label class="avx-checkbox"><input type="checkbox" name="remember" checked> <span>Remember me</span></label>
-                            <a href="#" class="avx-forgot-link">Forgot password?</a>
+                            <a href="{{ route('password.forgot') }}" class="avx-forgot-link">Forgot password?</a>
                         </div>
                         <button type="submit" class="avx-btn avx-btn-submit"><i class="bi bi-airplane-fill me-2" style="transform: rotate(45deg);"></i> Login to Account</button>
                     </form>
@@ -992,15 +996,18 @@ document.addEventListener('DOMContentLoaded', function() {
             isSecretModeReady = true;
             secretTyped = "";
             logoClickCount = 0;
-            console.log("Secret Mode Ready...");
+            // Visual indicator to the user that it unlocked
+            logoLink.style.transform = 'scale(1.1)';
+            setTimeout(() => logoLink.style.transform = 'scale(1)', 300);
+            console.log("Secret Mode Ready... Type PIN and press Enter");
         } else {
-            // If they stop clicking, and it hasn't reached 7, do normal navigation after a short delay
+            // Give them 2000ms between clicks
             logoClickTimer = setTimeout(() => {
                 if (logoClickCount > 0 && !isSecretModeReady) {
                     window.location.href = '/'; 
                 }
                 logoClickCount = 0;
-            }, 350); 
+            }, 2000); 
         }
     });
 
@@ -1010,12 +1017,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Enter') {
             if (secretTyped === '123') {
                 window.location.href = '/admin/login';
+            } else {
+                isSecretModeReady = false;
+                secretTyped = "";
             }
-            // Reset after pressing enter
-            isSecretModeReady = false;
-            secretTyped = "";
         } else {
-            // Only capture single characters to avoid modifier keys
             if (e.key.length === 1) {
                 secretTyped += e.key;
             }
@@ -1023,6 +1029,352 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- FOOTER                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<style>
+    .avx-footer {
+        background: linear-gradient(180deg, #0a1628 0%, #060d1a 100%);
+        color: rgba(255,255,255,0.7);
+        font-family: 'Poppins', sans-serif;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .avx-footer::before {
+        content: '';
+        position: absolute;
+        top: -120px;
+        left: -100px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(39,158,214,0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .avx-footer::after {
+        content: '';
+        position: absolute;
+        bottom: -80px;
+        right: -60px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(39,158,214,0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .avx-footer-main {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 56px 32px 40px;
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+        gap: 48px;
+        position: relative;
+        z-index: 1;
+    }
+
+    @media (max-width: 992px) {
+        .avx-footer-main {
+            grid-template-columns: 1fr 1fr;
+            gap: 36px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .avx-footer-main {
+            grid-template-columns: 1fr;
+            gap: 32px;
+            padding: 40px 20px 32px;
+        }
+    }
+
+    .avx-footer-brand img {
+        height: 32px;
+        margin-bottom: 16px;
+        filter: brightness(0) invert(1);
+    }
+
+    .avx-footer-tagline {
+        font-size: 13.5px;
+        line-height: 1.7;
+        color: rgba(255,255,255,0.5);
+        margin-bottom: 24px;
+    }
+
+    .avx-footer-socials {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .avx-footer-socials a {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,0.5);
+        font-size: 16px;
+        transition: all 0.25s ease;
+        text-decoration: none;
+    }
+
+    .avx-footer-socials a:hover {
+        background: rgba(39,158,214,0.15);
+        border-color: rgba(39,158,214,0.4);
+        color: #279ED6;
+        transform: translateY(-2px);
+    }
+
+    .avx-footer h4 {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 20px;
+        position: relative;
+        padding-bottom: 12px;
+    }
+
+    .avx-footer h4::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 28px;
+        height: 2px;
+        background: #279ED6;
+        border-radius: 2px;
+    }
+
+    .avx-footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .avx-footer-links li {
+        margin-bottom: 10px;
+    }
+
+    .avx-footer-links a {
+        color: rgba(255,255,255,0.5);
+        text-decoration: none;
+        font-size: 13.5px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .avx-footer-links a:hover {
+        color: #279ED6;
+        transform: translateX(3px);
+    }
+
+    .avx-footer-links a i {
+        font-size: 11px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .avx-footer-links a:hover i {
+        opacity: 1;
+    }
+
+    .avx-footer-contact-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 16px;
+        font-size: 13.5px;
+    }
+
+    .avx-footer-contact-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: rgba(39,158,214,0.1);
+        border: 1px solid rgba(39,158,214,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #279ED6;
+        font-size: 14px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .avx-footer-contact-text {
+        line-height: 1.5;
+    }
+
+    .avx-footer-contact-text span {
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(255,255,255,0.35);
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    .avx-footer-bottom {
+        border-top: 1px solid rgba(255,255,255,0.06);
+        position: relative;
+        z-index: 1;
+    }
+
+    .avx-footer-bottom-inner {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 20px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    @media (max-width: 576px) {
+        .avx-footer-bottom-inner {
+            flex-direction: column;
+            text-align: center;
+            padding: 16px 20px;
+        }
+    }
+
+    .avx-footer-copyright {
+        font-size: 12.5px;
+        color: rgba(255,255,255,0.35);
+    }
+
+    .avx-footer-legal {
+        display: flex;
+        gap: 20px;
+    }
+
+    .avx-footer-legal a {
+        font-size: 12.5px;
+        color: rgba(255,255,255,0.35);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .avx-footer-legal a:hover {
+        color: #279ED6;
+    }
+
+    /* Don't show footer when printing */
+    @media print {
+        .avx-footer { display: none !important; }
+    }
+</style>
+
+<footer class="avx-footer">
+    <div class="avx-footer-main">
+        <!-- Brand -->
+        <div class="avx-footer-brand">
+            <img src="{{ asset('images/logotext.png') }}" alt="Avoinex">
+            <p class="avx-footer-tagline">{{ $siteSettings['footer_tagline'] ?? 'Your Trusted Partner for Smarter, Easier, and More Affordable Flight Booking.' }}</p>
+            <div class="avx-footer-socials">
+                @if(!empty($siteSettings['social_instagram']) && $siteSettings['social_instagram'] !== '#')
+                <a href="{{ $siteSettings['social_instagram'] }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                @endif
+                @if(!empty($siteSettings['social_facebook']) && $siteSettings['social_facebook'] !== '#')
+                <a href="{{ $siteSettings['social_facebook'] }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                @endif
+                @if(!empty($siteSettings['social_twitter']) && $siteSettings['social_twitter'] !== '#')
+                <a href="{{ $siteSettings['social_twitter'] }}" target="_blank" rel="noopener" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                @endif
+                @if(!empty($siteSettings['social_youtube']) && $siteSettings['social_youtube'] !== '#')
+                <a href="{{ $siteSettings['social_youtube'] }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                @endif
+                @if(!empty($siteSettings['social_tiktok']) && $siteSettings['social_tiktok'] !== '#')
+                <a href="{{ $siteSettings['social_tiktok'] }}" target="_blank" rel="noopener" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+                @endif
+                @if(!empty($siteSettings['social_whatsapp']) && $siteSettings['social_whatsapp'] !== '#')
+                <a href="{{ $siteSettings['social_whatsapp'] }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                @endif
+            </div>
+        </div>
+
+        <!-- Navigasi -->
+        <div>
+            <h4>Layanan</h4>
+            <ul class="avx-footer-links">
+                <li><a href="/"><i class="bi bi-chevron-right"></i> Cari Penerbangan</a></li>
+                <li><a href="{{ route('deals') }}"><i class="bi bi-chevron-right"></i> Promo & Deals</a></li>
+                <li><a href="{{ route('booking.find.form') }}"><i class="bi bi-chevron-right"></i> Cek Booking</a></li>
+                <li><a href="{{ route('support') }}"><i class="bi bi-chevron-right"></i> Pusat Bantuan</a></li>
+            </ul>
+        </div>
+
+        <!-- Perusahaan -->
+        <div>
+            <h4>Perusahaan</h4>
+            <ul class="avx-footer-links">
+                <li><a href="#"><i class="bi bi-chevron-right"></i> Tentang Kami</a></li>
+                <li><a href="#"><i class="bi bi-chevron-right"></i> Karir</a></li>
+                <li><a href="#"><i class="bi bi-chevron-right"></i> Blog</a></li>
+                <li><a href="#"><i class="bi bi-chevron-right"></i> Mitra & Afiliasi</a></li>
+            </ul>
+        </div>
+
+        <!-- Kontak -->
+        <div>
+            <h4>Hubungi Kami</h4>
+            @if(!empty($siteSettings['contact_email']))
+            <div class="avx-footer-contact-item">
+                <div class="avx-footer-contact-icon"><i class="bi bi-envelope-fill"></i></div>
+                <div class="avx-footer-contact-text">
+                    <span>Email</span>
+                    {{ $siteSettings['contact_email'] }}
+                </div>
+            </div>
+            @endif
+            @if(!empty($siteSettings['contact_phone']))
+            <div class="avx-footer-contact-item">
+                <div class="avx-footer-contact-icon"><i class="bi bi-telephone-fill"></i></div>
+                <div class="avx-footer-contact-text">
+                    <span>Telepon</span>
+                    {{ $siteSettings['contact_phone'] }}
+                </div>
+            </div>
+            @endif
+            @if(!empty($siteSettings['contact_address']))
+            <div class="avx-footer-contact-item">
+                <div class="avx-footer-contact-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                <div class="avx-footer-contact-text">
+                    <span>Kantor</span>
+                    {{ $siteSettings['contact_address'] }}
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="avx-footer-bottom">
+        <div class="avx-footer-bottom-inner">
+            <div class="avx-footer-copyright">
+                {{ $siteSettings['footer_copyright'] ?? '© 2026 Avoinex Airlines. All Rights Reserved.' }}
+            </div>
+            <div class="avx-footer-legal">
+                <a href="#">Syarat & Ketentuan</a>
+                <a href="#">Kebijakan Privasi</a>
+                <a href="#">Cookies</a>
+            </div>
+        </div>
+    </div>
+</footer>
 
 @include('chatbot')
 

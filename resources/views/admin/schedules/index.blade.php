@@ -52,7 +52,7 @@
                             </span>
                         </td>
                         <td>
-                            <span style="font-weight: 700; font-size: 14px; color: var(--success);">${{ number_format($schedule->base_price_usd, 2) }}</span>
+                            <span style="font-weight: 700; font-size: 14px; color: var(--success);">Rp {{ number_format($schedule->base_price_usd, 0, ',', '.') }}</span>
                         </td>
                         <td>
                             <div class="d-flex gap-1">

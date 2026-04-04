@@ -39,7 +39,7 @@
                                 </td>
                                 <td>{{ $booking->flightInstance->flight_date->format('d M Y') }}</td>
                                 <td>
-                                    <div>${{ number_format($booking->total_price_usd, 2) }}</div>
+                                    <div>Rp {{ number_format($booking->total_price_usd, 0, ',', '.') }}</div>
                                     @if($booking->bookingSeats->sum('baggage_weight') > 0)
                                         <div class="small text-muted"><i class="bi bi-suitcase"></i> Includes Baggage</div>
                                     @endif
@@ -53,9 +53,14 @@
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column gap-2" style="min-width: 90px;">
-                                        <a href="{{ route('booking.confirmation', $booking->booking_id) }}" class="btn btn-sm btn-primary w-100">
+                                        <a href="{{ route('booking.confirmation', $booking->booking_id) }}" class="btn btn-sm btn-primary w-100 mb-1">
                                             <i class="bi bi-eye"></i> View
                                         </a>
+                                        @if($booking->booking_status === 'confirmed')
+                                            <a href="{{ route('booking.ticket', $booking->booking_id) }}" target="_blank" class="btn btn-sm btn-outline-success w-100 mb-1">
+                                                <i class="bi bi-file-earmark-pdf"></i> E-Ticket
+                                            </a>
+                                        @endif
                                         @php
                                             // Kita longgarkan logic: Selama belum berganti hari dari flight date
                                             $canCancel = \Carbon\Carbon::parse($booking->flightInstance->flight_date)->endOfDay()->isFuture();

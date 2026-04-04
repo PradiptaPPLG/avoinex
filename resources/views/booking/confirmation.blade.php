@@ -87,18 +87,26 @@
                         </div>
                     </div>
                     
-                    <h6 class="mt-4">Passengers</h6>
-                    <table class="table table-sm">
+                    <h6 class="mt-4" style="font-weight: 700;">Passengers & Price Breakdown</h6>
+                    @php
+                        $seatSubtotal = 0;
+                        $baggageTotal = 0;
+                    @endphp
+                    <table class="table table-sm" style="font-size: 13px;">
                         <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Passport</th>
                                 <th>Seat & Baggage</th>
-                                <th>Price</th>
+                                <th class="text-end">Price</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($booking->bookingSeats as $seat)
+                            @php
+                                $seatSubtotal += $seat->price_at_booking;
+                                $baggageTotal += $seat->baggage_price ?? 0;
+                            @endphp
                             <tr>
                                 <td>{{ $seat->passenger_first_name }} {{ $seat->passenger_last_name }}</td>
                                 <td>{{ $seat->passenger_passport }}</td>
@@ -108,27 +116,45 @@
                                     <div class="small text-muted"><i class="bi bi-suitcase"></i> {{ $seat->baggage_weight }} kg</div>
                                     @endif
                                 </td>
-                                <td>
-                                    <div>${{ number_format($seat->price_at_booking, 2) }}</div>
+                                <td class="text-end">
+                                    <div>Rp {{ number_format($seat->price_at_booking, 0, ',', '.') }}</div>
                                     @if($seat->baggage_price > 0)
-                                    <div class="small text-muted">+${{ number_format($seat->baggage_price, 2) }}</div>
+                                    <div class="small text-muted">+Rp {{ number_format($seat->baggage_price, 0, ',', '.') }}</div>
                                     @endif
                                 </td>
                             </tr>
                             @endforeach
                         </tbody>
+                        @php
+                            $subtotal = $seatSubtotal + $baggageTotal;
+                            $taxAmount = $subtotal * 0.10;
+                            $serviceFee = 5.00;
+                            $grandTotal = $subtotal + $taxAmount + $serviceFee;
+                        @endphp
                         <tfoot>
-                            <tr>
-                                <th colspan="3">Total</th>
-                                <th>${{ number_format($booking->total_price_usd, 2) }}</th>
+                            <tr class="text-muted" style="font-size: 12px;">
+                                <td colspan="3" class="text-end border-0 py-1">Subtotal (Seats + Baggage)</td>
+                                <td class="text-end border-0 py-1">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                            </tr>
+                            <tr class="text-muted" style="font-size: 12px;">
+                                <td colspan="3" class="text-end border-0 py-1"><i class="bi bi-receipt" style="font-size: 10px;"></i> Tax (10%)</td>
+                                <td class="text-end border-0 py-1">Rp {{ number_format($taxAmount, 0, ',', '.') }}</td>
+                            </tr>
+                            <tr class="text-muted" style="font-size: 12px;">
+                                <td colspan="3" class="text-end border-0 py-1"><i class="bi bi-gear" style="font-size: 10px;"></i> Service Fee</td>
+                                <td class="text-end border-0 py-1">Rp {{ number_format($serviceFee, 0, ',', '.') }}</td>
+                            </tr>
+                            <tr style="border-top: 2px solid #dee2e6;">
+                                <th colspan="3" class="text-end py-2">Total Paid</th>
+                                <th class="text-end py-2" style="color: #0066CC; font-size: 15px;">Rp {{ number_format($grandTotal, 0, ',', '.') }}</th>
                             </tr>
                         </tfoot>
                     </table>
                     
                     <div class="mt-4">
-                        <button class="btn btn-outline-primary" onclick="window.print()">
-                            <i class="bi bi-printer"></i> Print Ticket
-                        </button>
+                        <a href="{{ route('booking.ticket', $booking->booking_id) }}" class="btn btn-outline-primary" target="_blank">
+                            <i class="bi bi-file-earmark-pdf"></i> Download E-Ticket
+                        </a>
                         <a href="{{ route('home') }}" class="btn btn-primary">
                             <i class="bi bi-house"></i> Back to Home
                         </a>

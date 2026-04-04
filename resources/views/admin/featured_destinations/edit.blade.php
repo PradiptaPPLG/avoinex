@@ -61,10 +61,10 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Harga Mulai Dari (USD)</label>
+                            <label class="form-label">Harga Mulai Dari (IDR)</label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" step="0.01" name="starting_price_usd" class="form-control @error('starting_price_usd') is-invalid @enderror" value="{{ old('starting_price_usd', $featuredDestination->starting_price_usd) }}" required>
+                                <span class="input-group-text">Rp</span>
+                                <input type="text" name="starting_price_usd" class="form-control rupiah-input @error('starting_price_usd') is-invalid @enderror" value="{{ old('starting_price_usd', $featuredDestination->starting_price_usd) }}" required>
                             </div>
                             @error('starting_price_usd')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>

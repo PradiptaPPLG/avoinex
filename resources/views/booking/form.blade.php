@@ -161,12 +161,12 @@
                                         @php
                                             $baggageOptions = [
                                                 ['weight' => 0, 'price' => 0, 'label' => 'No Extra', 'sub' => 'Included'],
-                                                ['weight' => 20, 'price' => 20, 'label' => '20 kg', 'sub' => '+$20.00'],
-                                                ['weight' => 25, 'price' => 25, 'label' => '25 kg', 'sub' => '+$25.00'],
-                                                ['weight' => 30, 'price' => 30, 'label' => '30 kg', 'sub' => '+$30.00'],
-                                                ['weight' => 40, 'price' => 40, 'label' => '40 kg', 'sub' => '+$40.00'],
-                                                ['weight' => 50, 'price' => 50, 'label' => '50 kg', 'sub' => '+$50.00'],
-                                                ['weight' => 60, 'price' => 60, 'label' => '60 kg', 'sub' => '+$60.00'],
+                                                ['weight' => 20, 'price' => 20, 'label' => '20 kg', 'sub' => '+Rp ' . number_format(20, 0, ',', '.')],
+                                                ['weight' => 25, 'price' => 25, 'label' => '25 kg', 'sub' => '+Rp ' . number_format(25, 0, ',', '.')],
+                                                ['weight' => 30, 'price' => 30, 'label' => '30 kg', 'sub' => '+Rp ' . number_format(30, 0, ',', '.')],
+                                                ['weight' => 40, 'price' => 40, 'label' => '40 kg', 'sub' => '+Rp ' . number_format(40, 0, ',', '.')],
+                                                ['weight' => 50, 'price' => 50, 'label' => '50 kg', 'sub' => '+Rp ' . number_format(50, 0, ',', '.')],
+                                                ['weight' => 60, 'price' => 60, 'label' => '60 kg', 'sub' => '+Rp ' . number_format(60, 0, ',', '.')],
                                             ];
                                         @endphp
                                         @foreach($baggageOptions as $bgIdx => $bg)
@@ -230,25 +230,63 @@
 
                     <!-- Price Breakdown -->
                     <div>
-                        <h6>Price Breakdown</h6>
-                        <table class="table table-sm">
+                        <h6 class="mb-2" style="font-weight: 700; font-size: 14px;">Price Breakdown</h6>
+                        <table class="table table-sm mb-0" style="font-size: 13px;">
                             <tbody id="summary-prices">
+                                @php
+                                    $seatSubtotal = 0;
+                                @endphp
                                 @if(!empty($selectedSeats))
                                     @foreach($selectedSeats as $seat)
+                                    @php $seatSubtotal += floatval($seat['price'] ?? 150); @endphp
                                     <tr>
-                                        <td>Seat {{ $seat['number'] ?? 'N/A' }} ({{ $seat['class'] ?? 'economy' }})</td>
-                                        <td class="text-end">${{ number_format($seat['price'] ?? 150, 2) }}</td>
+                                        <td class="border-0 py-1">
+                                            <i class="bi bi-person-fill text-muted" style="font-size: 11px;"></i>
+                                            Seat {{ $seat['number'] ?? 'N/A' }} 
+                                            <span class="text-muted">({{ ucfirst($seat['class'] ?? 'economy') }})</span>
+                                        </td>
+                                        <td class="text-end border-0 py-1">Rp {{ number_format($seat['price'] ?? 150, 0, ',', '.') }}</td>
                                     </tr>
                                     @endforeach
                                 @endif
                             </tbody>
-                            <tfoot>
+                            <!-- Fee breakdown -->
+                            <tbody id="summary-fees">
+                                @php
+                                    $taxRate = 0.10;
+                                    $serviceFee = 5.00;
+                                    $taxAmount = $seatSubtotal * $taxRate;
+                                    $baseTotal = $seatSubtotal + $taxAmount + $serviceFee;
+                                @endphp
                                 <tr>
-                                    <th>Total</th>
-                                    <th class="text-end" id="summary-grand-total">${{ number_format($totalPrice ?? 0, 2) }}</th>
+                                    <td class="border-0 py-1 text-muted" style="font-size: 12px;">
+                                        <i class="bi bi-receipt" style="font-size: 10px;"></i> Tax (10%)
+                                    </td>
+                                    <td class="text-end border-0 py-1 text-muted" style="font-size: 12px;" id="summary-tax">
+                                        Rp {{ number_format($taxAmount, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border-0 py-1 text-muted" style="font-size: 12px;">
+                                        <i class="bi bi-gear" style="font-size: 10px;"></i> Service Fee
+                                    </td>
+                                    <td class="text-end border-0 py-1 text-muted" style="font-size: 12px;">
+                                        Rp {{ number_format($serviceFee, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr style="border-top: 2px solid #dee2e6;">
+                                    <th class="py-2" style="font-size: 14px;">Total</th>
+                                    <th class="text-end py-2" id="summary-grand-total" style="font-size: 14px; color: #0066CC;">
+                                        Rp {{ number_format($baseTotal, 0, ',', '.') }}
+                                    </th>
                                 </tr>
                             </tfoot>
                         </table>
+                        <div class="mt-2 p-2 rounded" style="background: rgba(39,158,214,0.06); font-size: 11px; color: #5A6B82;">
+                            <i class="bi bi-info-circle"></i> Harga sudah termasuk pajak dan biaya layanan.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -275,11 +313,9 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Form submit triggered!');
         console.log('Form is valid:', form.checkValidity());
 
-        // Don't prevent default - let browser handle HTML5 validation first
         if (!form.checkValidity()) {
             console.log('❌ Form has HTML5 validation errors');
-            // Let browser show native validation messages
-            return true; // Don't prevent default, browser will handle it
+            return true;
         }
 
         const firstName = document.querySelector('input[name="contact_first_name"]');
@@ -299,7 +335,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
-        // Check passenger data
         const passengerFirstNames = document.querySelectorAll('input[name="passenger_first_name[]"]');
         const passengerLastNames = document.querySelectorAll('input[name="passenger_last_name[]"]');
         const passengerPassports = document.querySelectorAll('input[name="passenger_passport[]"]');
@@ -335,7 +370,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
-        // Check if we have seat data
         const seatIds = document.querySelectorAll('input[name="seat_ids[]"]');
         if (seatIds.length === 0) {
             e.preventDefault();
@@ -344,24 +378,22 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
-        // Show loading - disable button to prevent double submit
         if (submitBtn) {
             submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing Booking...';
             submitBtn.disabled = true;
         }
 
         console.log('✅ Form validation passed, submitting...');
-        console.log('Form action:', form.action);
-        console.log('Form method:', form.method);
-
-        // Form will submit normally
         return true;
     });
 
-    // --- NEW CODE: Baggage Selection Handling ---
-    const baseTotalPrice = {{ $totalPrice ?? 0 }};
+    // --- Baggage Selection & Price Breakdown ---
+    const seatSubtotal = {{ $seatSubtotal ?? 0 }};
+    const TAX_RATE = 0.10;
+    const SERVICE_FEE = 5.00;
     const baggageTotals = {};
     const summaryPrices = document.getElementById('summary-prices');
+    const summaryTax = document.getElementById('summary-tax');
     const summaryGrandTotal = document.getElementById('summary-grand-total');
 
     document.querySelectorAll('.baggage-radio').forEach(radio => {
@@ -372,24 +404,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 const price = parseFloat(this.dataset.price);
                 const weight = this.value;
 
-                // update hidden inputs
                 const formContainer = this.closest('.passenger-form');
                 formContainer.querySelector('.baggage-weight-input').value = weight;
                 formContainer.querySelector('.baggage-price-input').value = price;
 
-                // update totals object
-                baggageTotals[passengerIndex] = {
-                    weight: weight,
-                    price: price
-                };
-
+                baggageTotals[passengerIndex] = { weight, price };
                 updateSummary();
             }
         });
     });
 
     function updateSummary() {
-        // Remove old baggage rows
         document.querySelectorAll('.baggage-summary-row').forEach(el => el.remove());
 
         let totalBaggageCost = 0;
@@ -402,17 +427,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const tr = document.createElement('tr');
                 tr.className = 'baggage-summary-row';
                 tr.innerHTML = `
-                    <td><small class="text-muted">&#8627; Pass ${parseInt(index) + 1} Baggage (${item.weight}kg)</small></td>
-                    <td class="text-end"><small class="text-muted">+$${item.price.toFixed(2)}</small></td>
+                    <td class="border-0 py-1"><small class="text-muted"><i class="bi bi-suitcase" style="font-size:10px;"></i> Pass ${parseInt(index) + 1} Baggage (${item.weight}kg)</small></td>
+                    <td class="text-end border-0 py-1"><small class="text-muted">+Rp ${item.price.toLocaleString('id-ID')}</small></td>
                 `;
                 summaryPrices.appendChild(tr);
             }
         });
 
-        const grandTotal = baseTotalPrice + totalBaggageCost;
-        if (summaryGrandTotal) {
-            summaryGrandTotal.innerHTML = '$' + grandTotal.toFixed(2);
-        }
+        // Recalculate with tax
+        const subtotalWithBaggage = seatSubtotal + totalBaggageCost;
+        const tax = subtotalWithBaggage * TAX_RATE;
+        const grandTotal = subtotalWithBaggage + tax + SERVICE_FEE;
+
+        if (summaryTax) summaryTax.textContent = 'Rp ' + tax.toLocaleString('id-ID');
+        if (summaryGrandTotal) summaryGrandTotal.textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
     }
 });
 </script>

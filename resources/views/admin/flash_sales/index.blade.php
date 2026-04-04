@@ -39,7 +39,7 @@
                                 @if($sale->discount_type == 'percentage')
                                     {{ $sale->discount_value }}% OFF
                                 @else
-                                    ${{ number_format($sale->discount_value, 0) }} OFF
+                                    Rp {{ number_format($sale->discount_value, 0, ',', '.') }} OFF
                                 @endif
                             </td>
                             <td class="py-3">

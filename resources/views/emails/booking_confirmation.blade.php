@@ -127,7 +127,7 @@
                         {{ $bSeat->baggage_weight ?? 0 }}kg
                     </td>
                     <td style="padding:12px 14px; font-size:13px; color:#333; text-align:right; border-bottom:1px solid #eee;">
-                        ${{ number_format($bSeat->price_at_booking + ($bSeat->baggage_price ?? 0), 2) }}
+                        Rp {{ number_format($bSeat->price_at_booking + ($bSeat->baggage_price ?? 0), 0, ',', '.') }}
                     </td>
                 </tr>
                 @endforeach
@@ -144,7 +144,7 @@
                         <p style="margin:0; font-size:13px; color:#666;">Total Price</p>
                     </td>
                     <td style="padding:16px 20px; text-align:right;">
-                        <p style="margin:0; font-size:24px; font-weight:800; color:#279ED6;">${{ number_format($booking->total_price_usd, 2) }}</p>
+                        <p style="margin:0; font-size:24px; font-weight:800; color:#279ED6;">Rp {{ number_format($booking->total_price_usd, 0, ',', '.') }}</p>
                     </td>
                 </tr>
             </table>

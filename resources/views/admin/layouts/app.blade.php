@@ -707,6 +707,13 @@
                 </a>
             </div>
 
+            <div class="nav-item">
+                <a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                    <i class="bi bi-gear nav-icon"></i>
+                    Settings
+                </a>
+            </div>
+
             <div class="sidebar-footer">
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
@@ -816,6 +823,46 @@
                 }
             });
         }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const rupiahInputs = document.querySelectorAll('.rupiah-input');
+            
+            rupiahInputs.forEach(input => {
+                if (input.value) {
+                    input.value = formatRupiah(input.value);
+                }
+                
+                input.addEventListener('input', function(e) {
+                    this.value = formatRupiah(this.value);
+                });
+            });
+            
+            function formatRupiah(angka) {
+                var number_string = angka.replace(/[^,\d]/g, '').toString(),
+                    split = number_string.split(','),
+                    sisa = split[0].length % 3,
+                    rupiah = split[0].substr(0, sisa),
+                    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+                
+                if (ribuan) {
+                    separator = sisa ? '.' : '';
+                    rupiah += separator + ribuan.join('.');
+                }
+                
+                rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+                return rupiah;
+            }
+            
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    rupiahInputs.forEach(input => {
+                        input.value = input.value.replace(/\./g, '');
+                    });
+                });
+            });
+        });
     </script>
     @stack('scripts')
 </body>

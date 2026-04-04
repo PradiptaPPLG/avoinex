@@ -110,7 +110,7 @@
                             <!-- Price -->
                             <div class="mb-3">
                                 <h6>Price</h6>
-                                <h3 class="text-primary">${{ number_format($flight->schedule->base_price_usd, 2) }}</h3>
+                                <h3 class="text-primary">Rp {{ number_format($flight->schedule->base_price_usd, 0, ',', '.') }}</h3>
                                 <small class="text-muted">per person • Economy class</small>
                             </div>
                             

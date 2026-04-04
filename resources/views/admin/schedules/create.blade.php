@@ -108,10 +108,10 @@
             {{-- Pricing & Validity --}}
             <div class="row g-4 mb-4">
                 <div class="col-md-4">
-                    <label class="form-label">Base Price (USD)</label>
+                    <label class="form-label">Base Price (IDR)</label>
                     <div style="position: relative;">
-                        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600;">$</span>
-                        <input type="number" step="0.01" name="base_price_usd" class="form-control" placeholder="0.00" style="padding-left: 28px;" required>
+                        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600;">Rp</span>
+                        <input type="text" name="base_price_usd" class="form-control rupiah-input" placeholder="0" style="padding-left: 36px;" required>
                     </div>
                     @error('base_price_usd')
                         <div class="text-danger" style="font-size: 12px; margin-top: 5px;">{{ $message }}</div>
