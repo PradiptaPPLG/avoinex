@@ -64,6 +64,20 @@
                     <form id="bookingForm" action="{{ route('booking.store') }}" method="POST">
                         @csrf
                         
+                        <!-- Countdown Timer -->
+                        <div class="alert alert-danger d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm" style="border-radius: 10px; border-left: 5px solid #dc3545;">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-clock-history fs-3 me-3 text-danger"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold" style="color: #c82333;">Selesaikan Pemesanan Anda!</h6>
+                                    <small class="mb-0" style="color: #6c757d;">Waktu Anda untuk menyelesaikan data penumpang dan pembayaran.</small>
+                                </div>
+                            </div>
+                            <div class="text-center rounded px-3 py-1 bg-white border border-danger shadow-sm">
+                                <span class="fs-4 fw-bold text-danger" id="booking-timer" style="font-variant-numeric: tabular-nums;">15:00</span>
+                            </div>
+                        </div>
+                        
                         <!-- Data Pemesan -->
                         <div class="mb-4">
                             <h5 class="fw-bold mb-3 border-bottom pb-2">Data Pemesan</h5>
@@ -299,6 +313,32 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Booking form loaded');
     console.log('Form action:', document.getElementById('bookingForm').action);
     console.log('Form method:', document.getElementById('bookingForm').method);
+
+    // --- Countdown Timer Logic ---
+    let timeRemaining = 15 * 60; // 15 menit
+    const timerDisplay = document.getElementById('booking-timer');
+    
+    if (timerDisplay) {
+        const timerInterval = setInterval(() => {
+            timeRemaining--;
+            
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeRemaining <= 60) {
+                // Tambahkan efek kelap-kelip merah pada menit terakhir jika menggunakan animate.css, atau ganti style manual
+                timerDisplay.parentElement.style.backgroundColor = '#ffe5e5';
+            }
+            
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                alert('Waktu pemesanan Anda telah habis. Silakan ulangi pencarian penerbangan untuk mengunci harga dan ketersediaan kursi.');
+                window.location.href = '/'; 
+            }
+        }, 1000);
+    }
 
     // Check if we have seat data
     const seatIds = document.querySelectorAll('input[name="seat_ids[]"]');

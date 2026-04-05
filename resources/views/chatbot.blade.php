@@ -81,6 +81,16 @@
         100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
+    .vanessa-speech-bubble.hide-bounce {
+        animation: bubbleBounceOut 0.4s cubic-bezier(0.600, -0.280, 0.735, 0.045) forwards;
+    }
+
+    @keyframes bubbleBounceOut {
+        0% { opacity: 1; transform: translateY(0) scale(1); }
+        30% { transform: translateY(-10px) scale(1.05); }
+        100% { opacity: 0; transform: translateY(15px) scale(0); }
+    }
+
     .vanessa-cursor {
         display: inline-block;
         width: 2px;
@@ -842,9 +852,14 @@
         let typeWriterTimeout;
         
         function hideVanessaBubble() {
-            if(speechBubble) {
-                speechBubble.classList.remove('show');
+            if(speechBubble && speechBubble.classList.contains('show')) {
                 clearTimeout(typeWriterTimeout);
+                speechBubble.classList.add('hide-bounce');
+                setTimeout(() => {
+                    speechBubble.classList.remove('show');
+                    speechBubble.classList.remove('hide-bounce');
+                    speechText.innerHTML = ''; 
+                }, 400); // durasi animasi bounce out
             }
         }
 

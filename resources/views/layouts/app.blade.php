@@ -1198,8 +1198,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     .avx-footer-contact-icon {
-        width: 34px;
-        height: 34px;
+        width: 38px;
+        height: 38px;
         border-radius: 8px;
         background: rgba(39,158,214,0.1);
         border: 1px solid rgba(39,158,214,0.15);
@@ -1207,9 +1207,14 @@ document.addEventListener('DOMContentLoaded', function() {
         align-items: center;
         justify-content: center;
         color: #279ED6;
-        font-size: 14px;
+        font-size: 16px;
         flex-shrink: 0;
-        margin-top: 2px;
+    }
+    .avx-footer-contact-icon i {
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1; /* Best for icon centering */
+        display: inline-flex;
     }
 
     .avx-footer-contact-text {
