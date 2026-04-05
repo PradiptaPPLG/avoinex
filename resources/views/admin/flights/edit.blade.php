@@ -67,6 +67,34 @@
                     <label class="form-label">Flight Date</label>
                     <input type="date" name="flight_date" class="form-control" value="{{ old('flight_date', $flight->flight_date->format('Y-m-d')) }}" required>
                 </div>
+                
+                @php
+                    $flightMealIds = $flight->meals->pluck('id')->toArray();
+                @endphp
+                <div>
+                    <label class="form-label mb-3 mt-2 border-bottom pb-2" style="font-size: 14px; color: var(--primary);">
+                        <i class="bi bi-cup-hot me-2"></i>In-Flight Meals Availability
+                    </label>
+                    <div class="row g-3">
+                        @forelse($meals as $meal)
+                        <div class="col-md-6">
+                            <div class="form-check border rounded p-3 h-100 d-flex align-items-center" style="background-color: var(--surface-2);">
+                                <input class="form-check-input me-3" type="checkbox" name="meals[]" value="{{ $meal->id }}" id="meal_{{ $meal->id }}" style="transform: scale(1.2);"
+                                {{ (is_array(old('meals')) && in_array($meal->id, old('meals'))) || (old('meals') === null && in_array($meal->id, $flightMealIds)) ? 'checked' : '' }}>
+                                <label class="form-check-label flex-grow-1" for="meal_{{ $meal->id }}" style="cursor: pointer;">
+                                    <div class="fw-bold">{{ $meal->name }}</div>
+                                    <div class="small text-muted mb-1">${{ number_format($meal->price_usd, 2) }}</div>
+                                    <div class="small" style="font-size: 11px;">{{ Str::limit($meal->description, 40) }}</div>
+                                </label>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="col-12">
+                            <span class="text-muted small">No active meals available. Create some in the Meals tab first.</span>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
             </div>
 
             <div class="d-flex gap-2 mt-4">

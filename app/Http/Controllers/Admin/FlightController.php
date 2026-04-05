@@ -21,7 +21,8 @@ class FlightController extends Controller
     {
         $schedules = Schedule::all();
         $aircraftInstances = AircraftInstance::with('aircraft')->get();
-        return view('admin.flights.create', compact('schedules', 'aircraftInstances'));
+        $meals = \App\Models\Meal::where('is_active', true)->orderBy('name')->get();
+        return view('admin.flights.create', compact('schedules', 'aircraftInstances', 'meals'));
     }
 
     public function store(Request $request)
@@ -43,6 +44,10 @@ class FlightController extends Controller
 
         $flight = FlightInstance::create($validated);
 
+        if ($request->has('meals') && is_array($request->meals)) {
+            $flight->meals()->sync($request->meals);
+        }
+
         // Auto-generate seat prices for this flight
         $this->generateFlightSeatPrices($flight);
 
@@ -55,7 +60,8 @@ class FlightController extends Controller
         $flight = FlightInstance::findOrFail($id);
         $schedules = Schedule::all();
         $aircraftInstances = AircraftInstance::with('aircraft')->get();
-        return view('admin.flights.edit', compact('flight', 'schedules', 'aircraftInstances'));
+        $meals = \App\Models\Meal::where('is_active', true)->orderBy('name')->get();
+        return view('admin.flights.edit', compact('flight', 'schedules', 'aircraftInstances', 'meals'));
     }
 
     public function update(Request $request, $id)
@@ -79,6 +85,12 @@ class FlightController extends Controller
 
         $oldAircraftInstanceId = $flight->aircraft_instance_id;
         $flight->update($validated);
+
+        if ($request->has('meals') && is_array($request->meals)) {
+            $flight->meals()->sync($request->meals);
+        } else {
+            $flight->meals()->sync([]);
+        }
 
         // Regenerate seat prices to sync any changes in the aircraft's seating layout or pricing rules
         $this->generateFlightSeatPrices($flight);

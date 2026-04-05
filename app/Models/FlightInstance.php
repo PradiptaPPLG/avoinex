@@ -47,6 +47,12 @@ class FlightInstance extends Model
         return $this->hasOne(FlashSale::class, 'flight_id', 'flight_instance_id');
     }
 
+    public function meals()
+    {
+        return $this->belongsToMany(Meal::class, 'flight_meals', 'flight_instance_id', 'meal_id')
+                    ->withTimestamps();
+    }
+
     public function flightInstanceCode()
     {
         if ($this->schedule) {

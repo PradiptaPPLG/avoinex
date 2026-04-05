@@ -698,6 +698,13 @@
                 </a>
             </div>
 
+            <div class="nav-item">
+                <a href="{{ route('admin.meals.index') }}" class="nav-link {{ request()->routeIs('admin.meals.*') ? 'active' : '' }}">
+                    <i class="bi bi-cup-hot nav-icon"></i>
+                    In-Flight Meals
+                </a>
+            </div>
+
             <div class="nav-section-label">Support</div>
 
             <div class="nav-item">

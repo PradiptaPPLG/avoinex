@@ -68,7 +68,8 @@ class BookingController extends Controller
         // ========== AMBIL DATA FLIGHT ==========
         $flight = FlightInstance::with([
             'schedule.originAirport',
-            'schedule.destinationAirport'
+            'schedule.destinationAirport',
+            'meals'
         ])->find($flightInstanceId);
 
         if (!$flight) {
@@ -106,7 +107,11 @@ class BookingController extends Controller
             'seat_numbers' => 'required|array',
             'seat_prices' => 'required|array',
             'baggage_weights' => 'required|array',
-            'baggage_prices' => 'required|array'
+            'baggage_prices' => 'required|array',
+            'meal_ids' => 'nullable|array',
+            'meal_prices' => 'nullable|array',
+            'has_insurances' => 'nullable|array',
+            'seat_is_vip' => 'nullable|array'
         ]);
 
         \Log::info('Validated data keys:', array_keys($validated));
@@ -181,8 +186,26 @@ class BookingController extends Controller
 
             \Log::info('Creating booking with code: ' . $bookingCode);
 
-            // Calculate base price dynamically (seats + baggage)
+            // Calculate base price dynamically (seats + baggage + meals + insurance)
             $subtotal = array_sum($validated['seat_prices']) + array_sum($validated['baggage_prices']);
+            
+            // Add meal prices if present
+            if (!empty($validated['meal_prices'])) {
+                $subtotal += array_sum($validated['meal_prices']);
+            }
+            // Add insurance prices if present
+            // Each insurance is 45.000 IDR which is $3.00 USD (assume $3.00 for backend consistency, though we can just sum a hypothetical insurance price array or manual value).
+            // Actually, we pass insurance value as 3.00 or derived from array. Let's add $3.00 for each `has_insurances` that is true if we don't have an explicit array of prices.
+            $insuranceSum = 0;
+            if (!empty($validated['has_insurances'])) {
+                foreach ($validated['has_insurances'] as $hasIns) {
+                    if ($hasIns == '1' || $hasIns == 'true' || $hasIns === true) {
+                        $insuranceSum += 3.00; // $3.00 = ~Rp 45.000
+                    }
+                }
+            }
+            $subtotal += $insuranceSum;
+
             $taxRate = 0.10;
             $serviceFee = 5.00;
             
@@ -276,6 +299,12 @@ class BookingController extends Controller
                     \Log::info('Auto-created FlightSeatPrice', ['id' => $flightSeatPrice->flight_seat_price_id, 'seat_id' => $seatId]);
                 }
 
+                $mealId = isset($validated['meal_ids'][$index]) && $validated['meal_ids'][$index] ? $validated['meal_ids'][$index] : null;
+                $mealPrice = isset($validated['meal_prices'][$index]) && $validated['meal_prices'][$index] ? floatval($validated['meal_prices'][$index]) : 0;
+                $hasInsurance = isset($validated['has_insurances'][$index]) && ($validated['has_insurances'][$index] == '1' || $validated['has_insurances'][$index] == 'true');
+                $insurancePrice = $hasInsurance ? 3.00 : 0.00;
+                $isVipSeat = isset($validated['seat_is_vip'][$index]) && ($validated['seat_is_vip'][$index] == '1' || $validated['seat_is_vip'][$index] == 'true');
+
                 BookingSeat::create([
                     'booking_id' => $booking->booking_id,
                     'flight_seat_price_id' => $flightSeatPrice->flight_seat_price_id,
@@ -287,7 +316,12 @@ class BookingController extends Controller
                     'price_at_booking' => $validated['seat_prices'][$index],
                     'special_requests' => $validated['special_requests'][$index] ?? null,
                     'baggage_weight' => $validated['baggage_weights'][$index] ?? 0,
-                    'baggage_price' => $validated['baggage_prices'][$index] ?? 0
+                    'baggage_price' => $validated['baggage_prices'][$index] ?? 0,
+                    'meal_id' => $mealId,
+                    'meal_price' => $mealPrice,
+                    'has_insurance' => $hasInsurance,
+                    'insurance_price' => $insurancePrice,
+                    'is_vip_seat_selection' => $isVipSeat
                 ]);
             }
 
@@ -427,7 +461,8 @@ class BookingController extends Controller
             'client',
             'flightInstance.schedule.originAirport',
             'flightInstance.schedule.destinationAirport',
-            'bookingSeats.seat'
+            'bookingSeats.seat',
+            'bookingSeats.meal'
         ])->findOrFail($id);
 
         return view('booking.confirmation', compact('booking'));
@@ -535,6 +570,7 @@ class BookingController extends Controller
             'flightInstance.schedule.destinationAirport',
             'flightInstance.schedule.airline',
             'bookingSeats.seat',
+            'bookingSeats.meal',
             'payment'
         ])->findOrFail($id);
 

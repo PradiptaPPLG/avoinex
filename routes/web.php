@@ -101,6 +101,7 @@ use App\Http\Controllers\Admin\CountryController;
 use App\Http\Controllers\Admin\AirlineController;
 use App\Http\Controllers\Admin\HelpController;
 use App\Http\Controllers\Admin\SiteSettingController;
+use App\Http\Controllers\Admin\MealController;
 
 Route::prefix('admin')->group(function () {
     Route::get('/', [AuthController::class , 'showLogin'])->name('admin.home');
@@ -167,6 +168,15 @@ Route::prefix('admin')->group(function () {
                     Route::delete('/{id}', [FlashSaleController::class , 'destroy'])->name('destroy');
                 }
                 );
+
+                Route::prefix('meals')->name('admin.meals.')->group(function () {
+                    Route::get('/', [MealController::class, 'index'])->name('index');
+                    Route::get('/create', [MealController::class, 'create'])->name('create');
+                    Route::post('/', [MealController::class, 'store'])->name('store');
+                    Route::get('/{meal}/edit', [MealController::class, 'edit'])->name('edit');
+                    Route::put('/{meal}', [MealController::class, 'update'])->name('update');
+                    Route::delete('/{meal}', [MealController::class, 'destroy'])->name('destroy');
+                });
 
                 Route::prefix('featured-destinations')->name('admin.featured_destinations.')->group(function () {
                     Route::get('/', [FeaturedDestinationController::class , 'index'])->name('index');

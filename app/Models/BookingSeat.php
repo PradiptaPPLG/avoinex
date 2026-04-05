@@ -23,7 +23,12 @@ class BookingSeat extends Model
         'price_at_booking',
         'special_requests',
         'baggage_weight',
-        'baggage_price'
+        'baggage_price',
+        'meal_id',
+        'meal_price',
+        'has_insurance',
+        'insurance_price',
+        'is_vip_seat_selection'
     ];
 
     public function booking()
@@ -39,6 +44,11 @@ class BookingSeat extends Model
     public function seat()
     {
         return $this->belongsTo(Seat::class, 'seat_id', 'seat_id');
+    }
+
+    public function meal()
+    {
+        return $this->belongsTo(Meal::class, 'meal_id', 'id');
     }
 
     /**

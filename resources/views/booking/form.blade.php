@@ -134,11 +134,18 @@
                         <div id="passengers-container">
                             @if(!empty($selectedSeats))
                                 @foreach($selectedSeats as $index => $seat)
-                                <div class="passenger-form border rounded p-3 mb-3">
-                                    <h6>Passenger {{ $index + 1 }} - Seat {{ $seat['number'] ?? 'N/A' }} ({{ $seat['class'] ?? 'economy' }})</h6>
+                                <div class="passenger-form border rounded p-3 mb-3" data-index="{{ $index }}">
+                                    <h6>Passenger {{ $index + 1 }} - Seat {{ $seat['number'] ?? 'N/A' }} 
+                                        @if(!empty($seat['isVipSelected']))
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> VIP Selection (+Rp 150.000)</span>
+                                        @else
+                                            <span class="text-muted">({{ ucfirst($seat['class'] ?? 'economy') }})</span>
+                                        @endif
+                                    </h6>
                                     <input type="hidden" name="seat_ids[]" value="{{ $seat['id'] ?? '' }}">
                                     <input type="hidden" name="seat_numbers[]" value="{{ $seat['number'] ?? '' }}">
-                                    <input type="hidden" name="seat_prices[]" value="{{ $seat['price'] ?? 150 }}">
+                                    <input type="hidden" name="seat_prices[]" value="{{ $seat['totalSeatPrice'] ?? ($seat['price'] ?? 150) }}">
+                                    <input type="hidden" name="seat_is_vip[]" value="{{ !empty($seat['isVipSelected']) ? '1' : '0' }}">
                                     
                                     <div class="row">
                                         <div class="col-md-4">
@@ -193,6 +200,59 @@
                                         </div>
                                         @endforeach
                                     </div>
+
+                                    <!-- Catering / Meals Section -->
+                                    @if(isset($flight->meals) && $flight->meals->count() > 0)
+                                    <hr class="mt-4 mb-3">
+                                    <h6><i class="bi bi-cup-hot text-primary"></i> In-Flight Meals</h6>
+                                    <input type="hidden" name="meal_ids[]" value="" class="meal-id-input">
+                                    <input type="hidden" name="meal_prices[]" value="0" class="meal-price-input">
+                                    
+                                    <div class="row g-2 mt-2 meal-options" data-passenger-index="{{ $index }}">
+                                        <!-- No Meal Option -->
+                                        <div class="col-6 col-md-3">
+                                            <input type="radio" class="btn-check meal-radio" name="meal_selection_{{ $index }}" id="meal_{{ $index }}_none" value="" data-price="0" data-name="No Meal" autocomplete="off" checked>
+                                            <label class="btn btn-outline-primary w-100 text-start p-2 rounded-3 h-100 d-flex flex-column align-items-center justify-content-center text-center" for="meal_{{ $index }}_none">
+                                                <i class="bi bi-x-circle text-muted mb-2" style="font-size: 2rem;"></i>
+                                                <div class="fw-bold">No Meal</div>
+                                                <div class="small text-muted">Included</div>
+                                            </label>
+                                        </div>
+                                        @foreach($flight->meals as $meal)
+                                        <div class="col-6 col-md-3">
+                                            <input type="radio" class="btn-check meal-radio" name="meal_selection_{{ $index }}" id="meal_{{ $index }}_{{ $meal->id }}" value="{{ $meal->id }}" data-price="{{ $meal->price_usd * 15000 }}" data-name="{{ $meal->name }}" autocomplete="off">
+                                            <label class="btn btn-outline-primary w-100 text-start p-2 rounded-3 h-100 d-flex flex-column" for="meal_{{ $index }}_{{ $meal->id }}">
+                                                <div class="rounded mb-2 overflow-hidden bg-light d-flex align-items-center justify-content-center" style="height: 60px;">
+                                                    @if($meal->image_path)
+                                                        <img src="{{ asset('storage/' . $meal->image_path) }}" alt="{{ $meal->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                                    @endif
+                                                </div>
+                                                <div class="fw-bold lh-sm text-truncate w-100" title="{{ $meal->name }}" style="font-size: 0.85rem;">{{ $meal->name }}</div>
+                                                <div class="small text-muted mt-auto" style="font-size: 0.8rem;">+Rp {{ number_format($meal->price_usd * 15000, 0, ',', '.') }}</div>
+                                            </label>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    @endif
+
+                                    <!-- Travel Insurance Section -->
+                                    <hr class="mt-4 mb-3">
+                                    <div class="card bg-light border-info border-opacity-50">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="form-check form-switch fs-5 flex-shrink-0 me-3">
+                                                    <input class="form-check-input insurance-toggle" type="checkbox" role="switch" id="insurance_{{ $index }}" data-passenger-index="{{ $index }}" data-price="45000">
+                                                    <input type="hidden" name="has_insurances[]" value="false" class="insurance-hidden-input">
+                                                </div>
+                                                <div>
+                                                    <label class="form-check-label fw-bold mb-1" for="insurance_{{ $index }}" style="cursor: pointer;">Avoinex Travel Protection (+Rp 45.000)</label>
+                                                    <p class="mb-0 small text-muted">Protect your trip from unexpected cancellations, flight delays, and baggage loss.</p>
+                                                </div>
+                                                <i class="bi bi-shield-check text-info ms-auto d-none d-sm-block" style="font-size: 2rem;"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                                 @endforeach
                             @else
@@ -252,14 +312,23 @@
                                 @endphp
                                 @if(!empty($selectedSeats))
                                     @foreach($selectedSeats as $seat)
-                                    @php $seatSubtotal += floatval($seat['price'] ?? 150); @endphp
+                                    @php $seatSubtotal += floatval($seat['totalSeatPrice'] ?? ($seat['price'] ?? 150)); @endphp
                                     <tr>
                                         <td class="border-0 py-1">
                                             <i class="bi bi-person-fill text-muted" style="font-size: 11px;"></i>
                                             Seat {{ $seat['number'] ?? 'N/A' }} 
-                                            <span class="text-muted">({{ ucfirst($seat['class'] ?? 'economy') }})</span>
+                                            @if(!empty($seat['isVipSelected']))
+                                                <span class="text-warning fw-bold small">(VIP)</span>
+                                            @endif
                                         </td>
-                                        <td class="text-end border-0 py-1">Rp {{ number_format($seat['price'] ?? 150, 0, ',', '.') }}</td>
+                                        <td class="text-end border-0 py-1" data-base-seat="{{ floatval($seat['totalSeatPrice'] ?? ($seat['price'] ?? 150)) }}">
+                                            Rp {{ number_format($seat['totalSeatPrice'] ?? ($seat['price'] ?? 150), 0, ',', '.') }}
+                                        </td>
+                                    </tr>
+                                    <!-- Dynamic Rows for Add-ons will be appended here by JS -->
+                                    <tr id="addon-row-{{ $index }}" style="display: none;">
+                                        <td class="border-0 py-0 pb-2 ps-3 small text-muted addon-list-{{ $index }}"></td>
+                                        <td class="border-0 py-0 pb-2 text-end small addon-price-{{ $index }}"></td>
                                     </tr>
                                     @endforeach
                                 @endif
@@ -427,15 +496,23 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     });
 
-    // --- Baggage Selection & Price Breakdown ---
+    // --- Add-ons Selection & Price Breakdown ---
     const seatSubtotal = {{ $seatSubtotal ?? 0 }};
     const TAX_RATE = 0.10;
     const SERVICE_FEE = 5.00;
-    const baggageTotals = {};
-    const summaryPrices = document.getElementById('summary-prices');
+    const addonsData = {}; // structure: addonsData[passengerIndex] = { baggage: 0, baggageLabel: '', meal: 0, mealLabel: '', insurance: 0 }
+    
+    const summaryPrices = document.getElementById('summary-prices'); // We'll append UI elements directly under each seat row!
     const summaryTax = document.getElementById('summary-tax');
     const summaryGrandTotal = document.getElementById('summary-grand-total');
 
+    // Initialize addonsData
+    document.querySelectorAll('.passenger-form').forEach(form => {
+        const idx = form.dataset.index;
+        addonsData[idx] = { baggage: 0, baggageLabel: '', meal: 0, mealLabel: '', insurance: 0 };
+    });
+
+    // 1. Baggage Observer
     document.querySelectorAll('.baggage-radio').forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {
@@ -448,36 +525,83 @@ document.addEventListener('DOMContentLoaded', function() {
                 formContainer.querySelector('.baggage-weight-input').value = weight;
                 formContainer.querySelector('.baggage-price-input').value = price;
 
-                baggageTotals[passengerIndex] = { weight, price };
+                addonsData[passengerIndex].baggage = price;
+                addonsData[passengerIndex].baggageLabel = weight > 0 ? \`+\${weight}kg Bag.\` : '';
                 updateSummary();
             }
         });
     });
 
+    // 2. Meal Observer
+    document.querySelectorAll('.meal-radio').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                const container = this.closest('.meal-options');
+                const passengerIndex = container.dataset.passengerIndex;
+                const price = parseFloat(this.dataset.price);
+                const mealId = this.value;
+                const mealName = this.dataset.name;
+
+                const formContainer = this.closest('.passenger-form');
+                formContainer.querySelector('.meal-id-input').value = mealId;
+                formContainer.querySelector('.meal-price-input').value = price;
+
+                addonsData[passengerIndex].meal = price;
+                addonsData[passengerIndex].mealLabel = mealId ? mealName : '';
+                updateSummary();
+            }
+        });
+    });
+
+    // 3. Insurance Observer
+    document.querySelectorAll('.insurance-toggle').forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const passengerIndex = this.dataset.passengerIndex;
+            const price = parseFloat(this.dataset.price);
+            
+            const formContainer = this.closest('.passenger-form');
+            formContainer.querySelector('.insurance-hidden-input').value = this.checked ? 'true' : 'false';
+
+            addonsData[passengerIndex].insurance = this.checked ? price : 0;
+            updateSummary();
+        });
+    });
+
     function updateSummary() {
-        document.querySelectorAll('.baggage-summary-row').forEach(el => el.remove());
+        let totalAddonsCost = 0;
 
-        let totalBaggageCost = 0;
+        Object.keys(addonsData).forEach(index => {
+            const rowListUi = document.querySelector(\`.addon-list-\${index}\`);
+            const rowPriceUi = document.querySelector(\`.addon-price-\${index}\`);
+            const rowContainer = document.getElementById(\`addon-row-\${index}\`);
+            
+            if(!rowListUi) return;
 
-        Object.keys(baggageTotals).forEach(index => {
-            const item = baggageTotals[index];
-            if (item.price > 0) {
-                totalBaggageCost += item.price;
-                
-                const tr = document.createElement('tr');
-                tr.className = 'baggage-summary-row';
-                tr.innerHTML = `
-                    <td class="border-0 py-1"><small class="text-muted"><i class="bi bi-suitcase" style="font-size:10px;"></i> Pass ${parseInt(index) + 1} Baggage (${item.weight}kg)</small></td>
-                    <td class="text-end border-0 py-1"><small class="text-muted">+Rp ${item.price.toLocaleString('id-ID')}</small></td>
-                `;
-                summaryPrices.appendChild(tr);
+            const item = addonsData[index];
+            let listHtml = [];
+            let rowAddonCost = 0;
+
+            if (item.baggage > 0) { listHtml.push(\`<i class="bi bi-suitcase me-1"></i> \${item.baggageLabel}\`); rowAddonCost += item.baggage; }
+            if (item.meal > 0) { listHtml.push(\`<i class="bi bi-cup-hot me-1"></i> \${item.mealLabel}\`); rowAddonCost += item.meal; }
+            if (item.insurance > 0) { listHtml.push(\`<i class="bi bi-shield-check me-1"></i> Travel Ins.\`); rowAddonCost += item.insurance; }
+
+            totalAddonsCost += rowAddonCost;
+
+            if (listHtml.length > 0) {
+                rowListUi.innerHTML = listHtml.join('<br>');
+                rowPriceUi.innerHTML = '+Rp ' + rowAddonCost.toLocaleString('id-ID');
+                rowContainer.style.display = 'table-row';
+            } else {
+                rowContainer.style.display = 'none';
+                rowListUi.innerHTML = '';
+                rowPriceUi.innerHTML = '';
             }
         });
 
         // Recalculate with tax
-        const subtotalWithBaggage = seatSubtotal + totalBaggageCost;
-        const tax = subtotalWithBaggage * TAX_RATE;
-        const grandTotal = subtotalWithBaggage + tax + SERVICE_FEE;
+        const subtotalWithAddons = seatSubtotal + totalAddonsCost;
+        const tax = subtotalWithAddons * TAX_RATE;
+        const grandTotal = subtotalWithAddons + tax + SERVICE_FEE;
 
         if (summaryTax) summaryTax.textContent = 'Rp ' + tax.toLocaleString('id-ID');
         if (summaryGrandTotal) summaryGrandTotal.textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');

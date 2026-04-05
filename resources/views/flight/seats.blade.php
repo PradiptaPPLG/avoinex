@@ -229,13 +229,33 @@
                 {{-- =============================== --}}
                 {{-- MAIN CABIN (ECONOMY / PREFERRED) --}}
                 {{-- =============================== --}}
-                <div class="economy-section">
-                    <h5 class="text-success mb-3">
+                <div class="economy-section position-relative pb-4" id="economySectionWrap">
+                    <!-- VIP PAYWALL OVERLAY -->
+                    <div id="economyOverlay" class="position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center px-3" style="z-index: 10; background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); top: 0; left: 0; border-radius: 12px;">
+                        <div class="bg-white p-4 rounded-4 shadow border text-center" style="max-width: 450px;">
+                            <div class="mb-3">
+                                <i class="bi bi-lock-fill text-warning" style="font-size: 2.5rem;"></i>
+                            </div>
+                            <h4 class="fw-bold mb-2">Economy Seat Selection</h4>
+                            <p class="text-muted small mb-4">You can randomly be assigned a seat for free during check-in, or pay a VIP Selection Fee to pick your exact seat right now.</p>
+                            
+                            <div class="d-grid gap-3">
+                                <button type="button" class="btn btn-outline-primary" id="btnRandomSeat">
+                                    <i class="bi bi-shuffle me-2"></i> Random Assignment (Free)
+                                </button>
+                                <button type="button" class="btn btn-warning fw-bold text-dark" id="btnUnlockVip">
+                                    <i class="bi bi-star-fill me-2"></i> Unlock Selection (+ Rp 150.000/seat)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="text-success mb-3 px-3">
                         <i class="bi bi-person-fill"></i> Main Cabin
                         <small class="text-muted ms-2">Rows {{ $econStart }}-{{ $totalRows }}</small>
                     </h5>
                     
-                    <div class="seat-map">
+                    <div class="seat-map px-3">
                         @for($row = $econStart; $row <= $totalRows; $row++)
                             @php
                                 $isPreferred = $prefEnabled && $row >= $prefStart && $row <= $prefEnd;
@@ -907,9 +927,53 @@ function initializeSeatSelection() {
     console.log('🔄 Initializing seat selection...');
     selectedSeats = [];
     totalPrice = 0;
+    
+    // Clear JS state
+    document.querySelectorAll('.seat-item').forEach(s => s.classList.remove('selected'));
+    document.getElementById('economySectionWrap')?.classList.remove('vip-unlocked');
+    document.getElementById('economyOverlay').style.display = 'flex';
+    isVipEconomyUnlocked = false;
+
     updateUI();
     console.log('✅ Initialization complete');
 }
+
+let isVipEconomyUnlocked = false;
+const VIP_SEAT_FEE = 150000;
+
+document.getElementById('btnUnlockVip')?.addEventListener('click', function() {
+    isVipEconomyUnlocked = true;
+    document.getElementById('economyOverlay').style.display = 'none';
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: 'Manual Seat Selection Unlocked',
+        showConfirmButton: false,
+        timer: 3000
+    });
+});
+
+document.getElementById('btnRandomSeat')?.addEventListener('click', function() {
+    // Collect all available economy seats
+    const allEcon = Array.from(document.querySelectorAll('.seat-item[data-class="economy"], .seat-item[data-class="preferred"]'));
+    if (allEcon.length < REQUIRED_SEATS) {
+        Swal.fire('Error', 'Not enough economy seats available!', 'error');
+        return;
+    }
+    
+    // Pick random seats
+    const shuffled = allEcon.sort(() => 0.5 - Math.random());
+    const picked = shuffled.slice(0, REQUIRED_SEATS);
+    
+    // Clear existing
+    handleClearSeats(true);
+    
+    // Check them silently
+    picked.forEach(seatEl => {
+        handleSeatClick(seatEl, true); // true = isRandom (no VIP fee)
+    });
+});
 
 document.addEventListener('click', function(event) {
     if (event.target.closest('.seat-item')) {
@@ -924,18 +988,40 @@ document.addEventListener('click', function(event) {
     }
 });
 
-function handleSeatClick(seatElement) {
+function handleSeatClick(seatElement, isRandom = false) {
     const seatId = seatElement.dataset.seatId;
     const seatNumber = seatElement.dataset.seatNumber;
-    const price = parseFloat(seatElement.dataset.price);
+    let basePriceUsd = parseFloat(seatElement.dataset.price);
     
-    console.log(`🪑 Seat clicked: ${seatNumber} (Rp ${price})`);
+    // Conversion rate USD to IDR for visual purposes (assume 15000)
+    // Wait, the page sets data-price in USD but visual is Rp.
+    // The previous code had the base price parsed directly from dataset.price which was actually USD!
+    // Ah, wait, if data-price is 150, the UI showed Rp 150.000 in JS?
+    // Let's use the data-price as is, but we ADD the VIP fee.
+    let finalPrice = basePriceUsd * 15000; // Let's strictly convert dataset price to IDR internally if it's in USD.
+    // Actually the backend sends dataset.price as USD (e.g. 150.00), so we multiply by 15000 to get IDR.
+    finalPrice = basePriceUsd * 15000;
+    
+    const isEconomy = seatElement.dataset.class === 'economy' || seatElement.dataset.class === 'preferred';
+    
+    // If it's an economy seat selected manually (not random)
+    let appliedVipFee = 0;
+    if (isEconomy && !isRandom && isVipEconomyUnlocked) {
+        appliedVipFee = VIP_SEAT_FEE;
+    }
+
+    const totalSeatPrice = finalPrice + appliedVipFee;
+    
+    console.log(`🪑 Seat clicked: ${seatNumber} (Base: Rp ${finalPrice}, VIP Fee: Rp ${appliedVipFee})`);
     
     if (seatElement.classList.contains('selected')) {
         // Deselect
         seatElement.classList.remove('selected');
-        selectedSeats = selectedSeats.filter(s => s.id !== seatId);
-        totalPrice -= price;
+        const removedSeat = selectedSeats.find(s => s.id === seatId);
+        if (removedSeat) {
+            totalPrice -= removedSeat.totalSeatPrice;
+            selectedSeats = selectedSeats.filter(s => s.id !== seatId);
+        }
         console.log(`➖ Deselected: ${seatNumber}`);
     } else {
         // Check against required seats limit
@@ -946,7 +1032,7 @@ function handleSeatClick(seatElement) {
             if (oldestSeatElement) {
                 oldestSeatElement.classList.remove('selected');
             }
-            totalPrice -= oldestSeat.price;
+            totalPrice -= oldestSeat.totalSeatPrice;
             console.log(`➖ Auto-deselected: ${oldestSeat.number}`);
         }
         
@@ -954,9 +1040,12 @@ function handleSeatClick(seatElement) {
         selectedSeats.push({
             id: seatId,
             number: seatNumber,
-            price: price
+            price: finalPrice, // sending original converted IDR price
+            vipFee: appliedVipFee,
+            totalSeatPrice: totalSeatPrice,
+            isVipSelected: appliedVipFee > 0
         });
-        totalPrice += price;
+        totalPrice += totalSeatPrice;
         console.log(`➕ Selected: ${seatNumber} (${selectedSeats.length}/${REQUIRED_SEATS})`);
     }
     
@@ -972,13 +1061,13 @@ function toggleSeatDisabledState() {
     });
 }
 
-function handleClearSeats() {
+function handleClearSeats(bypassConfirm = false) {
     if (selectedSeats.length === 0) {
-        alert('No seats to clear');
+        if(!bypassConfirm) alert('No seats to clear');
         return;
     }
     
-    if (confirm('Clear all selected seats?')) {
+    if (bypassConfirm || confirm('Clear all selected seats?')) {
         document.querySelectorAll('.seat-item.selected').forEach(seat => {
             seat.classList.remove('selected');
         });
@@ -1105,16 +1194,17 @@ function updateSeatList() {
     
     let html = '<div class="row">';
     selectedSeats.forEach((seat, index) => {
+        let vipBadge = seat.isVipSelected ? `<span class="badge bg-warning text-dark ms-2" style="font-size: 0.65rem;">VIP Seat +Rp150k</span>` : '';
         html += `
             <div class="col-md-4 mb-2">
                 <div class="border rounded p-2 bg-light">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <strong class="fs-5">${seat.number}</strong>
+                            <strong class="fs-5">${seat.number}</strong> ${vipBadge}
                             <div class="small text-muted">Passenger ${index + 1}</div>
                         </div>
                         <div class="text-end">
-                            <span class="text-primary fw-bold">Rp ${seat.price.toLocaleString('id-ID')}</span>
+                            <span class="text-primary fw-bold">Rp ${seat.totalSeatPrice.toLocaleString('id-ID')}</span>
                         </div>
                     </div>
                 </div>
