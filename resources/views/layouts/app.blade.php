@@ -1378,5 +1378,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @include('chatbot')
 
+@stack('scripts')
 </body>
 </html>

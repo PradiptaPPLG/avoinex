@@ -1382,5 +1382,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <?php echo $__env->make('chatbot', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
+<?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html><?php /**PATH C:\xampp\htdocs\Avoinex\resources\views/layouts/app.blade.php ENDPATH**/ ?>
