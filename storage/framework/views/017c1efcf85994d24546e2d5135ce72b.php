@@ -698,6 +698,13 @@
                 </a>
             </div>
 
+            <div class="nav-item">
+                <a href="<?php echo e(route('admin.meals.index')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.meals.*') ? 'active' : ''); ?>">
+                    <i class="bi bi-cup-hot nav-icon"></i>
+                    In-Flight Meals
+                </a>
+            </div>
+
             <div class="nav-section-label">Support</div>
 
             <div class="nav-item">

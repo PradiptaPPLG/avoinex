@@ -988,69 +988,69 @@ document.addEventListener('click', function(event) {
     }
 });
 
-function handleSeatClick(seatElement, isRandom = false) {
-    const seatId = seatElement.dataset.seatId;
-    const seatNumber = seatElement.dataset.seatNumber;
-    let basePriceUsd = parseFloat(seatElement.dataset.price);
-    
-    // Conversion rate USD to IDR for visual purposes (assume 15000)
-    // Wait, the page sets data-price in USD but visual is Rp.
-    // The previous code had the base price parsed directly from dataset.price which was actually USD!
-    // Ah, wait, if data-price is 150, the UI showed Rp 150.000 in JS?
-    // Let's use the data-price as is, but we ADD the VIP fee.
-    let finalPrice = basePriceUsd * 15000; // Let's strictly convert dataset price to IDR internally if it's in USD.
-    // Actually the backend sends dataset.price as USD (e.g. 150.00), so we multiply by 15000 to get IDR.
-    finalPrice = basePriceUsd * 15000;
-    
-    const isEconomy = seatElement.dataset.class === 'economy' || seatElement.dataset.class === 'preferred';
-    
-    // If it's an economy seat selected manually (not random)
-    let appliedVipFee = 0;
-    if (isEconomy && !isRandom && isVipEconomyUnlocked) {
-        appliedVipFee = VIP_SEAT_FEE;
-    }
-
-    const totalSeatPrice = finalPrice + appliedVipFee;
-    
-    console.log(`🪑 Seat clicked: ${seatNumber} (Base: Rp ${finalPrice}, VIP Fee: Rp ${appliedVipFee})`);
-    
-    if (seatElement.classList.contains('selected')) {
-        // Deselect
-        seatElement.classList.remove('selected');
-        const removedSeat = selectedSeats.find(s => s.id === seatId);
-        if (removedSeat) {
-            totalPrice -= removedSeat.totalSeatPrice;
-            selectedSeats = selectedSeats.filter(s => s.id !== seatId);
+    function handleSeatClick(seatElement, isRandom = false) {
+        const seatId = seatElement.dataset.seatId;
+        const seatNumber = seatElement.dataset.seatNumber;
+        let basePriceUsd = parseFloat(seatElement.dataset.price);
+        
+        // Conversion rate USD to IDR for visual purposes (assume 15000)
+        // Wait, the page sets data-price in USD but visual is Rp.
+        // The previous code had the base price parsed directly from dataset.price which was actually USD!
+        // Ah, wait, if data-price is 150, the UI showed Rp 150.000 in JS?
+        // Let's use the data-price as is, but we ADD the VIP fee.
+        let finalPrice = basePriceUsd * 15000; // Let's strictly convert dataset price to IDR internally if it's in USD.
+        // Actually the backend sends dataset.price as USD (e.g. 150.00), so we multiply by 15000 to get IDR.
+        finalPrice = basePriceUsd * 15000;
+        
+        const isEconomy = seatElement.dataset.class === 'economy' || seatElement.dataset.class === 'preferred';
+        
+        // If it's an economy seat selected manually (not random)
+        let appliedVipFee = 0;
+        if (isEconomy && !isRandom && isVipEconomyUnlocked) {
+            appliedVipFee = VIP_SEAT_FEE;
         }
-        console.log(`➖ Deselected: ${seatNumber}`);
-    } else {
-        // Check against required seats limit
-        if (selectedSeats.length >= REQUIRED_SEATS) {
-            // Auto-cancel the earliest selected seat
-            const oldestSeat = selectedSeats.shift();
-            const oldestSeatElement = document.querySelector(`.seat-item[data-seat-id="${oldestSeat.id}"]`);
-            if (oldestSeatElement) {
-                oldestSeatElement.classList.remove('selected');
+
+        const totalSeatPrice = finalPrice + appliedVipFee;
+        
+        console.log(`🪑 Seat clicked: ${seatNumber} (Base: Rp ${finalPrice}, VIP Fee: Rp ${appliedVipFee})`);
+        
+        if (seatElement.classList.contains('selected')) {
+            // Deselect
+            seatElement.classList.remove('selected');
+            const removedSeat = selectedSeats.find(s => s.id === seatId);
+            if (removedSeat) {
+                totalPrice -= removedSeat.totalSeatPrice;
+                selectedSeats = selectedSeats.filter(s => s.id !== seatId);
             }
-            totalPrice -= oldestSeat.totalSeatPrice;
-            console.log(`➖ Auto-deselected: ${oldestSeat.number}`);
+            console.log(`➖ Deselected: ${seatNumber}`);
+        } else {
+            // Check against required seats limit
+            if (selectedSeats.length >= REQUIRED_SEATS) {
+                // Auto-cancel the earliest selected seat
+                const oldestSeat = selectedSeats.shift();
+                const oldestSeatElement = document.querySelector(`.seat-item[data-seat-id="${oldestSeat.id}"]`);
+                if (oldestSeatElement) {
+                    oldestSeatElement.classList.remove('selected');
+                }
+                totalPrice -= oldestSeat.totalSeatPrice;
+                console.log(`➖ Auto-deselected: ${oldestSeat.number}`);
+            }
+            
+            seatElement.classList.add('selected');
+            selectedSeats.push({
+                id: seatId,
+                number: seatNumber,
+                price: finalPrice, // sending original converted IDR price
+                vipFee: appliedVipFee,
+                totalSeatPrice: totalSeatPrice,
+                isVipSelected: appliedVipFee > 0
+            });
+            totalPrice += totalSeatPrice;
+            console.log(`➕ Selected: ${seatNumber} (${selectedSeats.length}/${REQUIRED_SEATS})`);
         }
         
-        seatElement.classList.add('selected');
-        selectedSeats.push({
-            id: seatId,
-            number: seatNumber,
-            price: finalPrice, // sending original converted IDR price
-            vipFee: appliedVipFee,
-            totalSeatPrice: totalSeatPrice,
-            isVipSelected: appliedVipFee > 0
-        });
-        totalPrice += totalSeatPrice;
-        console.log(`➕ Selected: ${seatNumber} (${selectedSeats.length}/${REQUIRED_SEATS})`);
+        updateUI();
     }
-    
-    updateUI();
-}
 
 function toggleSeatDisabledState() {
     // We no longer disable unselected seats when max is reached.
