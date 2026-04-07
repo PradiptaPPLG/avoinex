@@ -89,7 +89,7 @@
                     
                     <h6 class="mt-4" style="font-weight: 700;">Passengers & Price Breakdown</h6>
                     @php
-                        $exchangeRate = config('app.usd_to_idr', 15000);
+                        $exchangeRate = config('app.usd_to_idr', 15500);
                         $seatSubtotal = 0;
                         $baggageTotal = 0;
                         $mealTotal = 0;

@@ -59,7 +59,7 @@
 @endpush
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 avx-reveal avx-delay-100">
     <div class="quick-nav">
         <!-- Quick Navigation -->
         <h6 class="text-muted fw-bold text-uppercase mb-2" style="font-size: 11px; letter-spacing: 0.05em;">
@@ -84,7 +84,7 @@
 
 <div class="accordion" id="helpAccordion">
     <!-- System Overview -->
-    <div class="accordion-item">
+    <div class="accordion-item avx-reveal avx-delay-150">
         <h2 class="accordion-header" id="headingOne">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                 <i class="bi bi-info-circle me-2"></i> {{ $lang === 'id' ? 'Gambaran Sistem' : 'System Overview' }}
@@ -104,7 +104,7 @@
     </div>
 
     <!-- Admin Workflow -->
-    <div class="accordion-item">
+    <div class="accordion-item avx-reveal avx-delay-200">
         <h2 class="accordion-header" id="headingTwo">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                 <i class="bi bi-diagram-3 me-2"></i> {{ $lang === 'id' ? 'Alur Kerja Administrator (Workflow)' : 'Admin Workflow' }}
@@ -136,7 +136,7 @@
     </div>
 
     <!-- Form Input Guide -->
-    <div class="accordion-item">
+    <div class="accordion-item avx-reveal avx-delay-250">
         <h2 class="accordion-header" id="headingThree">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                 <i class="bi bi-pencil-square me-2"></i> {{ $lang === 'id' ? 'Panduan Pengisian Form' : 'Form Input Guide' }}
@@ -182,7 +182,7 @@
     </div>
 
     <!-- Seat System Explanation -->
-    <div class="accordion-item">
+    <div class="accordion-item avx-reveal avx-delay-300">
         <h2 class="accordion-header" id="headingFour">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
                 <i class="bi bi-grid-3x3 me-2"></i> {{ $lang === 'id' ? 'Penjelasan Sistem Zonasi Kursi' : 'Seat System Explanation' }}
@@ -216,7 +216,7 @@
     </div>
 
     <!-- Terminology / Glossary -->
-    <div class="accordion-item">
+    <div class="accordion-item avx-reveal avx-delay-350">
         <h2 class="accordion-header" id="headingFive">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
                 <i class="bi bi-journal-text me-2"></i> {{ $lang === 'id' ? 'Daftar Istilah (Glosarium)' : 'Terminology / Glossary' }}
@@ -246,7 +246,7 @@
     </div>
 
     <!-- Sidebar Explanation -->
-    <div class="accordion-item">
+    <div class="accordion-item avx-reveal avx-delay-400">
         <h2 class="accordion-header" id="headingSix">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
                 <i class="bi bi-layout-sidebar me-2"></i> {{ $lang === 'id' ? 'Fungsi Menu Panel' : 'Sidebar Menu Explanation' }}
@@ -278,7 +278,7 @@
     </div>
     
     <!-- Troubleshooting -->
-    <div class="accordion-item">
+    <div class="accordion-item avx-reveal avx-delay-450">
         <h2 class="accordion-header" id="headingSeven">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
                 <i class="bi bi-wrench-adjustable me-2"></i> {{ $lang === 'id' ? 'Pemecahan Masalah (Troubleshooting)' : 'Troubleshooting Issues' }}

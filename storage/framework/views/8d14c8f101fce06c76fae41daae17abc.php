@@ -4,11 +4,11 @@
 <div class="avx-support-bg pb-5">
     <!-- Header Hero Section -->
     <div class="avx-support-hero text-center text-white pb-5 pt-0">
-        <div class="container py-5">
+        <div class="container py-5 avx-reveal">
             <h1 class="display-5 fw-bold mb-3">How can we help you?</h1>
             <p class="lead mb-4 opacity-75">Search our knowledge base or browse categories below</p>
             
-            <div class="row justify-content-center">
+            <div class="row justify-content-center avx-reveal avx-delay-100">
                 <div class="col-md-8 col-lg-6">
                     <div class="input-group input-group-lg shadow-sm">
                         <span class="input-group-text bg-white border-0 text-muted px-4">
@@ -25,7 +25,7 @@
     <div class="container" style="margin-top: -40px;">
         <!-- Quick Links Cards -->
         <div class="row g-4 mb-5 justify-content-center">
-            <div class="col-md-4">
+            <div class="col-md-4 avx-reveal avx-delay-100">
                 <a href="<?php echo e(route('booking.index')); ?>" class="text-decoration-none">
                     <div class="card h-100 avx-support-card border-0 shadow-sm text-center p-4">
                         <div class="avx-icon-circle bg-primary bg-opacity-10 text-primary mx-auto mb-3">
@@ -36,7 +36,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 avx-reveal avx-delay-200">
                 <a href="<?php echo e(route('booking.find.form')); ?>" class="text-decoration-none">
                     <div class="card h-100 avx-support-card border-0 shadow-sm text-center p-4">
                         <div class="avx-icon-circle bg-success bg-opacity-10 text-success mx-auto mb-3">
@@ -47,7 +47,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 avx-reveal avx-delay-300">
                 <a href="#" class="text-decoration-none">
                     <div class="card h-100 avx-support-card border-0 shadow-sm text-center p-4">
                         <div class="avx-icon-circle bg-warning bg-opacity-10 text-warning mx-auto mb-3">
@@ -61,7 +61,7 @@
         </div>
 
         <!-- FAQ Section -->
-        <div class="card border-0 shadow-sm mb-5 rounded-4 overflow-hidden avx-faq-card">
+        <div class="card border-0 shadow-sm mb-5 rounded-4 overflow-hidden avx-faq-card avx-reveal">
             <div class="card-header bg-white border-0 p-4 pb-0 d-flex justify-content-between align-items-center flex-wrap">
                 <h3 class="fw-bold mb-0"><i class="bi bi-question-circle text-primary me-2"></i> Frequently Asked Questions</h3>
                 <span id="noResultsMsg" class="text-muted small d-none mt-2 mt-md-0">No results found</span>
@@ -130,9 +130,9 @@
         </div>
 
         <!-- Contact Support -->
-        <h3 class="fw-bold mb-4 text-center">Contact Support</h3>
+        <h3 class="fw-bold mb-4 text-center avx-reveal">Contact Support</h3>
         <div class="row g-4 mb-5">
-            <div class="col-md-4">
+            <div class="col-md-4 avx-reveal avx-delay-100">
                 <div class="card h-100 avx-contact-card border-0 shadow-sm rounded-4 p-4 text-center">
                     <div class="avx-contact-icon mx-auto mb-3 bg-success bg-opacity-10 text-success">
                         <i class="bi bi-whatsapp fs-3"></i>
@@ -146,7 +146,7 @@
                     <a href="https://wa.me/6285219583336?text=Halo%20Avoinex%2C%20saya%20butuh%20bantuan%20terkait%20booking%20saya" target="_blank" class="btn btn-success fw-bold px-4 rounded-pill mt-auto">Open Chat</a>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 avx-reveal avx-delay-200">
                 <div class="card h-100 avx-contact-card border-0 shadow-sm rounded-4 p-4 text-center">
                     <div class="avx-contact-icon mx-auto mb-3 bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-chat-dots-fill fs-3"></i>
@@ -159,7 +159,7 @@
                     <button class="btn btn-outline-primary fw-bold px-4 rounded-pill mt-auto" onclick="toggleChatbot()">Start Live Chat</button>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 avx-reveal avx-delay-300">
                 <div class="card h-100 avx-contact-card border-0 shadow-sm rounded-4 p-4 text-center">
                     <div class="avx-contact-icon mx-auto mb-3 bg-info bg-opacity-10 text-info">
                         <i class="bi bi-envelope-paper-fill fs-3"></i>
@@ -290,6 +290,22 @@
 .faq-item {
     transition: all 0.2s ease;
 }
+
+/* Scroll Reveal Animations */
+.avx-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: opacity, transform;
+}
+.avx-reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+.avx-delay-100 { transition-delay: 100ms; }
+.avx-delay-200 { transition-delay: 200ms; }
+.avx-delay-300 { transition-delay: 300ms; }
+.avx-delay-400 { transition-delay: 400ms; }
 
 /* Floating WA Button */
 .avx-floating-wa {
@@ -472,11 +488,30 @@ document.addEventListener('DOMContentLoaded', function() {
     searchBtn.addEventListener('click', filterFAQs);
 });
 
-// Chatbot Toggle
-function toggleChatbot() {
-    const container = document.getElementById('chatbotContainer');
-    container.classList.toggle('active');
-}
+    // Chatbot Toggle
+    function toggleChatbot() {
+        const container = document.getElementById('chatbotContainer');
+        container.classList.toggle('active');
+    }
+
+    // Intersection Observer for Scroll Reveal
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px -50px 0px',
+        threshold: 0.1
+    };
+    
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    const revealElements = document.querySelectorAll('.avx-reveal');
+    revealElements.forEach(el => observer.observe(el));
 </script>
 <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>

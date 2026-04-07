@@ -31,8 +31,8 @@
                             <tr>
                                 <th>Booking Code</th>
                                 <th>Booking Date</th>
-                                <th>Flight Number</th>
-                                <th>Route</th>
+                                <th class="text-center">Flight Number</th>
+                                <th class="text-center">Route</th>
                                 <th>Flight Date</th>
                                 <th>Total Price</th>
                                 <th>Status</th>
@@ -44,18 +44,38 @@
                             <tr>
                                 <td><strong><?php echo e($booking->booking_code); ?></strong></td>
                                 <td><?php echo e($booking->created_at->format('d M Y H:i')); ?></td>
-                                <td><?php echo e($booking->flightInstance->schedule->flight_number); ?></td>
-                                <td>
-                                    <?php echo e($booking->flightInstance->schedule->originAirport->city); ?> (<?php echo e($booking->flightInstance->schedule->originAirport->iata_code); ?>)
-                                    →
-                                    <?php echo e($booking->flightInstance->schedule->destinationAirport->city); ?> (<?php echo e($booking->flightInstance->schedule->destinationAirport->iata_code); ?>)
+                                <td class="text-center">
+                                    <span class="badge bg-light text-primary border px-3 py-2" style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">
+                                        <?php echo e($booking->flightInstance->schedule->flight_number); ?>
+
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="fw-bold text-dark">
+                                        <?php echo e($booking->flightInstance->schedule->originAirport->iata_code); ?>
+
+                                        <i class="bi bi-arrow-right mx-1 text-muted"></i>
+                                        <?php echo e($booking->flightInstance->schedule->destinationAirport->iata_code); ?>
+
+                                    </div>
+                                    <div class="small text-muted" style="font-size: 11px;">
+                                        <?php echo e($booking->flightInstance->schedule->originAirport->city); ?> to <?php echo e($booking->flightInstance->schedule->destinationAirport->city); ?>
+
+                                    </div>
                                 </td>
                                 <td><?php echo e($booking->flightInstance->flight_date->format('d M Y')); ?></td>
                                 <td>
-                                    <div>Rp <?php echo e(number_format($booking->total_price_usd, 0, ',', '.')); ?></div>
-                                    <?php if($booking->bookingSeats->sum('baggage_weight') > 0): ?>
-                                        <div class="small text-muted"><i class="bi bi-suitcase"></i> Includes Baggage</div>
-                                    <?php endif; ?>
+                                    <?php $exchangeRate = config('app.usd_to_idr', 15500); ?>
+                                    <div class="fw-bold text-primary">Rp <?php echo e(number_format($booking->total_price_usd * $exchangeRate, 0, ',', '.')); ?></div>
+                                    <div class="mt-1 d-flex align-items-center gap-1" title="<?php echo e($booking->bookingSeats->sum('baggage_weight') > 0 ? 'Baggage Included' : 'No Baggage'); ?>">
+                                        <?php if($booking->bookingSeats->sum('baggage_weight') > 0): ?>
+                                            <i class="bi bi-record-circle-fill text-success" style="font-size: 12px;"></i>
+                                            <span class="text-muted" style="font-size: 11px;">Baggage</span>
+                                        <?php else: ?>
+                                            <i class="bi bi-circle text-muted" style="font-size: 12px;"></i>
+                                            <span class="text-muted" style="font-size: 11px;">No Baggage</span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td>
                                     
@@ -67,7 +87,8 @@
                                         <span class="badge bg-info"><i class="bi bi-arrow-counterclockwise me-1"></i>Refunded</span>
                                         <?php if($booking->refund_amount_usd): ?>
                                             <div class="small text-success mt-1">
-                                                <i class="bi bi-cash-coin"></i> Rp <?php echo e(number_format($booking->refund_amount_usd, 0, ',', '.')); ?>
+                                                <?php $exchangeRate = config('app.usd_to_idr', 15500); ?>
+                                                <i class="bi bi-cash-coin"></i> Rp <?php echo e(number_format($booking->refund_amount_usd * $exchangeRate, 0, ',', '.')); ?>
 
                                             </div>
                                         <?php endif; ?>
@@ -170,7 +191,8 @@
                         <div class="alert alert-info mb-3">
                             <i class="bi bi-info-circle me-1"></i>
                             <strong>Booking:</strong> <?php echo e($booking->booking_code); ?><br>
-                            <strong>Total Bayar:</strong> Rp <?php echo e(number_format($booking->total_price_usd, 0, ',', '.')); ?>
+                            <strong>Total Bayar:</strong> <?php $exchangeRate = config('app.usd_to_idr', 15500); ?>
+                            Rp <?php echo e(number_format($booking->total_price_usd * $exchangeRate, 0, ',', '.')); ?>
 
                         </div>
 
@@ -205,5 +227,29 @@
     <?php endif; ?>
 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 <?php $__env->stopSection(); ?>
+
+<?php $__env->startPush('styles'); ?>
+<style>
+    .table > :not(caption) > * > * {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+    }
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: none;
+    }
+    .card-header {
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
+    }
+    .badge {
+        padding: 0.5em 0.8em;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+</style>
+<?php $__env->stopPush(); ?>
 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\Avoinex\resources\views/booking/index.blade.php ENDPATH**/ ?>

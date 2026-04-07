@@ -943,7 +943,8 @@ function initializeSeatSelection() {
 
 // Handled globally now
 
-document.getElementById('btnUnlockVip')?.addEventListener('click', function() {
+// Global function to unlock VIP mapping
+window.unlockVipSelection = function() {
     isVipEconomyUnlocked = true;
     const overlay = document.getElementById('economyOverlay');
     if (overlay) {
@@ -958,9 +959,14 @@ document.getElementById('btnUnlockVip')?.addEventListener('click', function() {
         showConfirmButton: false,
         timer: 3000
     });
+};
+
+document.getElementById('btnUnlockVip')?.addEventListener('click', function() {
+    unlockVipSelection();
 });
 
-document.getElementById('btnRandomSeat')?.addEventListener('click', function() {
+// Global function to assign random seats
+window.assignRandomSeats = function() {
     // Collect all available economy seats
     const allEcon = Array.from(document.querySelectorAll('.seat-item[data-class="economy"], .seat-item[data-class="preferred"]'));
     if (allEcon.length < REQUIRED_SEATS) {
@@ -980,12 +986,40 @@ document.getElementById('btnRandomSeat')?.addEventListener('click', function() {
         handleSeatClick(seatEl, true); // true = isRandom (no VIP fee)
     });
 
-    // Hide overlay
+    // Update overlay to show "Success" state instead of hiding
     const overlay = document.getElementById('economyOverlay');
     if (overlay) {
-        overlay.classList.add('d-none');
-        overlay.style.setProperty('display', 'none', 'important');
+        const overlayContent = overlay.querySelector('.bg-white');
+        if (overlayContent) {
+            overlayContent.innerHTML = `
+                <div class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 2.5rem;"></i>
+                </div>
+                <h4 class="fw-bold mb-2">Random Seats Assigned</h4>
+                <p class="text-muted small mb-4">We've picked the best available seats for you. You can see them in the summary below.</p>
+                
+                <div class="d-grid gap-3">
+                    <button type="button" class="btn btn-warning fw-bold text-dark" onclick="unlockVipSelection()">
+                        <i class="bi bi-star-fill me-2"></i> Change to VIP Selection (+ Rp 150.000/seat)
+                    </button>
+                    <p class="small text-muted mb-0">The seat map will remain blurred for protection.</p>
+                </div>
+            `;
+        }
     }
+
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'info',
+        title: 'Random Seats Assigned',
+        showConfirmButton: false,
+        timer: 3000
+    });
+};
+
+document.getElementById('btnRandomSeat')?.addEventListener('click', function() {
+    assignRandomSeats();
 });
 
 document.addEventListener('click', function(event) {
@@ -1097,6 +1131,47 @@ function handleClearSeats(bypassConfirm = false) {
         selectedSeats = [];
         totalPrice = 0;
         console.log('🗑️ All seats cleared');
+        
+        // RESET OVERLAY if it was showing the "Random" success screen
+        if (!isVipEconomyUnlocked) {
+            const overlay = document.getElementById('economyOverlay');
+            if (overlay) {
+                const overlayContent = overlay.querySelector('.bg-white');
+                if (overlayContent) {
+                    overlayContent.innerHTML = `
+                        <div class="mb-4">
+                            <i class="bi bi-lock-fill text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Economy Seat Selection</h4>
+                        <p class="text-muted small mb-4 px-3">Seat selection for economy class is locked. You can choose a random assignment for free, or unlock manual selection for a premium fee.</p>
+                        
+                        <div class="d-grid gap-3 px-3">
+                            <button type="button" class="btn btn-primary fw-bold py-3" id="btnRandomSeat">
+                                <i class="bi bi-shuffle me-2"></i> Random Assignment (Free)
+                            </button>
+                            <div class="text-center">
+                                <span class="bg-white px-2 text-muted small position-relative" style="z-index: 1;">OR</span>
+                                <hr class="mt-n2" style="margin-top: -10px;">
+                            </div>
+                            <button type="button" class="btn btn-warning fw-bold py-3 text-dark" id="btnUnlockVip">
+                                <i class="bi bi-star-fill me-2"></i> Unlock Selection (+ Rp 150.000/seat)
+                            </button>
+                        </div>
+                        
+                        <p class="mt-4 small text-muted mb-0">VIP Manual selection allows you to choose any available seat.</p>
+                    `;
+                    
+                    // Re-attach listeners to the fresh elements
+                    document.getElementById('btnRandomSeat')?.addEventListener('click', function() {
+                        assignRandomSeats();
+                    });
+                     document.getElementById('btnUnlockVip')?.addEventListener('click', function() {
+                        unlockVipSelection();
+                    });
+                }
+            }
+        }
+        
         updateUI();
     }
 }

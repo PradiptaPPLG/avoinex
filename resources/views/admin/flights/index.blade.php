@@ -5,7 +5,7 @@
 
 @section('content')
 
-<div class="card">
+<div class="card avx-reveal">
     <div class="card-header d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-2">
             <i class="bi bi-airplane-engines-fill text-primary"></i>

@@ -5,7 +5,7 @@
 
 
 <div class="row g-3 mb-4">
-    <div class="col-md-6 col-xl-3">
+    <div class="col-md-6 col-xl-3 avx-reveal avx-delay-100">
         <div class="stat-card">
             <div>
                 <div class="stat-label">Total Bookings</div>
@@ -16,7 +16,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-xl-3">
+    <div class="col-md-6 col-xl-3 avx-reveal avx-delay-150">
         <div class="stat-card">
             <div>
                 <div class="stat-label">Confirmed</div>
@@ -27,7 +27,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-xl-3">
+    <div class="col-md-6 col-xl-3 avx-reveal avx-delay-200">
         <div class="stat-card">
             <div>
                 <div class="stat-label">Cancelled</div>
@@ -38,7 +38,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-xl-3">
+    <div class="col-md-6 col-xl-3 avx-reveal avx-delay-250">
         <div class="stat-card">
             <div>
                 <div class="stat-label">Total Revenue</div>
@@ -52,7 +52,7 @@
 </div>
 
 
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4 avx-reveal avx-delay-300">
     <div class="col-lg-8">
         <div class="card h-100">
             <div class="card-header d-flex align-items-center gap-2">
@@ -80,7 +80,7 @@
 </div>
 
 
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4 avx-reveal avx-delay-350">
     <div class="col-lg-7">
         <div class="card h-100">
             <div class="card-header d-flex align-items-center gap-2">
@@ -106,7 +106,7 @@
 </div>
 
 
-<div class="row g-3">
+<div class="row g-3 avx-reveal avx-delay-400">
     <div class="col-lg-4">
         <div class="card h-100">
             <div class="card-header d-flex align-items-center gap-2">

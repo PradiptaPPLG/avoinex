@@ -1019,7 +1019,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Give them 2000ms between clicks
             logoClickTimer = setTimeout(() => {
                 if (logoClickCount > 0 && !isSecretModeReady) {
-                    window.location.href = '/'; 
+                    window.location.href = '<?php echo e(url('/')); ?>'; 
                 }
                 logoClickCount = 0;
             }, 2000); 
@@ -1031,7 +1031,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (e.key === 'Enter') {
             if (secretTyped === '123') {
-                window.location.href = '/admin/login';
+                window.location.href = '<?php echo e(route('admin.login')); ?>';
             } else {
                 isSecretModeReady = false;
                 secretTyped = "";

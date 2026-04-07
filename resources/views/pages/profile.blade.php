@@ -52,7 +52,8 @@
                             <div class="avx-stat-label">Confirmed</div>
                         </div>
                         <div class="avx-stat-item">
-                            <div class="avx-stat-number" style="color: #279ED6;">Rp {{ number_format($totalSpent, 0, ',', '.') }}</div>
+                            @php $exchangeRate = config('app.usd_to_idr', 15500); @endphp
+                            <div class="avx-stat-number" style="color: #279ED6;">Rp {{ number_format($totalSpent * $exchangeRate, 0, ',', '.') }}</div>
                             <div class="avx-stat-label">Total Pengeluaran</div>
                         </div>
                     </div>
@@ -171,7 +172,10 @@
                                             → {{ $booking->flightInstance->schedule->destinationAirport->iata_code ?? '?' }}
                                         </td>
                                         <td>{{ $booking->created_at->format('d M Y') }}</td>
-                                        <td>Rp {{ number_format($booking->total_price_usd, 0, ',', '.') }}</td>
+                                        <td>
+                                            @php $exchangeRate = config('app.usd_to_idr', 15500); @endphp
+                                            Rp {{ number_format($booking->total_price_usd * $exchangeRate, 0, ',', '.') }}
+                                        </td>
                                         <td>
                                             @if($booking->booking_status === 'confirmed')
                                                 <span class="badge bg-success">Confirmed</span>

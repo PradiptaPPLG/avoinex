@@ -187,7 +187,7 @@ class BookingController extends Controller
 
             // Frontend sends seat_prices and baggage_prices in IDR!
             // We need to convert them back to USD for storage in the 'total_price_usd' column.
-            $exchangeRate = config('app.usd_to_idr', 15000);
+            $exchangeRate = config('app.usd_to_idr', 15500);
             
             $subtotalIdr = array_sum($validated['seat_prices']) + array_sum($validated['baggage_prices']);
             
@@ -309,7 +309,7 @@ class BookingController extends Controller
                 $hasInsurance = isset($validated['has_insurances'][$index]) && ($validated['has_insurances'][$index] == '1' || $validated['has_insurances'][$index] == 'true');
 
                 
-                $exchangeRate = config('app.usd_to_idr', 15000);
+                $exchangeRate = config('app.usd_to_idr', 15500);
                 $insurancePriceIdr = 45000;
                 $insurancePriceUsd = $hasInsurance ? round($insurancePriceIdr / $exchangeRate, 2) : 0.00;
                 

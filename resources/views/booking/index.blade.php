@@ -31,8 +31,8 @@
                             <tr>
                                 <th>Booking Code</th>
                                 <th>Booking Date</th>
-                                <th>Flight Number</th>
-                                <th>Route</th>
+                                <th class="text-center">Flight Number</th>
+                                <th class="text-center">Route</th>
                                 <th>Flight Date</th>
                                 <th>Total Price</th>
                                 <th>Status</th>
@@ -44,18 +44,34 @@
                             <tr>
                                 <td><strong>{{ $booking->booking_code }}</strong></td>
                                 <td>{{ $booking->created_at->format('d M Y H:i') }}</td>
-                                <td>{{ $booking->flightInstance->schedule->flight_number }}</td>
-                                <td>
-                                    {{ $booking->flightInstance->schedule->originAirport->city }} ({{ $booking->flightInstance->schedule->originAirport->iata_code }})
-                                    →
-                                    {{ $booking->flightInstance->schedule->destinationAirport->city }} ({{ $booking->flightInstance->schedule->destinationAirport->iata_code }})
+                                <td class="text-center">
+                                    <span class="badge bg-light text-primary border px-3 py-2" style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">
+                                        {{ $booking->flightInstance->schedule->flight_number }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="fw-bold text-dark">
+                                        {{ $booking->flightInstance->schedule->originAirport->iata_code }}
+                                        <i class="bi bi-arrow-right mx-1 text-muted"></i>
+                                        {{ $booking->flightInstance->schedule->destinationAirport->iata_code }}
+                                    </div>
+                                    <div class="small text-muted" style="font-size: 11px;">
+                                        {{ $booking->flightInstance->schedule->originAirport->city }} to {{ $booking->flightInstance->schedule->destinationAirport->city }}
+                                    </div>
                                 </td>
                                 <td>{{ $booking->flightInstance->flight_date->format('d M Y') }}</td>
                                 <td>
-                                    <div>Rp {{ number_format($booking->total_price_usd, 0, ',', '.') }}</div>
-                                    @if($booking->bookingSeats->sum('baggage_weight') > 0)
-                                        <div class="small text-muted"><i class="bi bi-suitcase"></i> Includes Baggage</div>
-                                    @endif
+                                    @php $exchangeRate = config('app.usd_to_idr', 15500); @endphp
+                                    <div class="fw-bold text-primary">Rp {{ number_format($booking->total_price_usd * $exchangeRate, 0, ',', '.') }}</div>
+                                    <div class="mt-1 d-flex align-items-center gap-1" title="{{ $booking->bookingSeats->sum('baggage_weight') > 0 ? 'Baggage Included' : 'No Baggage' }}">
+                                        @if($booking->bookingSeats->sum('baggage_weight') > 0)
+                                            <i class="bi bi-record-circle-fill text-success" style="font-size: 12px;"></i>
+                                            <span class="text-muted" style="font-size: 11px;">Baggage</span>
+                                        @else
+                                            <i class="bi bi-circle text-muted" style="font-size: 12px;"></i>
+                                            <span class="text-muted" style="font-size: 11px;">No Baggage</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>
                                     {{-- Dynamic status badges --}}
@@ -67,7 +83,8 @@
                                         <span class="badge bg-info"><i class="bi bi-arrow-counterclockwise me-1"></i>Refunded</span>
                                         @if($booking->refund_amount_usd)
                                             <div class="small text-success mt-1">
-                                                <i class="bi bi-cash-coin"></i> Rp {{ number_format($booking->refund_amount_usd, 0, ',', '.') }}
+                                                @php $exchangeRate = config('app.usd_to_idr', 15500); @endphp
+                                                <i class="bi bi-cash-coin"></i> Rp {{ number_format($booking->refund_amount_usd * $exchangeRate, 0, ',', '.') }}
                                             </div>
                                         @endif
                                     @elseif($booking->booking_status === 'cancelled')
@@ -168,7 +185,8 @@
                         <div class="alert alert-info mb-3">
                             <i class="bi bi-info-circle me-1"></i>
                             <strong>Booking:</strong> {{ $booking->booking_code }}<br>
-                            <strong>Total Bayar:</strong> Rp {{ number_format($booking->total_price_usd, 0, ',', '.') }}
+                            <strong>Total Bayar:</strong> @php $exchangeRate = config('app.usd_to_idr', 15500); @endphp
+                            Rp {{ number_format($booking->total_price_usd * $exchangeRate, 0, ',', '.') }}
                         </div>
 
                         <div class="alert alert-light border mb-3">
@@ -202,3 +220,27 @@
     @endif
 @endforeach
 @endsection
+
+@push('styles')
+<style>
+    .table > :not(caption) > * > * {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+    }
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: none;
+    }
+    .card-header {
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
+    }
+    .badge {
+        padding: 0.5em 0.8em;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+</style>
+@endpush

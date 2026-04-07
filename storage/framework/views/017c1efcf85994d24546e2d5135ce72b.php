@@ -593,6 +593,28 @@
         .sidebar-nav::-webkit-scrollbar { width: 4px; }
         .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
         .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        /* ── SCROLL REVEAL ANIMATIONS ────────────────────── */
+        .avx-reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                        transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+            will-change: opacity, transform;
+        }
+        .avx-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .avx-delay-50 { transition-delay: 50ms; }
+        .avx-delay-100 { transition-delay: 100ms; }
+        .avx-delay-150 { transition-delay: 150ms; }
+        .avx-delay-200 { transition-delay: 200ms; }
+        .avx-delay-250 { transition-delay: 250ms; }
+        .avx-delay-300 { transition-delay: 300ms; }
+        .avx-delay-350 { transition-delay: 350ms; }
+        .avx-delay-400 { transition-delay: 400ms; }
+        .avx-delay-500 { transition-delay: 500ms; }
     </style>
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
@@ -758,7 +780,7 @@
             </div>
         </header>
 
-        <div class="content-area">
+        <div class="content-area avx-reveal">
             <?php if(session('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
                     <i class="bi bi-check-circle me-2"></i><?php echo e(session('success')); ?>
@@ -791,6 +813,27 @@
         }
         updateClock();
         setInterval(updateClock, 1000);
+
+        // ===== INTERSECTION OBSERVER FOR SCROLL REVEAL =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px 0px -50px 0px',
+                threshold: 0.1
+            };
+            
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const revealElements = document.querySelectorAll('.avx-reveal');
+            revealElements.forEach(el => observer.observe(el));
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

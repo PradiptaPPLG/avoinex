@@ -88,7 +88,7 @@ class BookingController extends Controller
                 \Illuminate\Support\Facades\Log::error("Gagal kirim email refund approved: " . $e->getMessage());
             }
 
-            return back()->with('success', "Refund untuk booking {$booking->booking_code} BERHASIL disetujui secara otomatis senilai Rp " . number_format($calc['amount'], 0, ',', '.') . " (" . $calc['percentage'] . "%). Email notifikasi telah dikirim ke " . $booking->client->email);
+            return back()->with('success', "Refund untuk booking {$booking->booking_code} BERHASIL disetujui secara otomatis senilai Rp " . number_format($calc['amount'] * 15500, 0, ',', '.') . " (" . $calc['percentage'] . "%). Email notifikasi telah dikirim ke " . $booking->client->email);
         }
 
         // Reject
