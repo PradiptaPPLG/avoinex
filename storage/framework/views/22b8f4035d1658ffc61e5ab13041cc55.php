@@ -341,10 +341,12 @@
                             <!-- Fee breakdown -->
                             <tbody id="summary-fees">
                                 <?php
+                                    $exchangeRate = config('app.usd_to_idr', 15000);
                                     $taxRate = 0.10;
-                                    $serviceFee = 5.00;
-                                    $taxAmount = $seatSubtotal * $taxRate;
-                                    $baseTotal = $seatSubtotal + $taxAmount + $serviceFee;
+                                    $serviceFeeUsd = 5.00;
+                                    $serviceFeeIdr = $serviceFeeUsd * $exchangeRate;
+                                    $taxAmount = $totalPrice * $taxRate;
+                                    $baseTotal = $totalPrice + $taxAmount + $serviceFeeIdr;
                                 ?>
                                 <tr>
                                     <td class="border-0 py-1 text-muted" style="font-size: 12px;">
@@ -360,7 +362,7 @@
                                         <i class="bi bi-gear" style="font-size: 10px;"></i> Service Fee
                                     </td>
                                     <td class="text-end border-0 py-1 text-muted" style="font-size: 12px;">
-                                        Rp <?php echo e(number_format($serviceFee, 0, ',', '.')); ?>
+                                        Rp <?php echo e(number_format($serviceFeeIdr, 0, ',', '.')); ?>
 
                                     </td>
                                 </tr>

@@ -89,6 +89,7 @@
                     
                     <h6 class="mt-4" style="font-weight: 700;">Passengers & Price Breakdown</h6>
                     @php
+                        $exchangeRate = config('app.usd_to_idr', 15000);
                         $seatSubtotal = 0;
                         $baggageTotal = 0;
                         $mealTotal = 0;
@@ -132,42 +133,46 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <div>Rp {{ number_format($seat->price_at_booking, 0, ',', '.') }}</div>
+                                    <div>Rp {{ number_format($seat->price_at_booking * $exchangeRate, 0, ',', '.') }}</div>
                                     @if($seat->meal_price > 0)
-                                    <div class="small text-muted">+Rp {{ number_format($seat->meal_price, 0, ',', '.') }}</div>
+                                    <div class="small text-muted">+Rp {{ number_format($seat->meal_price * $exchangeRate, 0, ',', '.') }}</div>
                                     @endif
                                     @if($seat->baggage_price > 0)
-                                    <div class="small text-muted">+Rp {{ number_format($seat->baggage_price, 0, ',', '.') }}</div>
+                                    <div class="small text-muted">+Rp {{ number_format($seat->baggage_price * $exchangeRate, 0, ',', '.') }}</div>
                                     @endif
                                     @if($seat->insurance_price > 0)
-                                    <div class="small text-muted">+Rp {{ number_format($seat->insurance_price, 0, ',', '.') }}</div>
+                                    <div class="small text-muted">+Rp {{ number_format($seat->insurance_price * $exchangeRate, 0, ',', '.') }}</div>
                                     @endif
                                 </td>
                             </tr>
                             @endforeach
                         </tbody>
                         @php
+                            $exchangeRate = config('app.usd_to_idr', 15000);
                             $subtotal = $seatSubtotal + $baggageTotal + $mealTotal + $insuranceTotal;
                             $taxAmount = $subtotal * 0.10;
-                            $serviceFee = 5.00; // This seems to be handled differently in some parts, but keeping it consistent with the existing confirmation logic
-                            $grandTotal = $subtotal + $taxAmount + $serviceFee;
+                            $serviceFeeUsd = 5.00;
+                            $serviceFeeIdr = $serviceFeeUsd * $exchangeRate;
+                            
+                            // Use stored grand total to ensure absolute consistency
+                            $grandTotalIdr = $booking->total_price_usd * $exchangeRate;
                         @endphp
                         <tfoot>
                             <tr class="text-muted" style="font-size: 12px;">
                                 <td colspan="3" class="text-end border-0 py-1">Subtotal (Add-ons Incl.)</td>
-                                <td class="text-end border-0 py-1">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                                <td class="text-end border-0 py-1">Rp {{ number_format($subtotal * $exchangeRate, 0, ',', '.') }}</td>
                             </tr>
                             <tr class="text-muted" style="font-size: 12px;">
                                 <td colspan="3" class="text-end border-0 py-1"><i class="bi bi-receipt" style="font-size: 10px;"></i> Tax (10%)</td>
-                                <td class="text-end border-0 py-1">Rp {{ number_format($taxAmount, 0, ',', '.') }}</td>
+                                <td class="text-end border-0 py-1">Rp {{ number_format($taxAmount * $exchangeRate, 0, ',', '.') }}</td>
                             </tr>
                             <tr class="text-muted" style="font-size: 12px;">
                                 <td colspan="3" class="text-end border-0 py-1"><i class="bi bi-gear" style="font-size: 10px;"></i> Service Fee</td>
-                                <td class="text-end border-0 py-1">Rp {{ number_format($serviceFee, 0, ',', '.') }}</td>
+                                <td class="text-end border-0 py-1">Rp {{ number_format($serviceFeeIdr, 0, ',', '.') }}</td>
                             </tr>
                             <tr style="border-top: 2px solid #dee2e6;">
                                 <th colspan="3" class="text-end py-2">Total Paid</th>
-                                <th class="text-end py-2" style="color: #0066CC; font-size: 15px;">Rp {{ number_format($grandTotal, 0, ',', '.') }}</th>
+                                <th class="text-end py-2" style="color: #0066CC; font-size: 15px;">Rp {{ number_format($grandTotalIdr, 0, ',', '.') }}</th>
                             </tr>
                         </tfoot>
                     </table>

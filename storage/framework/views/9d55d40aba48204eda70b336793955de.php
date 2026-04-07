@@ -87,15 +87,18 @@
                     
                     <h6 class="mt-4" style="font-weight: 700;">Passengers & Price Breakdown</h6>
                     <?php
+                        $exchangeRate = config('app.usd_to_idr', 15000);
                         $seatSubtotal = 0;
                         $baggageTotal = 0;
+                        $mealTotal = 0;
+                        $insuranceTotal = 0;
                     ?>
                     <table class="table table-sm" style="font-size: 13px;">
                         <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Passport</th>
-                                <th>Seat & Baggage</th>
+                                <th>Seat & Add-ons</th>
                                 <th class="text-end">Price</th>
                             </tr>
                         </thead>
@@ -104,47 +107,70 @@
                             <?php
                                 $seatSubtotal += $seat->price_at_booking;
                                 $baggageTotal += $seat->baggage_price ?? 0;
+                                $mealTotal += $seat->meal_price ?? 0;
+                                $insuranceTotal += $seat->insurance_price ?? 0;
                             ?>
                             <tr>
                                 <td><?php echo e($seat->passenger_first_name); ?> <?php echo e($seat->passenger_last_name); ?></td>
                                 <td><?php echo e($seat->passenger_passport); ?></td>
                                 <td>
-                                    <div><?php echo e($seat->seat->seat_number ?? 'N/A'); ?></div>
+                                    <div>
+                                        <strong><?php echo e($seat->seat->seat_number ?? 'N/A'); ?></strong>
+                                        <?php if($seat->is_vip_seat_selection): ?>
+                                            <span class="badge bg-warning text-dark small ms-1"><i class="bi bi-star-fill"></i> VIP</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if($seat->meal_id): ?>
+                                    <div class="small text-muted"><i class="bi bi-cup-hot"></i> <?php echo e($seat->meal->name ?? 'Meal'); ?></div>
+                                    <?php endif; ?>
                                     <?php if($seat->baggage_weight > 0): ?>
                                     <div class="small text-muted"><i class="bi bi-suitcase"></i> <?php echo e($seat->baggage_weight); ?> kg</div>
                                     <?php endif; ?>
+                                    <?php if($seat->has_insurance): ?>
+                                    <div class="small text-muted"><i class="bi bi-shield-check"></i> Travel Protection</div>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-end">
-                                    <div>Rp <?php echo e(number_format($seat->price_at_booking, 0, ',', '.')); ?></div>
+                                    <div>Rp <?php echo e(number_format($seat->price_at_booking * $exchangeRate, 0, ',', '.')); ?></div>
+                                    <?php if($seat->meal_price > 0): ?>
+                                    <div class="small text-muted">+Rp <?php echo e(number_format($seat->meal_price * $exchangeRate, 0, ',', '.')); ?></div>
+                                    <?php endif; ?>
                                     <?php if($seat->baggage_price > 0): ?>
-                                    <div class="small text-muted">+Rp <?php echo e(number_format($seat->baggage_price, 0, ',', '.')); ?></div>
+                                    <div class="small text-muted">+Rp <?php echo e(number_format($seat->baggage_price * $exchangeRate, 0, ',', '.')); ?></div>
+                                    <?php endif; ?>
+                                    <?php if($seat->insurance_price > 0): ?>
+                                    <div class="small text-muted">+Rp <?php echo e(number_format($seat->insurance_price * $exchangeRate, 0, ',', '.')); ?></div>
                                     <?php endif; ?>
                                 </td>
                             </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                         <?php
-                            $subtotal = $seatSubtotal + $baggageTotal;
+                            $exchangeRate = config('app.usd_to_idr', 15000);
+                            $subtotal = $seatSubtotal + $baggageTotal + $mealTotal + $insuranceTotal;
                             $taxAmount = $subtotal * 0.10;
-                            $serviceFee = 5.00;
-                            $grandTotal = $subtotal + $taxAmount + $serviceFee;
+                            $serviceFeeUsd = 5.00;
+                            $serviceFeeIdr = $serviceFeeUsd * $exchangeRate;
+                            
+                            // Use stored grand total to ensure absolute consistency
+                            $grandTotalIdr = $booking->total_price_usd * $exchangeRate;
                         ?>
                         <tfoot>
                             <tr class="text-muted" style="font-size: 12px;">
-                                <td colspan="3" class="text-end border-0 py-1">Subtotal (Seats + Baggage)</td>
-                                <td class="text-end border-0 py-1">Rp <?php echo e(number_format($subtotal, 0, ',', '.')); ?></td>
+                                <td colspan="3" class="text-end border-0 py-1">Subtotal (Add-ons Incl.)</td>
+                                <td class="text-end border-0 py-1">Rp <?php echo e(number_format($subtotal * $exchangeRate, 0, ',', '.')); ?></td>
                             </tr>
                             <tr class="text-muted" style="font-size: 12px;">
                                 <td colspan="3" class="text-end border-0 py-1"><i class="bi bi-receipt" style="font-size: 10px;"></i> Tax (10%)</td>
-                                <td class="text-end border-0 py-1">Rp <?php echo e(number_format($taxAmount, 0, ',', '.')); ?></td>
+                                <td class="text-end border-0 py-1">Rp <?php echo e(number_format($taxAmount * $exchangeRate, 0, ',', '.')); ?></td>
                             </tr>
                             <tr class="text-muted" style="font-size: 12px;">
                                 <td colspan="3" class="text-end border-0 py-1"><i class="bi bi-gear" style="font-size: 10px;"></i> Service Fee</td>
-                                <td class="text-end border-0 py-1">Rp <?php echo e(number_format($serviceFee, 0, ',', '.')); ?></td>
+                                <td class="text-end border-0 py-1">Rp <?php echo e(number_format($serviceFeeIdr, 0, ',', '.')); ?></td>
                             </tr>
                             <tr style="border-top: 2px solid #dee2e6;">
                                 <th colspan="3" class="text-end py-2">Total Paid</th>
-                                <th class="text-end py-2" style="color: #0066CC; font-size: 15px;">Rp <?php echo e(number_format($grandTotal, 0, ',', '.')); ?></th>
+                                <th class="text-end py-2" style="color: #0066CC; font-size: 15px;">Rp <?php echo e(number_format($grandTotalIdr, 0, ',', '.')); ?></th>
                             </tr>
                         </tfoot>
                     </table>

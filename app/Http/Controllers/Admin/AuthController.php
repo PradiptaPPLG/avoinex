@@ -113,12 +113,20 @@ class AuthController extends Controller
         $topRouteLabels = $topRoutes->pluck('route')->toArray();
         $topRouteValues = $topRoutes->pluck('total')->toArray();
 
+        // ======= IDR Conversion =======
+        $exchangeRate = config('app.usd_to_idr', 15000);
+        $totalRevenueIdr = $totalRevenue * $exchangeRate;
+
+        // ======= Refund Stats =======
+        $refundRequests = Booking::where('booking_status', 'refund_requested')->count();
+
         return view('admin.dashboard', compact(
             'totalBookings',
             'confirmedBookings',
             'cancelledBookings',
             'pendingBookings',
             'totalRevenue',
+            'totalRevenueIdr',
             'flightsToday',
             'revenueMonths',
             'revenueData',
@@ -128,7 +136,8 @@ class AuthController extends Controller
             'bookingCancelledData',
             'statusDistribution',
             'topRouteLabels',
-            'topRouteValues'
+            'topRouteValues',
+            'refundRequests'
         ));
     }
 

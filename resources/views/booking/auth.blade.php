@@ -40,7 +40,7 @@
 
                     <div class="avx-auth-body">
                         <!-- Option 1: Login -->
-                        <a href="javascript:void(0)" onclick="showModal('login')" class="avx-auth-option avx-auth-login">
+                        <button type="button" onclick="showModal('login')" class="avx-auth-option avx-auth-login w-100" style="border:none; cursor:pointer; text-align:left;">
                             <div class="avx-auth-option-icon" style="background:linear-gradient(135deg,#279ED6,#1a7ab5);">
                                 <i class="bi bi-box-arrow-in-right"></i>
                             </div>
@@ -49,10 +49,10 @@
                                 <p class="mb-0 text-muted small">Sign in with your existing account</p>
                             </div>
                             <i class="bi bi-chevron-right avx-auth-chevron"></i>
-                        </a>
+                        </button>
 
                         <!-- Option 2: Register -->
-                        <a href="javascript:void(0)" onclick="showModal('register')" class="avx-auth-option avx-auth-register">
+                        <button type="button" onclick="showModal('register')" class="avx-auth-option avx-auth-register w-100" style="border:none; cursor:pointer; text-align:left;">
                             <div class="avx-auth-option-icon" style="background:linear-gradient(135deg,#28a745,#20c997);">
                                 <i class="bi bi-person-plus-fill"></i>
                             </div>
@@ -61,7 +61,7 @@
                                 <p class="mb-0 text-muted small">Register to manage your bookings easily</p>
                             </div>
                             <i class="bi bi-chevron-right avx-auth-chevron"></i>
-                        </a>
+                        </button>
 
                         <!-- Divider -->
                         <div class="avx-auth-divider">

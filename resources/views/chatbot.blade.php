@@ -1,3 +1,47 @@
+@php
+    $preferredAi = 'vanessa';
+    if(session('client_id')) {
+        $client = \App\Models\Client::find(session('client_id'));
+        $preferredAi = $client->preferred_ai ?? 'vanessa';
+    }
+
+    $aiData = [
+        'vanessa' => [
+            'name' => 'Vanessa',
+            'title' => 'Avoinex Assistant',
+            'tech' => 'Grok-1',
+            'avatar' => asset('images/vanessa02.png'),
+            'avatar_blink' => asset('images/vanessa.png'),
+            'greeting' => 'Halo! Saya Vanessa, asisten virtual Avoinex Airlines. Ada yang bisa saya bantu untuk penerbangan atau perjalanan Anda hari ini?'
+        ],
+        'sofia' => [
+            'name' => 'Sofia',
+            'title' => 'Travel Planner',
+            'tech' => 'Gemini 1.5 Pro',
+            'avatar' => asset('images/sofia.png'),
+            'avatar_blink' => asset('images/sofia.png'),
+            'greeting' => 'Halo! Saya Sofia. Saya siap membantu merencanakan perjalanan impian Anda dengan teknologi Gemini.'
+        ],
+        'serena' => [
+            'name' => 'Serena',
+            'title' => 'Creative Concierge',
+            'tech' => 'GPT-4o',
+            'avatar' => asset('images/serena.png'),
+            'avatar_blink' => asset('images/serena.png'),
+            'greeting' => 'Halo! Saya Serena. Ada yang bisa saya bantu untuk membuat perjalanan Anda lebih berkesan?'
+        ],
+        'lucy' => [
+            'name' => 'Lucy',
+            'title' => 'Elite Analyst',
+            'tech' => 'Claude 3.5 Opus',
+            'avatar' => asset('images/lucy.png'),
+            'avatar_blink' => asset('images/lucy.png'),
+            'greeting' => 'Halo. Saya Lucy. Saya di sini untuk memberikan analisis dan bantuan perjalanan tingkat tinggi untuk Anda.'
+        ]
+    ];
+
+    $currentAi = $aiData[$preferredAi] ?? $aiData['vanessa'];
+@endphp
 <!-- Chatbot Widget UI -->
 <style>
     :root {
@@ -422,10 +466,10 @@
     <div class="chatbot-widget-btn" id="chatbotWidgetBtn" aria-label="Open AI Assistant">
         <div class="chatbot-badge" id="chatbotBadge"></div>
         <!-- Preload images to avoid flickering -->
-        <link rel="preload" href="{{ asset('images/vanessa.png') }}" as="image">
-        <link rel="preload" href="{{ asset('images/vanessa02.png') }}" as="image">
+        <link rel="preload" href="{{ $currentAi['avatar'] }}" as="image">
+        <link rel="preload" href="{{ $currentAi['avatar_blink'] }}" as="image">
         <!-- Main avatar image for the widget button -->
-        <img src="{{ asset('images/vanessa.png') }}" alt="Vanessa Assistant" id="chatbotAvatarBtn">
+        <img src="{{ $currentAi['avatar'] }}" alt="{{ $currentAi['name'] }} Assistant" id="chatbotAvatarBtn">
     </div>
 </div>
 
@@ -435,18 +479,18 @@
         <div class="chatbot-header-info">
             <div class="chatbot-header-avatar">
                 <!-- Avatar image inside chat header -->
-                <img src="{{ asset('images/vanessa.png') }}" alt="Vanessa" id="chatbotAvatarHeader">
+                <img src="{{ $currentAi['avatar'] }}" alt="{{ $currentAi['name'] }}" id="chatbotAvatarHeader">
             </div>
             <div>
-                <h3 class="chatbot-title">Vanessa</h3>
-                <p class="chatbot-status" id="chatbotStatus">Avoinex Assistant</p>
+                <h3 class="chatbot-title">{{ $currentAi['name'] }}</h3>
+                <p class="chatbot-status" id="chatbotStatus">{{ $currentAi['title'] }}</p>
             </div>
         </div>
         <button class="chatbot-close" id="chatbotCloseBtn" aria-label="Close Chat">&times;</button>
     </div>
     
     <div class="chatbot-body" id="chatbotBody">
-        <div class="chat-msg bot">Halo! Saya Vanessa, asisten virtual Avoinex Airlines. Ada yang bisa saya bantu untuk penerbangan atau perjalanan Anda hari ini?</div>
+        <div class="chat-msg bot">{{ $currentAi['greeting'] }}</div>
         <!-- Typing indicator -->
         <div class="chatbot-typing" id="chatbotTyping">
             <div class="dot"></div>
@@ -456,7 +500,7 @@
     </div>
 
     <div class="chatbot-footer">
-        <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Tulis pesan ke Vanessa..." autocomplete="off">
+        <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Tulis pesan ke {{ $currentAi['name'] }}..." autocomplete="off">
         <button class="chatbot-send" id="chatbotSendBtn" aria-label="Send Message" disabled>
             <svg viewBox="0 0 24 24">
                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
@@ -501,8 +545,8 @@
         });
 
         // --- Photo Loop Animation (Blink) ---
-        const frame1 = "{{ asset('images/vanessa.png') }}";
-        const frame2 = "{{ asset('images/vanessa02.png') }}";
+        const frame1 = "{{ $currentAi['avatar'] }}";
+        const frame2 = "{{ $currentAi['avatar_blink'] }}";
         const frames = [frame1, frame2];
         let avatarIndex = 0;
         

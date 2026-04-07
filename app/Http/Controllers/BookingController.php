@@ -14,8 +14,7 @@ class BookingController extends Controller
     public function index()
     {
         $bookings = Booking::where('client_id', session('client_id'))
-            ->whereIn('booking_status', ['confirmed', 'pending'])
-            ->where('payment_status', 'paid')
+            ->whereIn('booking_status', ['confirmed', 'pending', 'refund_requested', 'cancelled'])
             ->with([
             'flightInstance.schedule.originAirport',
             'flightInstance.schedule.destinationAirport',
@@ -214,8 +213,9 @@ class BookingController extends Controller
             $taxRate = 0.10;
             $serviceFeeUsd = 5.00; // Fixed USD fee
             
-            // Calculate final grand total in USD
-            $grandTotalUsd = $subtotalUsd + ($subtotalUsd * $taxRate) + $serviceFeeUsd;
+            // Calculate final grand total in USD with higher precision
+            // This avoids the Rp 31 difference caused by rounding to 2 decimals too early
+            $grandTotalUsd = $subtotalUsd * (1 + $taxRate) + $serviceFeeUsd;
 
             $booking = Booking::create([
                 'booking_code' => $bookingCode,
@@ -368,9 +368,12 @@ class BookingController extends Controller
         }
     }
 
+    /**
+     * Cancel an UNPAID booking (instant, no refund needed).
+     */
     public function cancel($bookingId)
     {
-        $booking = Booking::with(['flightInstance', 'bookingSeats', 'bookingSeats.flightSeatPrice'])
+        $booking = Booking::with(['flightInstance'])
             ->where('booking_id', $bookingId)
             ->where('client_id', session('client_id'))
             ->first();
@@ -379,70 +382,99 @@ class BookingController extends Controller
             abort(403);
         }
 
-        if ($booking->booking_status !== 'confirmed') {
+        if (!$booking->canCancel()) {
             return redirect()->route('booking.index')
-                ->with('error', 'Only confirmed bookings can be cancelled.');
-        }
-
-        // Logika: Hanya bisa dibatalkan sampai akhir hari penerbangan (tidak boleh lewat / expired)
-        $flightDate = \Carbon\Carbon::parse($booking->flightInstance->flight_date)->endOfDay();
-        
-        if (now()->isAfter($flightDate)) {
-            return redirect()->route('booking.index')
-                ->with('error', 'Cannot cancel past flights.');
-        }
-
-        // Kembalikan kuota Flash Sale jika pesanan menggunakan promo
-        $flashSale = \App\Models\FlashSale::where('flight_id', $booking->flight_instance_id)->first();
-        if ($flashSale) {
-            $passengerCount = $booking->bookingSeats->count();
-            $isPromoBooking = false;
-            foreach ($booking->bookingSeats as $seat) {
-                if ($seat->price_at_booking < ($seat->flightSeatPrice->price_usd ?? 0)) {
-                    $isPromoBooking = true;
-                    break;
-                }
-            }
-            // Jika membooking promo, restorasi kuota yang sudah dipesan
-            if ($isPromoBooking && $flashSale->seats_sold >= $passengerCount) {
-                $flashSale->decrement('seats_sold', $passengerCount);
-            }
+                ->with('error', 'Booking ini tidak bisa dibatalkan. Gunakan "Request Refund" untuk pesanan yang sudah dibayar.');
         }
 
         $booking->update([
             'booking_status' => 'cancelled',
-            'payment_status' => 'refunded'
         ]);
 
         return redirect()->route('booking.index')
-            ->with('success', 'Booking successfully cancelled. Refund will be processed in 3-5 business days.');
+            ->with('success', 'Booking berhasil dibatalkan.');
     }
 
+    /**
+     * Request a refund for a PAID booking (needs admin approval).
+     */
+    public function requestRefund(Request $request, $bookingId)
+    {
+        $booking = Booking::with(['flightInstance'])
+            ->where('booking_id', $bookingId)
+            ->where('client_id', session('client_id'))
+            ->first();
+
+        if (!$booking) {
+            abort(403);
+        }
+
+        if (!$booking->canRequestRefund()) {
+            return redirect()->route('booking.index')
+                ->with('error', 'Booking ini tidak bisa di-refund. Pastikan pesanan sudah dibayar dan penerbangan belum lewat.');
+        }
+
+        $request->validate([
+            'refund_reason' => 'required|string|max:1000',
+        ]);
+
+        $booking->update([
+            'booking_status'      => 'refund_requested',
+            'payment_status'      => 'refund_pending',
+            'refund_reason'       => $request->refund_reason,
+            'refund_requested_at' => now(),
+        ]);
+
+        // Restore flash sale quota if applicable
+        $this->restoreFlashSaleQuota($booking);
+
+        return redirect()->route('booking.index')
+            ->with('success', 'Permintaan refund berhasil dikirim! Tim kami akan memprosesnya dalam 1-3 hari kerja.');
+    }
+
+    /**
+     * Guest cancel — for unpaid guest bookings via Find Booking.
+     */
     public function cancelGuest(Request $request, $bookingId)
     {
         $request->validate(['email' => 'required|email']);
-        
-        $booking = Booking::with(['flightInstance', 'bookingSeats', 'bookingSeats.flightSeatPrice', 'client'])
+
+        $booking = Booking::with(['flightInstance', 'client'])
             ->where('booking_id', $bookingId)
             ->first();
 
-        // Verifikasi kepemilikan
         if (!$booking || $booking->client->email !== $request->email) {
-            abort(403, 'Unauthorized actions. Email does not match.');
+            abort(403, 'Unauthorized. Email does not match.');
         }
 
-        if ($booking->booking_status !== 'confirmed') {
-            return back()->with('error', 'Only confirmed bookings can be cancelled.');
+        // Guest can cancel unpaid OR request refund for paid
+        if ($booking->canCancel()) {
+            $booking->update(['booking_status' => 'cancelled']);
+            return back()->with('success', 'Booking berhasil dibatalkan.');
         }
 
-        $flightDate = \Carbon\Carbon::parse($booking->flightInstance->flight_date)->endOfDay();
-        
-        if (now()->isAfter($flightDate)) {
-            return back()->with('error', 'Cannot cancel past flights.');
+        if ($booking->canRequestRefund()) {
+            $booking->update([
+                'booking_status'      => 'refund_requested',
+                'payment_status'      => 'refund_pending',
+                'refund_reason'       => $request->input('refund_reason', 'Guest cancellation request'),
+                'refund_requested_at' => now(),
+            ]);
+            $this->restoreFlashSaleQuota($booking);
+            return back()->with('success', 'Permintaan refund berhasil dikirim! Tim kami akan memprosesnya dalam 1-3 hari kerja.');
         }
 
-        // Restorasi Flash Sale Kuota
+        return back()->with('error', 'Booking ini tidak bisa dibatalkan atau di-refund.');
+    }
+
+    /**
+     * Restore flash sale quota when a booking is cancelled/refunded.
+     */
+    private function restoreFlashSaleQuota(Booking $booking)
+    {
+        $booking->load('bookingSeats.flightSeatPrice');
         $flashSale = \App\Models\FlashSale::where('flight_id', $booking->flight_instance_id)->first();
+
         if ($flashSale) {
             $passengerCount = $booking->bookingSeats->count();
             $isPromoBooking = false;
@@ -456,13 +488,6 @@ class BookingController extends Controller
                 $flashSale->decrement('seats_sold', $passengerCount);
             }
         }
-
-        $booking->update([
-            'booking_status' => 'cancelled',
-            'payment_status' => 'refunded'
-        ]);
-
-        return back()->with('success', 'Booking successfully cancelled. Refund will be processed in 3-5 business days.');
     }
 
     public function confirmation($id)

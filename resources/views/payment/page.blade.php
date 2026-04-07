@@ -152,8 +152,9 @@
                         </div>
                         @endif
 
+                        @php $exchangeRate = config('app.usd_to_idr', 15000); @endphp
                         <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
-                            <i class="bi bi-lock me-2"></i> Pay Now Rp {{ number_format($booking->total_price_usd, 0, ',', '.') }}
+                            <i class="bi bi-lock me-2"></i> Pay Now Rp {{ number_format($booking->total_price_usd * $exchangeRate, 0, ',', '.') }}
                         </button>
                     </form>
                 </div>
@@ -175,8 +176,11 @@
                     
                     <h6 style="font-weight: 700; font-size: 13px; margin-bottom: 10px;">Passengers & Seats</h6>
                     @php
+                        $exchangeRate = config('app.usd_to_idr', 15000);
                         $seatSubtotal = 0;
                         $baggageTotal = 0;
+                        $mealTotal = 0;
+                        $insuranceTotal = 0;
                     @endphp
                     <table class="table table-sm mb-0" style="font-size: 13px;">
                         <tbody>
@@ -184,21 +188,46 @@
                             @php 
                                 $seatSubtotal += $seat->price_at_booking;
                                 $baggageTotal += $seat->baggage_price ?? 0;
+                                $mealTotal += $seat->meal_price ?? 0;
+                                // Assuming insurance is $3.00 if present or handled similarly
+                                $insuranceTotal += $seat->insurance_price ?? 0;
                             @endphp
-                            <tr>
-                                <td class="border-0 py-1">
-                                    <i class="bi bi-person-fill text-muted" style="font-size: 11px;"></i>
-                                    {{ $seat->passenger_first_name }} {{ $seat->passenger_last_name }}
-                                    <div class="text-muted" style="font-size: 11px; margin-left: 16px;">Seat {{ $seat->seat->seat_number ?? '-' }}</div>
+                            <tr style="border-bottom: 1px solid #f0f2f5;">
+                                <td class="border-0 py-2">
+                                    <div class="fw-bold text-dark">
+                                        <i class="bi bi-person-fill text-primary" style="font-size: 11px;"></i>
+                                        {{ $seat->passenger_first_name }} {{ $seat->passenger_last_name }}
+                                    </div>
+                                    <div class="text-muted small" style="margin-left: 16px;">
+                                        Seat {{ $seat->seat->seat_number ?? '-' }}
+                                    </div>
+                                    @if($seat->meal)
+                                    <div class="text-muted small" style="margin-left: 16px;">
+                                        <i class="bi bi-cup-hot" style="font-size: 10px;"></i> {{ $seat->meal->name }}
+                                    </div>
+                                    @endif
+                                    @if($seat->has_insurance)
+                                    <div class="text-muted small" style="margin-left: 16px;">
+                                        <i class="bi bi-shield-check" style="font-size: 10px;"></i> Travel Insurance
+                                    </div>
+                                    @endif
                                 </td>
-                                <td class="text-end border-0 py-1">Rp {{ number_format($seat->price_at_booking, 0, ',', '.') }}</td>
+                                <td class="text-end border-0 py-2 align-top">
+                                    <div class="fw-bold">Rp {{ number_format($seat->price_at_booking * $exchangeRate, 0, ',', '.') }}</div>
+                                    @if($seat->meal_price > 0)
+                                    <div class="text-muted small">+Rp {{ number_format($seat->meal_price * $exchangeRate, 0, ',', '.') }}</div>
+                                    @endif
+                                    @if($seat->insurance_price > 0)
+                                    <div class="text-muted small">+Rp {{ number_format($seat->insurance_price * $exchangeRate, 0, ',', '.') }}</div>
+                                    @endif
+                                </td>
                             </tr>
                             @if($seat->baggage_price > 0)
                             <tr>
-                                <td class="border-0 py-0 text-muted" style="font-size: 11px; padding-left: 16px !important;">
+                                <td class="border-0 py-1 text-muted" style="font-size: 11px; padding-left: 16px !important;">
                                     <i class="bi bi-suitcase" style="font-size: 10px;"></i> Baggage {{ $seat->baggage_weight }}kg
                                 </td>
-                                <td class="text-end border-0 py-0 text-muted" style="font-size: 11px;">+Rp {{ number_format($seat->baggage_price, 0, ',', '.') }}</td>
+                                <td class="text-end border-0 py-1 text-muted" style="font-size: 11px;">+Rp {{ number_format($seat->baggage_price * $exchangeRate, 0, ',', '.') }}</td>
                             </tr>
                             @endif
                             @endforeach
@@ -206,18 +235,21 @@
                         
                         <!-- Fee Breakdown -->
                         @php
-                            $subtotal = $seatSubtotal + $baggageTotal;
+                            $subtotal = $seatSubtotal + $baggageTotal + $mealTotal + $insuranceTotal;
                             $taxAmount = $subtotal * 0.10;
-                            $serviceFee = 5.00;
-                            $grandTotal = $subtotal + $taxAmount + $serviceFee;
+                            $serviceFeeUsd = 5.00;
+                            $serviceFeeIdr = $serviceFeeUsd * $exchangeRate;
+                            
+                            // Use stored grand total to ensure identity with button
+                            $grandTotalIdr = $booking->total_price_usd * $exchangeRate;
                         @endphp
-                        <tbody>
+                        <tbody id="payment-fee-breakdown">
                             <tr>
                                 <td class="py-1 text-muted" style="font-size: 12px; border-top: 1px dashed #dee2e6;">
                                     <i class="bi bi-receipt" style="font-size: 10px;"></i> Tax (10%)
                                 </td>
                                 <td class="text-end py-1 text-muted" style="font-size: 12px; border-top: 1px dashed #dee2e6;">
-                                    Rp {{ number_format($taxAmount, 0, ',', '.') }}
+                                    Rp {{ number_format($taxAmount * $exchangeRate, 0, ',', '.') }}
                                 </td>
                             </tr>
                             <tr>
@@ -225,7 +257,7 @@
                                     <i class="bi bi-gear" style="font-size: 10px;"></i> Service Fee
                                 </td>
                                 <td class="text-end border-0 py-1 text-muted" style="font-size: 12px;">
-                                    Rp {{ number_format($serviceFee, 0, ',', '.') }}
+                                    Rp {{ number_format($serviceFeeIdr, 0, ',', '.') }}
                                 </td>
                             </tr>
                         </tbody>
@@ -233,7 +265,7 @@
                             <tr style="border-top: 2px solid #dee2e6;">
                                 <th class="py-2" style="font-size: 15px;">Total</th>
                                 <th class="text-end py-2" style="font-size: 15px; color: #0066CC;">
-                                    Rp {{ number_format($grandTotal, 0, ',', '.') }}
+                                    Rp {{ number_format($grandTotalIdr, 0, ',', '.') }}
                                 </th>
                             </tr>
                         </tfoot>

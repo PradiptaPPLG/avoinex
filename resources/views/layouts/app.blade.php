@@ -154,15 +154,28 @@
             position: absolute;
             top: 100%;
             right: 0;
-            margin-top: 10px;
+            margin-top: 15px;
             background: white;
             border-radius: 12px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.15);
             min-width: 200px;
             display: none;
-            overflow: hidden;
-            z-index: 1001;
+            /* overflow: hidden; Removed to allow transparent bridge */
+            z-index: 9999 !important;
             border: 1px solid #e8e8e8;
+            pointer-events: auto !important;
+        }
+
+        /* Bridge between trigger and menu to prevent closing on hover gap */
+        .avx-user-dropdown::before {
+            content: "";
+            position: absolute;
+            top: -15px;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: transparent;
+            z-index: -1;
         }
 
         .avx-user-dropdown.show {
@@ -187,8 +200,15 @@
             padding-left: 20px;
         }
 
+        .avx-dropdown-item:first-child {
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
         .avx-dropdown-item:last-child {
             border-bottom: none;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
         }
 
         .avx-dropdown-item.logout:hover {
@@ -255,7 +275,7 @@
             align-items: center;
             justify-content: center;
             background: rgba(0,0,0,0.55);
-            z-index: 99999;
+            z-index: 999999;
         }
 
         /* Container that centers the card */
@@ -500,7 +520,7 @@
             </div>
             
             <!-- User Profile dengan wrapper -->
-            <div class="avx-user-profile-wrapper">
+            <div class="avx-user-profile-wrapper" onclick="event.stopPropagation(); document.getElementById('userDropdown').classList.toggle('show');">
                 <div class="avx-user-profile" id="userProfile">
                     <div class="avx-user-avatar">
                         @if(session('client_avatar') && session('client_avatar') != 'default')
@@ -532,6 +552,10 @@
                     <a href="{{ route('booking.index') }}" class="avx-dropdown-item">
                         <svg class="avx-dropdown-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                         My Bookings
+                    </a>
+                    <a href="#" class="avx-dropdown-item" onclick="event.preventDefault(); showModal('aiHub');">
+                        <svg class="avx-dropdown-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M13 14h-2a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1zm5-4h2v3h-2zm-12 0h2v3H6zM9 13H7v5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-5h-2M15 5H9a1 1 0 0 0-1 1v2h8V6a1 1 0 0 0-1-1zM12 2a1 1 0 0 1 1 1v2h-2V3a1 1 0 0 1 1-1z"/><circle cx="10.5" cy="11.5" r=".5" fill="currentColor"/><circle cx="13.5" cy="11.5" r=".5" fill="currentColor"/></svg>
+                        AI Assistant Hub
                     </a>
                     <div class="avx-dropdown-item logout">
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -756,49 +780,35 @@
 document.addEventListener('DOMContentLoaded', function() {
     const userProfile = document.getElementById('userProfile');
     const userDropdown = document.getElementById('userDropdown');
-    let dropdownTimeout;
     
     if (userProfile && userDropdown) {
-        // Hover untuk membuka dropdown
-        userProfile.addEventListener('mouseenter', function() {
-            clearTimeout(dropdownTimeout);
-            dropdownTimeout = setTimeout(() => {
-                userDropdown.classList.add('show');
-            }, 200);
-        });
+        // Base click handling is now handled by the inline onclick in the HTML
+        // to ensure it works even if other scripts fail.
         
-        // Hover untuk menutup dropdown (dengan delay)
-        userProfile.addEventListener('mouseleave', function(e) {
-            clearTimeout(dropdownTimeout);
-            dropdownTimeout = setTimeout(() => {
-                if (!userDropdown.matches(':hover')) {
-                    userDropdown.classList.remove('show');
-                }
-            }, 300);
-        });
-        
-        // Juga support klik untuk mobile
-        userProfile.addEventListener('click', function(e) {
-            e.stopPropagation();
-            userDropdown.classList.toggle('show');
-        });
-        
-        // Biar dropdown stay open ketika hover di dalamnya
-        userDropdown.addEventListener('mouseenter', function() {
-            clearTimeout(dropdownTimeout);
-        });
-        
-        userDropdown.addEventListener('mouseleave', function() {
-            dropdownTimeout = setTimeout(() => {
-                userDropdown.classList.remove('show');
-            }, 300);
-        });
-        
-        // Close dropdown ketika klik di luar
+        // Close when clicking outside
         document.addEventListener('click', function(e) {
             if (!userProfile.contains(e.target) && !userDropdown.contains(e.target)) {
                 userDropdown.classList.remove('show');
             }
+        });
+
+        // Hover support for desktop
+        const wrapper = userProfile.parentElement;
+        let hideTimeout;
+
+        userProfile.addEventListener('mouseenter', function() {
+            clearTimeout(hideTimeout);
+            userDropdown.classList.add('show');
+        });
+
+        userDropdown.addEventListener('mouseenter', function() {
+            clearTimeout(hideTimeout);
+        });
+
+        wrapper.addEventListener('mouseleave', function() {
+            hideTimeout = setTimeout(function() {
+                userDropdown.classList.remove('show');
+            }, 100);
         });
     }
     
@@ -898,7 +908,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if(regForm) regForm.style.display = 'none';
     }
 
-    window.showModal = function(type){ showOverlay(type); };
+    window.showModal = function(type){ 
+        console.log("Triggering modal: " + type);
+        showOverlay(type); 
+    };
     window.closeModal = function(type){ hideOverlay(type); };
 
     window.switchModal = function(from, to){
@@ -972,7 +985,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 notification.remove();
             }, 3000);
         @endif
-    });
     });
 })();
 </script>
@@ -1386,6 +1398,140 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @include('chatbot')
 
-@stack('scripts')
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    @stack('scripts')
+    <!-- ==================== -->
+    <!-- AI ASSISTANT HUB MODAL -->
+    <!-- ==================== -->
+    @php
+        $activeAi = 'vanessa';
+        if(session('client_id')) {
+            $client = \App\Models\Client::find(session('client_id'));
+            $activeAi = $client->preferred_ai ?? 'vanessa';
+        }
+    @endphp
+    
+    <style>
+        @keyframes avxModalFadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .avx-modal-animate {
+            animation: avxModalFadeIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        }
+        .ai-card {
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .ai-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(39, 158, 214, 0.15);
+        }
+        .ai-card.active {
+            background: linear-gradient(145deg, #f0f9ff 0%, #ffffff 100%) !important;
+        }
+    </style>
+
+    <div id="aiHubModal" class="avx-modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" style="display: none;">
+        <div class="avx-modal-container" role="document" tabindex="-1" style="width: 1000px; max-width: 95vw;">
+            <button class="avx-modal-close" onclick="closeModal('aiHub')" aria-label="Close modal">×</button>
+
+            <div class="avx-modal-card avx-modal-animate" style="padding: 50px; border-radius: 64px; position: relative; background: #fff;">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold" style="color: #279ED6; font-size: 32px; letter-spacing: -0.5px;">Avoinex AI Hub</h2>
+                    <p class="text-muted" style="font-size: 16px;">Pilih asisten digital eksklusif untuk menemani perjalanan Anda</p>
+                </div>
+
+                <div class="row g-4">
+                    <!-- VANESSA (ACTIVE BY DEFAULT) -->
+                    <div class="col-md-3">
+                        <div class="ai-card {{ $activeAi == 'vanessa' ? 'active' : '' }}" onclick="selectAi('vanessa')" style="
+                            border: {{ $activeAi == 'vanessa' ? '2px solid #279ED6' : '1px solid #e2e8f0' }};
+                            border-radius: 32px;
+                            padding: 30px 20px;
+                            text-align: center;
+                            position: relative;
+                            cursor: pointer;
+                        ">
+                            @if($activeAi == 'vanessa')
+                            <div class="badge bg-primary position-absolute" style="top: 15px; right: 15px; font-size: 10px; padding: 5px 10px; border-radius: 20px;">ACTIVE</div>
+                            @endif
+                            <img src="{{ asset('images/vanessa02.png') }}" alt="Vanessa" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px; border: 4px solid #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.12);">
+                            <h5 class="fw-bold mb-1" style="font-size: 18px; color: #1a202c;">VANESSA</h5>
+                            <p class="text-muted small mb-3" style="font-size: 12px;">Technology: <strong style="color: #279ED6;">Grok-1</strong></p>
+                            <div class="small fw-bold" style="font-size: 11px; color: #279ED6; background: rgba(39, 158, 214, 0.08); display: inline-block; padding: 4px 12px; border-radius: 12px;">Default Assistant</div>
+                        </div>
+                    </div>
+
+                    <!-- SOFIA (COMING SOON) -->
+                    <div class="col-md-3">
+                        <div class="ai-card locked" style="
+                            border: 1px solid #e2e8f0;
+                            border-radius: 32px;
+                            padding: 30px 20px;
+                            text-align: center;
+                            background: #fff;
+                            position: relative;
+                            cursor: default;
+                        ">
+                            <div class="badge bg-secondary position-absolute" style="top: 15px; right: 15px; font-size: 10px; padding: 5px 10px; border-radius: 20px; background: #94a3b8 !important;">SOON</div>
+                            <img src="{{ asset('images/sofia.png') }}" alt="Sofia" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);">
+                            <h5 class="fw-bold mb-1" style="font-size: 18px; color: #64748b;">SOFIA</h5>
+                            <p class="text-muted small mb-0" style="font-size: 12px;">Technology:<br><strong style="color: #64748b;">Gemini 1.5 Pro</strong></p>
+                        </div>
+                    </div>
+
+                    <!-- SERENA (COMING SOON) -->
+                    <div class="col-md-3">
+                        <div class="ai-card locked" style="
+                            border: 1px solid #e2e8f0;
+                            border-radius: 32px;
+                            padding: 30px 20px;
+                            text-align: center;
+                            background: #fff;
+                            position: relative;
+                            cursor: default;
+                        ">
+                            <div class="badge bg-secondary position-absolute" style="top: 15px; right: 15px; font-size: 10px; padding: 5px 10px; border-radius: 20px; background: #94a3b8 !important;">SOON</div>
+                            <img src="{{ asset('images/serena.png') }}" alt="Serena" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);">
+                            <h5 class="fw-bold mb-1" style="font-size: 18px; color: #64748b;">SERENA</h5>
+                            <p class="text-muted small mb-0" style="font-size: 12px;">Technology:<br><strong style="color: #64748b;">GPT-4o</strong></p>
+                        </div>
+                    </div>
+
+                    <!-- LUCY (COMING SOON) -->
+                    <div class="col-md-3">
+                        <div class="ai-card locked" style="
+                            border: 1px solid #e2e8f0;
+                            border-radius: 32px;
+                            padding: 30px 20px;
+                            text-align: center;
+                            background: #fff;
+                            position: relative;
+                            cursor: default;
+                        ">
+                            <div class="badge bg-dark position-absolute" style="top: 15px; right: 15px; font-size: 10px; padding: 5px 10px; border-radius: 20px;">LOCKED</div>
+                            <img src="{{ asset('images/lucy.png') }}" alt="Lucy" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);">
+                            <h5 class="fw-bold mb-1" style="font-size: 18px; color: #64748b;">LUCY</h5>
+                            <p class="text-muted small mb-0" style="font-size: 12px;">Technology:<br><strong style="color: #64748b;">Claude 3.5 Opus</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 p-4 rounded-4 text-center small text-muted" style="background: rgba(39, 158, 214, 0.05); border: 1px dashed rgba(39, 158, 214, 0.2);">
+                    <i class="bi bi-stars me-1" style="color: #279ED6;"></i> Sofia, Serena, & Lucy sedang dalam tahap sinkronisasi data dengan sistem Avoinex. Pantau terus untuk update selanjutnya!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectAi(name) {
+            if(name === 'vanessa') {
+                // Vanessa already active
+            }
+        }
+    </script>
 </body>
 </html>

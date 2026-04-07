@@ -42,7 +42,7 @@
         <div class="stat-card">
             <div>
                 <div class="stat-label">Total Revenue</div>
-                <div class="stat-value" style="font-size:24px;">Rp <?php echo e(number_format($totalRevenue, 0, ',', '.')); ?></div>
+                <div class="stat-value" style="font-size:24px;">Rp <?php echo e(number_format($totalRevenueIdr, 0, ',', '.')); ?></div>
             </div>
             <div class="stat-icon" style="background: rgba(0,194,168,0.12); color: #00C2A8;">
                 <i class="bi bi-cash-stack"></i>

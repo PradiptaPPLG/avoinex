@@ -18,7 +18,8 @@ class PaymentController extends Controller
                     'client',
                     'flightInstance.schedule.originAirport',
                     'flightInstance.schedule.destinationAirport',
-                    'bookingSeats.seat'
+                    'bookingSeats.seat',
+                    'bookingSeats.meal'
                 ])
                 ->findOrFail($bookingId);
 

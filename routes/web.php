@@ -26,8 +26,8 @@ Route::get('/support', fn() => view('pages.support'))->name('support');
 /* |-------------------------------------------------------------------------- | AUTH ROUTES |-------------------------------------------------------------------------- */
 
 Route::post('/login', [LoginController::class , 'login'])->name('login.submit');
-Route::post('/signup', [RegisterController::class , 'register'])->name('signup.submit');
 Route::post('/register', [RegisterController::class , 'register'])->name('register'); // <-- Tambah ini
+Route::post('/signup', [RegisterController::class , 'register'])->name('signup.submit');
 
 Route::post('/logout', [LoginController::class , 'logout'])->name('logout');
 
@@ -58,6 +58,7 @@ Route::post('/flight/{id}/book', [FlightController::class , 'storeBooking'])->na
 // Booking form and process
 Route::get('/my-bookings', [BookingController::class , 'index'])->name('booking.index');
 Route::post('/my-bookings/{booking}/cancel', [BookingController::class , 'cancel'])->name('booking.cancel');
+Route::post('/my-bookings/{booking}/refund', [BookingController::class , 'requestRefund'])->name('booking.refund.request');
 Route::get('/booking/{id}/ticket', [BookingController::class, 'downloadTicket'])->name('booking.ticket');
 Route::post('/booking/guest-cancel/{booking}', [BookingController::class , 'cancelGuest'])->name('booking.guest.cancel');
 Route::get('/booking/auth', [BookingController::class , 'authGate'])->name('booking.auth');
@@ -155,6 +156,8 @@ Route::prefix('admin')->group(function () {
 
                 Route::prefix('bookings')->name('admin.bookings.')->group(function () {
                     Route::get('/', [AdminBookingController::class , 'index'])->name('index');
+                    Route::get('/refunds', [AdminBookingController::class , 'refunds'])->name('refunds');
+                    Route::post('/refunds/{booking}/process', [AdminBookingController::class , 'processRefund'])->name('refund.process');
                     Route::get('/{id}', [AdminBookingController::class , 'show'])->name('show');
                 }
                 );

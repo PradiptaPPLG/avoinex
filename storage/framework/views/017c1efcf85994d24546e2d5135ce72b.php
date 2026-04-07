@@ -648,9 +648,20 @@
             <div class="nav-section-label">Revenue</div>
 
             <div class="nav-item">
-                <a href="<?php echo e(route('admin.bookings.index')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.bookings.*') ? 'active' : ''); ?>">
+                <a href="<?php echo e(route('admin.bookings.index')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.bookings.index') || request()->routeIs('admin.bookings.show') ? 'active' : ''); ?>">
                     <i class="bi bi-ticket-perforated nav-icon"></i>
                     Bookings
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <?php $refundBadgeCount = \App\Models\Booking::where('booking_status', 'refund_requested')->count(); ?>
+                <a href="<?php echo e(route('admin.bookings.refunds')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.bookings.refunds') ? 'active' : ''); ?>">
+                    <i class="bi bi-arrow-counterclockwise nav-icon"></i>
+                    Refund Requests
+                    <?php if($refundBadgeCount > 0): ?>
+                        <span class="badge bg-danger ms-auto" style="font-size: 10px;"><?php echo e($refundBadgeCount); ?></span>
+                    <?php endif; ?>
                 </a>
             </div>
 

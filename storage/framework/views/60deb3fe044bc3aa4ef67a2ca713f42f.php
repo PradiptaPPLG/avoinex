@@ -100,6 +100,20 @@
             border-top: 1px solid #ddd;
             padding-top: 10px;
         }
+        .vip-badge {
+            background-color: #FFC107;
+            color: #000;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .insurance-tag {
+            color: #279ED6;
+            font-size: 11px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -198,8 +212,8 @@
             <tr>
                 <th>No</th>
                 <th>Passenger Name</th>
-                <th>Seat</th>
-                <th>Class</th>
+                <th>Seat & Class</th>
+                <th>Add-ons (Meals & Insurance)</th>
                 <th>Baggage</th>
             </tr>
         </thead>
@@ -207,9 +221,24 @@
             <?php $__currentLoopData = $booking->bookingSeats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $seat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <tr>
                 <td><?php echo e($index + 1); ?></td>
-                <td style="font-weight: bold; text-transform: uppercase;"><?php echo e($seat->passenger_name); ?></td>
-                <td style="font-weight: bold; color: #279ED6;"><?php echo e($seat->seat->seat_number); ?></td>
-                <td style="text-transform: capitalize;"><?php echo e($seat->seat->seat_class ?? 'Economy'); ?></td>
+                <td style="font-weight: bold; text-transform: uppercase;"><?php echo e($seat->passenger_first_name); ?> <?php echo e($seat->passenger_last_name); ?></td>
+                <td>
+                    <span style="font-weight: bold; color: #279ED6;"><?php echo e($seat->seat->seat_number); ?></span>
+                    <span style="text-transform: capitalize; color: #666; font-size: 11px;">(<?php echo e($seat->seat->seat_class ?? 'Economy'); ?>)</span>
+                    <?php if($seat->is_vip_seat_selection): ?>
+                        <span class="vip-badge">VIP CHOICE</span>
+                    <?php endif; ?>
+                </td>
+                <td>
+                    <?php if($seat->meal_id): ?>
+                        <div style="font-size: 12px;">Meal: <?php echo e($seat->meal->name ?? 'Meal'); ?></div>
+                    <?php endif; ?>
+                    <?php if($seat->has_insurance): ?>
+                        <div class="insurance-tag">Travel Protection Included</div>
+                    <?php else: ?>
+                        <div style="font-size: 11px; color: #999;">No Insurance</div>
+                    <?php endif; ?>
+                </td>
                 <td><?php echo e($seat->baggage_weight > 0 ? $seat->baggage_weight . ' kg' : 'Cabin Only'); ?></td>
             </tr>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -227,7 +256,11 @@
         </tr>
         <tr>
             <td class="info-label">Total Amount</td>
-            <td class="info-value" style="font-size: 20px; color: #279ED6;">Rp <?php echo e(number_format($booking->total_price_usd, 0, ',', '.')); ?></td>
+            <td class="info-value" style="font-size: 20px; color: #279ED6;">
+                <?php $exchangeRate = config('app.usd_to_idr', 15000); ?>
+                Rp <?php echo e(number_format($booking->total_price_usd * $exchangeRate, 0, ',', '.')); ?>
+
+            </td>
         </tr>
     </table>
 
