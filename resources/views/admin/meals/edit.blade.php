@@ -41,26 +41,35 @@
                     @csrf
                     @method('PUT')
                     
-                    <div class="form-section-title">
-                        <i class="bi bi-info-circle"></i> Meal Information
-                    </div>
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-4 small border-0 shadow-sm" role="alert">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
 
                     <div class="mb-3">
                         <label class="form-label">Meal Name *</label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g. Nasi Goreng Spesial" required value="{{ old('name', $meal->name) }}">
+                        <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" placeholder="e.g. Nasi Goreng Spesial" required value="{{ old('name', $meal->name) }}">
+                        @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Price (USD) *</label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" step="0.01" min="0" name="price_usd" class="form-control" required value="{{ old('price_usd', $meal->price_usd) }}">
+                            <label class="form-label">Price (IDR) *</label>
+                            <div class="input-group @error('price_idr') has-validation @enderror">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" step="0.01" min="0" name="price_idr" class="form-control @error('price_idr') is-invalid @enderror" required value="{{ old('price_idr', round($meal->price_usd * config('app.usd_to_idr', 15000), 0)) }}">
+                                @error('price_idr')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                         </div>
                         <div class="col-md-6 d-flex align-items-end">
                             <div class="form-check form-switch mb-2">
-                                <input class="form-check-input" type="checkbox" role="switch" name="is_active" id="isActive" {{ $meal->is_active ? 'checked' : '' }}>
+                                <input class="form-check-input" type="checkbox" role="switch" name="is_active" id="isActive" value="1" {{ $meal->is_active ? 'checked' : '' }}>
                                 <label class="form-check-label" for="isActive">Active (Available for flights)</label>
                             </div>
                         </div>
@@ -68,7 +77,8 @@
 
                     <div class="mb-4">
                         <label class="form-label">Description *</label>
-                        <textarea name="description" class="form-control" rows="3" required placeholder="A brief description...">{{ old('description', $meal->description) }}</textarea>
+                        <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="3" required placeholder="A brief description...">{{ old('description', $meal->description) }}</textarea>
+                        @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="form-section-title mt-4">
@@ -176,12 +186,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    submitBtn.addEventListener('click', function() {
+    form.addEventListener('submit', function(e) {
+        // If they uploaded an image but forgot to click Apply Crop, auto crop it
         if (cropper && imageInput.files.length > 0) {
             const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
             croppedImageInput.value = canvas.toDataURL('image/jpeg', 0.85);
         }
-        form.submit();
+    });
+
+    submitBtn.addEventListener('click', function() {
+        form.requestSubmit(); // This triggers 'submit' event correctly
     });
 });
 </script>

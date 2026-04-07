@@ -1,9 +1,7 @@
-@extends('admin.layouts.app')
+<?php $__env->startSection('title', 'Schedule Management'); ?>
+<?php $__env->startSection('page-title', 'Flight Schedules'); ?>
 
-@section('title', 'Schedule Management')
-@section('page-title', 'Flight Schedules')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="card">
     <div class="card-header d-flex align-items-center justify-content-between">
@@ -11,7 +9,7 @@
             <i class="bi bi-calendar3 text-primary"></i>
             <h5 class="mb-0">Schedule Registry</h5>
         </div>
-        <a href="{{ route('admin.schedules.create') }}" class="btn btn-primary">
+        <a href="<?php echo e(route('admin.schedules.create')); ?>" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Add Schedule
         </a>
     </div>
@@ -30,38 +28,39 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($schedules as $schedule)
+                    <?php $__empty_1 = true; $__currentLoopData = $schedules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $schedule): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
                         <td>
                             <span style="font-family:'JetBrains Mono',monospace; font-size: 14px; font-weight: 700; color: var(--text-primary);">
-                                {{ $schedule->flight_number }}
+                                <?php echo e($schedule->flight_number); ?>
+
                             </span>
                         </td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-family:'JetBrains Mono',monospace; font-weight: 700; font-size: 13px; background: var(--surface-2); padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border);">{{ $schedule->originAirport->iata_code }}</span>
+                                <span style="font-family:'JetBrains Mono',monospace; font-weight: 700; font-size: 13px; background: var(--surface-2); padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border);"><?php echo e($schedule->originAirport->iata_code); ?></span>
                                 <i class="bi bi-arrow-right" style="color: var(--text-muted); font-size: 12px;"></i>
-                                <span style="font-family:'JetBrains Mono',monospace; font-weight: 700; font-size: 13px; background: var(--surface-2); padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border);">{{ $schedule->destinationAirport->iata_code }}</span>
+                                <span style="font-family:'JetBrains Mono',monospace; font-weight: 700; font-size: 13px; background: var(--surface-2); padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border);"><?php echo e($schedule->destinationAirport->iata_code); ?></span>
                             </div>
                         </td>
-                        <td style="font-family:'JetBrains Mono',monospace; font-size: 13px; font-weight: 500;">{{ $schedule->departure_time_gmt }}</td>
-                        <td style="font-family:'JetBrains Mono',monospace; font-size: 13px; font-weight: 500;">{{ $schedule->arrival_time_gmt }}</td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size: 13px; font-weight: 500;"><?php echo e($schedule->departure_time_gmt); ?></td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size: 13px; font-weight: 500;"><?php echo e($schedule->arrival_time_gmt); ?></td>
                         <td>
                             <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">
-                                <i class="bi bi-clock me-1" style="font-size: 11px;"></i>{{ $schedule->duration_minutes }} min
+                                <i class="bi bi-clock me-1" style="font-size: 11px;"></i><?php echo e($schedule->duration_minutes); ?> min
                             </span>
                         </td>
                         <td>
-                            <span style="font-weight: 700; font-size: 14px; color: var(--success);">Rp {{ number_format($schedule->base_price_usd * config('app.usd_to_idr', 15000), 0, ',', '.') }}</span>
+                            <span style="font-weight: 700; font-size: 14px; color: var(--success);">Rp <?php echo e(number_format($schedule->base_price_usd * config('app.usd_to_idr', 15000), 0, ',', '.')); ?></span>
                         </td>
                         <td>
                             <div class="d-flex gap-1">
-                                <a href="{{ route('admin.schedules.edit', $schedule->schedule_id) }}" class="btn btn-sm btn-warning" title="Edit">
+                                <a href="<?php echo e(route('admin.schedules.edit', $schedule->schedule_id)); ?>" class="btn btn-sm btn-warning" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form action="{{ route('admin.schedules.destroy', $schedule->schedule_id) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
+                                <form action="<?php echo e(route('admin.schedules.destroy', $schedule->schedule_id)); ?>" method="POST" style="display:inline;">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
                                     <button type="button" class="btn btn-sm btn-danger" title="Delete" onclick="confirmDelete(event, this.closest('form'), 'Delete this schedule?')">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -69,24 +68,26 @@
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="7" class="text-center py-5">
                             <i class="bi bi-calendar3" style="font-size: 32px; color: var(--border); display: block; margin-bottom: 12px;"></i>
                             <span style="color: var(--text-muted); font-weight: 500;">No schedules found</span>
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
-        @if($schedules->hasPages())
+        <?php if($schedules->hasPages()): ?>
         <div class="d-flex justify-content-end px-4 py-3" style="border-top: 1px solid var(--border);">
-            {{ $schedules->links() }}
+            <?php echo e($schedules->links()); ?>
+
         </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\Avoinex\resources\views/admin/schedules/index.blade.php ENDPATH**/ ?>

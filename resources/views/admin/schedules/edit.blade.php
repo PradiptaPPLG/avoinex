@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Create Schedule')
-@section('page-title', 'Create Schedule')
+@section('title', 'Edit Schedule')
+@section('page-title', 'Edit Schedule')
 
 @section('content')
 
@@ -9,25 +9,26 @@
     <a href="{{ route('admin.schedules.index') }}" class="btn btn-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i> Back
     </a>
-    <div style="color: var(--text-muted); font-size: 13px;">Schedules → Create New</div>
+    <div style="color: var(--text-muted); font-size: 13px;">Schedules → Edit #{{ $schedule->schedule_id }}</div>
 </div>
 
 <div class="card" style="max-width: 860px;">
     <div class="card-header">
         <div class="form-section-title mb-0">
-            <i class="bi bi-calendar-plus"></i>
-            New Flight Schedule
+            <i class="bi bi-pencil-square"></i>
+            Modify Flight Schedule
         </div>
     </div>
     <div class="card-body">
-        <form action="{{ route('admin.schedules.store') }}" method="POST">
+        <form action="{{ route('admin.schedules.update', $schedule->schedule_id) }}" method="POST">
             @csrf
+            @method('PUT')
 
             {{-- Flight Identity --}}
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
                     <label class="form-label">Flight Number</label>
-                    <input type="text" name="flight_number" class="form-control" placeholder="e.g. GA-202" required>
+                    <input type="text" name="flight_number" class="form-control" placeholder="e.g. GA-202" required value="{{ old('flight_number', $schedule->flight_number) }}">
                     @error('flight_number')
                         <div class="text-danger" style="font-size: 12px; margin-top: 5px;"><i class="bi bi-exclamation-circle me-1"></i>{{ $message }}</div>
                     @enderror
@@ -37,7 +38,9 @@
                     <select name="airline_code" class="form-control" required>
                         <option value="">— Select Airline —</option>
                         @foreach($airlines as $airline)
-                            <option value="{{ $airline->airline_code }}">{{ $airline->airline_code }} — {{ $airline->airline_name }}</option>
+                            <option value="{{ $airline->airline_code }}" {{ $schedule->airline_code == $airline->airline_code ? 'selected' : '' }}>
+                                {{ $airline->airline_code }} — {{ $airline->airline_name }}
+                            </option>
                         @endforeach
                     </select>
                     @error('airline_code')
@@ -55,7 +58,9 @@
                         <select name="origin_iata_code" class="form-control" required>
                             <option value="">— Select Airport —</option>
                             @foreach($airports as $airport)
-                                <option value="{{ $airport->iata_code }}">{{ $airport->iata_code }} — {{ $airport->city }}</option>
+                                <option value="{{ $airport->iata_code }}" {{ $schedule->origin_iata_code == $airport->iata_code ? 'selected' : '' }}>
+                                    {{ $airport->iata_code }} — {{ $airport->city }}
+                                </option>
                             @endforeach
                         </select>
                         @error('origin_iata_code')
@@ -70,7 +75,9 @@
                         <select name="destination_iata_code" class="form-control" required>
                             <option value="">— Select Airport —</option>
                             @foreach($airports as $airport)
-                                <option value="{{ $airport->iata_code }}">{{ $airport->iata_code }} — {{ $airport->city }}</option>
+                                <option value="{{ $airport->iata_code }}" {{ $schedule->destination_iata_code == $airport->iata_code ? 'selected' : '' }}>
+                                    {{ $airport->iata_code }} — {{ $airport->city }}
+                                </option>
                             @endforeach
                         </select>
                         @error('destination_iata_code')
@@ -84,21 +91,21 @@
             <div class="row g-4 mb-4">
                 <div class="col-md-4">
                     <label class="form-label">Departure Time (GMT)</label>
-                    <input type="time" name="departure_time_gmt" class="form-control" required>
+                    <input type="time" name="departure_time_gmt" class="form-control" required value="{{ old('departure_time_gmt', substr($schedule->departure_time_gmt, 0, 5)) }}">
                     @error('departure_time_gmt')
                         <div class="text-danger" style="font-size: 12px; margin-top: 5px;">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Arrival Time (GMT)</label>
-                    <input type="time" name="arrival_time_gmt" class="form-control" required>
+                    <input type="time" name="arrival_time_gmt" class="form-control" required value="{{ old('arrival_time_gmt', substr($schedule->arrival_time_gmt, 0, 5)) }}">
                     @error('arrival_time_gmt')
                         <div class="text-danger" style="font-size: 12px; margin-top: 5px;">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Duration (minutes)</label>
-                    <input type="number" name="duration_minutes" class="form-control" placeholder="e.g. 150" required>
+                    <input type="number" name="duration_minutes" class="form-control" placeholder="e.g. 150" required value="{{ old('duration_minutes', $schedule->duration_minutes) }}">
                     @error('duration_minutes')
                         <div class="text-danger" style="font-size: 12px; margin-top: 5px;">{{ $message }}</div>
                     @enderror
@@ -107,11 +114,15 @@
 
             {{-- Pricing & Validity --}}
             <div class="row g-4 mb-4">
+                @php
+                    $exchangeRate = config('app.usd_to_idr', 15000);
+                    $priceIdr = round($schedule->base_price_usd * $exchangeRate, 0);
+                @endphp
                 <div class="col-md-4">
                     <label class="form-label">Base Price (IDR)</label>
                     <div style="position: relative;">
                         <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600;">Rp</span>
-                        <input type="number" name="base_price_idr" class="form-control rupiah-input" placeholder="0" style="padding-left: 36px;" required>
+                        <input type="number" name="base_price_idr" class="form-control rupiah-input" placeholder="0" style="padding-left: 36px;" required value="{{ old('base_price_idr', $priceIdr) }}">
                     </div>
                     @error('base_price_idr')
                         <div class="text-danger" style="font-size: 12px; margin-top: 5px;">{{ $message }}</div>
@@ -119,14 +130,14 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Effective From</label>
-                    <input type="date" name="effective_from" class="form-control" value="{{ date('Y-m-d') }}" required>
+                    <input type="date" name="effective_from" class="form-control" required value="{{ old('effective_from', $schedule->effective_from) }}">
                     @error('effective_from')
                         <div class="text-danger" style="font-size: 12px; margin-top: 5px;">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Effective To <span style="color: var(--text-muted); font-weight: 400;">(optional)</span></label>
-                    <input type="date" name="effective_to" class="form-control">
+                    <input type="date" name="effective_to" class="form-control" value="{{ old('effective_to', $schedule->effective_to) }}">
                     @error('effective_to')
                         <div class="text-danger" style="font-size: 12px; margin-top: 5px;">{{ $message }}</div>
                     @enderror
@@ -135,7 +146,7 @@
 
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-lg me-1"></i> Create Schedule
+                    <i class="bi bi-save me-1"></i> Update Schedule
                 </button>
                 <a href="{{ route('admin.schedules.index') }}" class="btn btn-secondary">Cancel</a>
             </div>

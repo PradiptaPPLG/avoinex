@@ -64,9 +64,9 @@
                             <label class="form-label">Harga Mulai Dari (IDR)</label>
                             <div class="input-group">
                                 <span class="input-group-text">Rp</span>
-                                <input type="text" name="starting_price_usd" class="form-control rupiah-input @error('starting_price_usd') is-invalid @enderror" value="{{ old('starting_price_usd', $featuredDestination->starting_price_usd) }}" required>
+                                <input type="number" name="starting_price_idr" class="form-control rupiah-input @error('starting_price_idr') is-invalid @enderror" value="{{ old('starting_price_idr', round($featuredDestination->starting_price_usd * config('app.usd_to_idr', 15000), 0)) }}" required>
                             </div>
-                            @error('starting_price_usd')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            @error('starting_price_idr')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Rentang Tanggal (cth: 3-14 Mar)</label>

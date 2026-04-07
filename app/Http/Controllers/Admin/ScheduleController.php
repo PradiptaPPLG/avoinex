@@ -33,10 +33,14 @@ class ScheduleController extends Controller
             'departure_time_gmt' => 'required',
             'arrival_time_gmt' => 'required',
             'duration_minutes' => 'required|integer',
-            'base_price_usd' => 'required|numeric',
+            'base_price_idr' => 'required|numeric',
             'effective_from' => 'required|date',
             'effective_to' => 'nullable|date|after:effective_from'
         ]);
+
+        $exchangeRate = config('app.usd_to_idr', 15000);
+        $validated['base_price_usd'] = round($validated['base_price_idr'] / $exchangeRate, 2);
+        unset($validated['base_price_idr']);
 
         Schedule::create($validated);
 
@@ -64,10 +68,14 @@ class ScheduleController extends Controller
             'departure_time_gmt' => 'required',
             'arrival_time_gmt' => 'required',
             'duration_minutes' => 'required|integer',
-            'base_price_usd' => 'required|numeric',
+            'base_price_idr' => 'required|numeric',
             'effective_from' => 'required|date',
             'effective_to' => 'nullable|date|after:effective_from'
         ]);
+
+        $exchangeRate = config('app.usd_to_idr', 15000);
+        $validated['base_price_usd'] = round($validated['base_price_idr'] / $exchangeRate, 2);
+        unset($validated['base_price_idr']);
 
         $schedule->update($validated);
 

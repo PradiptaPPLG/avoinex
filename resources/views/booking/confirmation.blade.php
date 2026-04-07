@@ -91,13 +91,15 @@
                     @php
                         $seatSubtotal = 0;
                         $baggageTotal = 0;
+                        $mealTotal = 0;
+                        $insuranceTotal = 0;
                     @endphp
                     <table class="table table-sm" style="font-size: 13px;">
                         <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Passport</th>
-                                <th>Seat & Baggage</th>
+                                <th>Seat & Add-ons</th>
                                 <th class="text-end">Price</th>
                             </tr>
                         </thead>
@@ -106,34 +108,53 @@
                             @php
                                 $seatSubtotal += $seat->price_at_booking;
                                 $baggageTotal += $seat->baggage_price ?? 0;
+                                $mealTotal += $seat->meal_price ?? 0;
+                                $insuranceTotal += $seat->insurance_price ?? 0;
                             @endphp
                             <tr>
                                 <td>{{ $seat->passenger_first_name }} {{ $seat->passenger_last_name }}</td>
                                 <td>{{ $seat->passenger_passport }}</td>
                                 <td>
-                                    <div>{{ $seat->seat->seat_number ?? 'N/A' }}</div>
+                                    <div>
+                                        <strong>{{ $seat->seat->seat_number ?? 'N/A' }}</strong>
+                                        @if($seat->is_vip_seat_selection)
+                                            <span class="badge bg-warning text-dark small ms-1"><i class="bi bi-star-fill"></i> VIP</span>
+                                        @endif
+                                    </div>
+                                    @if($seat->meal_id)
+                                    <div class="small text-muted"><i class="bi bi-cup-hot"></i> {{ $seat->meal->name ?? 'Meal' }}</div>
+                                    @endif
                                     @if($seat->baggage_weight > 0)
                                     <div class="small text-muted"><i class="bi bi-suitcase"></i> {{ $seat->baggage_weight }} kg</div>
+                                    @endif
+                                    @if($seat->has_insurance)
+                                    <div class="small text-muted"><i class="bi bi-shield-check"></i> Travel Protection</div>
                                     @endif
                                 </td>
                                 <td class="text-end">
                                     <div>Rp {{ number_format($seat->price_at_booking, 0, ',', '.') }}</div>
+                                    @if($seat->meal_price > 0)
+                                    <div class="small text-muted">+Rp {{ number_format($seat->meal_price, 0, ',', '.') }}</div>
+                                    @endif
                                     @if($seat->baggage_price > 0)
                                     <div class="small text-muted">+Rp {{ number_format($seat->baggage_price, 0, ',', '.') }}</div>
+                                    @endif
+                                    @if($seat->insurance_price > 0)
+                                    <div class="small text-muted">+Rp {{ number_format($seat->insurance_price, 0, ',', '.') }}</div>
                                     @endif
                                 </td>
                             </tr>
                             @endforeach
                         </tbody>
                         @php
-                            $subtotal = $seatSubtotal + $baggageTotal;
+                            $subtotal = $seatSubtotal + $baggageTotal + $mealTotal + $insuranceTotal;
                             $taxAmount = $subtotal * 0.10;
-                            $serviceFee = 5.00;
+                            $serviceFee = 5.00; // This seems to be handled differently in some parts, but keeping it consistent with the existing confirmation logic
                             $grandTotal = $subtotal + $taxAmount + $serviceFee;
                         @endphp
                         <tfoot>
                             <tr class="text-muted" style="font-size: 12px;">
-                                <td colspan="3" class="text-end border-0 py-1">Subtotal (Seats + Baggage)</td>
+                                <td colspan="3" class="text-end border-0 py-1">Subtotal (Add-ons Incl.)</td>
                                 <td class="text-end border-0 py-1">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
                             </tr>
                             <tr class="text-muted" style="font-size: 12px;">

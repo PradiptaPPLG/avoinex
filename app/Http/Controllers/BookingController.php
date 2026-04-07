@@ -186,37 +186,42 @@ class BookingController extends Controller
 
             \Log::info('Creating booking with code: ' . $bookingCode);
 
-            // Calculate base price dynamically (seats + baggage + meals + insurance)
-            $subtotal = array_sum($validated['seat_prices']) + array_sum($validated['baggage_prices']);
+            // Frontend sends seat_prices and baggage_prices in IDR!
+            // We need to convert them back to USD for storage in the 'total_price_usd' column.
+            $exchangeRate = config('app.usd_to_idr', 15000);
             
-            // Add meal prices if present
+            $subtotalIdr = array_sum($validated['seat_prices']) + array_sum($validated['baggage_prices']);
+            
+            // Add meal prices (IDR) if present
             if (!empty($validated['meal_prices'])) {
-                $subtotal += array_sum($validated['meal_prices']);
+                $subtotalIdr += array_sum($validated['meal_prices']);
             }
-            // Add insurance prices if present
-            // Each insurance is 45.000 IDR which is $3.00 USD (assume $3.00 for backend consistency, though we can just sum a hypothetical insurance price array or manual value).
-            // Actually, we pass insurance value as 3.00 or derived from array. Let's add $3.00 for each `has_insurances` that is true if we don't have an explicit array of prices.
-            $insuranceSum = 0;
+            
+            // Add insurance prices (IDR) if present
+            $insuranceSumIdr = 0;
             if (!empty($validated['has_insurances'])) {
                 foreach ($validated['has_insurances'] as $hasIns) {
                     if ($hasIns == '1' || $hasIns == 'true' || $hasIns === true) {
-                        $insuranceSum += 3.00; // $3.00 = ~Rp 45.000
+                        $insuranceSumIdr += 45000; // Fixed IDR price
                     }
                 }
             }
-            $subtotal += $insuranceSum;
+            $subtotalIdr += $insuranceSumIdr;
+
+            // Convert to USD for DB
+            $subtotalUsd = $subtotalIdr / $exchangeRate;
 
             $taxRate = 0.10;
-            $serviceFee = 5.00;
+            $serviceFeeUsd = 5.00; // Fixed USD fee
             
-            // Calculate final grand total with tax and service fee
-            $grandTotal = $subtotal + ($subtotal * $taxRate) + $serviceFee;
+            // Calculate final grand total in USD
+            $grandTotalUsd = $subtotalUsd + ($subtotalUsd * $taxRate) + $serviceFeeUsd;
 
             $booking = Booking::create([
                 'booking_code' => $bookingCode,
                 'client_id' => $client->client_id,
                 'flight_instance_id' => $flightInstanceId,
-                'total_price_usd' => $grandTotal,
+                'total_price_usd' => $grandTotalUsd,
                 'booking_status' => 'pending',
                 'payment_status' => 'unpaid',
                 'expires_at' => now()->addHours(24)
@@ -300,9 +305,14 @@ class BookingController extends Controller
                 }
 
                 $mealId = isset($validated['meal_ids'][$index]) && $validated['meal_ids'][$index] ? $validated['meal_ids'][$index] : null;
-                $mealPrice = isset($validated['meal_prices'][$index]) && $validated['meal_prices'][$index] ? floatval($validated['meal_prices'][$index]) : 0;
+                $mealPriceIdr = isset($validated['meal_prices'][$index]) && $validated['meal_prices'][$index] ? floatval($validated['meal_prices'][$index]) : 0;
                 $hasInsurance = isset($validated['has_insurances'][$index]) && ($validated['has_insurances'][$index] == '1' || $validated['has_insurances'][$index] == 'true');
-                $insurancePrice = $hasInsurance ? 3.00 : 0.00;
+
+                
+                $exchangeRate = config('app.usd_to_idr', 15000);
+                $insurancePriceIdr = 45000;
+                $insurancePriceUsd = $hasInsurance ? round($insurancePriceIdr / $exchangeRate, 2) : 0.00;
+                
                 $isVipSeat = isset($validated['seat_is_vip'][$index]) && ($validated['seat_is_vip'][$index] == '1' || $validated['seat_is_vip'][$index] == 'true');
 
                 BookingSeat::create([
@@ -313,14 +323,14 @@ class BookingController extends Controller
                     'passenger_passport' => $validated['passenger_passport'][$index],
                     'passenger_date_of_birth' => $validated['passenger_dob'][$index] ?? null,
                     'seat_id' => $seatId,
-                    'price_at_booking' => $validated['seat_prices'][$index],
+                    'price_at_booking' => round($validated['seat_prices'][$index] / $exchangeRate, 2),
                     'special_requests' => $validated['special_requests'][$index] ?? null,
                     'baggage_weight' => $validated['baggage_weights'][$index] ?? 0,
-                    'baggage_price' => $validated['baggage_prices'][$index] ?? 0,
+                    'baggage_price' => round(($validated['baggage_prices'][$index] ?? 0) / $exchangeRate, 2),
                     'meal_id' => $mealId,
-                    'meal_price' => $mealPrice,
+                    'meal_price' => round($mealPriceIdr / $exchangeRate, 2),
                     'has_insurance' => $hasInsurance,
-                    'insurance_price' => $insurancePrice,
+                    'insurance_price' => $insurancePriceUsd,
                     'is_vip_seat_selection' => $isVipSeat
                 ]);
             }

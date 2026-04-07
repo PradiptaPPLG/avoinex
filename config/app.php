@@ -15,6 +15,9 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'usd_to_idr' => env('USD_TO_IDR', 15000),
+
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

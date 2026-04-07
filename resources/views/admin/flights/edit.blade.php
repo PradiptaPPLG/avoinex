@@ -83,7 +83,7 @@
                                 {{ (is_array(old('meals')) && in_array($meal->id, old('meals'))) || (old('meals') === null && in_array($meal->id, $flightMealIds)) ? 'checked' : '' }}>
                                 <label class="form-check-label flex-grow-1" for="meal_{{ $meal->id }}" style="cursor: pointer;">
                                     <div class="fw-bold">{{ $meal->name }}</div>
-                                    <div class="small text-muted mb-1">${{ number_format($meal->price_usd, 2) }}</div>
+                                    <div class="small text-muted mb-1">Rp {{ number_format($meal->price_usd * config('app.usd_to_idr', 15000), 0, ',', '.') }}</div>
                                     <div class="small" style="font-size: 11px;">{{ Str::limit($meal->description, 40) }}</div>
                                 </label>
                             </div>

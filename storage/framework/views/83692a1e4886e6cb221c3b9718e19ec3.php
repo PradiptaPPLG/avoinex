@@ -33,26 +33,70 @@
                 <form action="<?php echo e(route('admin.meals.store')); ?>" method="POST" id="mealForm">
                     <?php echo csrf_field(); ?>
                     
-                    <div class="form-section-title">
-                        <i class="bi bi-info-circle"></i> Meal Information
-                    </div>
+                    <?php if($errors->any()): ?>
+                        <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-4 small border-0 shadow-sm" role="alert">
+                            <ul class="mb-0">
+                                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <li><?php echo e($error); ?></li>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
 
                     <div class="mb-3">
                         <label class="form-label">Meal Name *</label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g. Nasi Goreng Spesial" required value="<?php echo e(old('name')); ?>">
+                        <input type="text" name="name" class="form-control <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" placeholder="e.g. Nasi Goreng Spesial" required value="<?php echo e(old('name')); ?>">
+                        <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Price (USD) *</label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" step="0.01" min="0" name="price_usd" class="form-control" required value="<?php echo e(old('price_usd', 0.00)); ?>">
+                            <label class="form-label">Price (IDR) *</label>
+                            <div class="input-group <?php $__errorArgs = ['price_idr'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> has-validation <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" step="0.01" min="0" name="price_idr" class="form-control <?php $__errorArgs = ['price_idr'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required value="<?php echo e(old('price_idr', 0)); ?>">
+                                <?php $__errorArgs = ['price_idr'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                         <div class="col-md-6 d-flex align-items-end">
                             <div class="form-check form-switch mb-2">
-                                <input class="form-check-input" type="checkbox" role="switch" name="is_active" id="isActive" checked>
+                                <input class="form-check-input" type="checkbox" role="switch" name="is_active" id="isActive" value="1" checked>
                                 <label class="form-check-label" for="isActive">Active (Available for flights)</label>
                             </div>
                         </div>
@@ -60,7 +104,22 @@
 
                     <div class="mb-4">
                         <label class="form-label">Description *</label>
-                        <textarea name="description" class="form-control" rows="3" required placeholder="A brief description of the meal ingredients..."><?php echo e(old('description')); ?></textarea>
+                        <textarea name="description" class="form-control <?php $__errorArgs = ['description'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" rows="3" required placeholder="A brief description of the meal ingredients..."><?php echo e(old('description')); ?></textarea>
+                        <?php $__errorArgs = ['description'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <div class="form-section-title mt-4">
@@ -163,14 +222,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    submitBtn.addEventListener('click', function() {
+    form.addEventListener('submit', function(e) {
         // If they uploaded an image but forgot to click Apply Crop, auto crop it
         if (cropper && imageInput.files.length > 0) {
             const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
             croppedImageInput.value = canvas.toDataURL('image/jpeg', 0.85);
         }
-        
-        form.submit();
+    });
+
+    submitBtn.addEventListener('click', function() {
+        form.requestSubmit(); // This triggers 'submit' event correctly
     });
 });
 </script>

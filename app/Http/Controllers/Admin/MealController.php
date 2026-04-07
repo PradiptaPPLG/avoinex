@@ -27,15 +27,18 @@ class MealController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'price_usd' => 'required|numeric|min:0',
-            'is_active' => 'boolean',
+            'price_idr' => 'required|numeric|min:0',
             'cropped_image' => 'nullable|string' // base64 encoded image
         ]);
 
         $meal = new Meal();
         $meal->name = $request->name;
         $meal->description = $request->description;
-        $meal->price_usd = $request->price_usd;
+        
+        // Convert IDR to USD for storage
+        $exchangeRate = config('app.usd_to_idr', 15000);
+        $meal->price_usd = round($request->price_idr / $exchangeRate, 2);
+        
         $meal->is_active = $request->has('is_active');
 
         if ($request->filled('cropped_image')) {
@@ -57,14 +60,17 @@ class MealController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'price_usd' => 'required|numeric|min:0',
-            'is_active' => 'boolean',
+            'price_idr' => 'required|numeric|min:0',
             'cropped_image' => 'nullable|string'
         ]);
 
         $meal->name = $request->name;
         $meal->description = $request->description;
-        $meal->price_usd = $request->price_usd;
+        
+        // Convert IDR to USD for storage
+        $exchangeRate = config('app.usd_to_idr', 15000);
+        $meal->price_usd = round($request->price_idr / $exchangeRate, 2);
+        
         $meal->is_active = $request->has('is_active');
 
         if ($request->filled('cropped_image')) {
@@ -92,19 +98,28 @@ class MealController extends Controller
 
     private function saveBase64Image($base64String)
     {
-        // Extract base64
-        $image_parts = explode(";base64,", $base64String);
-        $image_type_aux = explode("image/", $image_parts[0]);
-        $image_type = $image_type_aux[1];
-        if (!in_array($image_type, ['jpeg', 'png', 'jpg', 'webp'])) {
-            $image_type = 'jpg';
-        }
-        $image_base64 = base64_decode($image_parts[1]);
-        $fileName = 'meals/' . Str::random(20) . '.' . $image_type;
-        
-        // Save using Storage facade
-        Storage::disk('public')->put($fileName, $image_base64);
+        try {
+            // Extract base64
+            $image_parts = explode(";base64,", $base64String);
+            if (count($image_parts) < 2) return null;
 
-        return $fileName;
+            $image_type_aux = explode("image/", $image_parts[0]);
+            if (count($image_type_aux) < 2) return null;
+            
+            $image_type = $image_type_aux[1];
+            if (!in_array($image_type, ['jpeg', 'png', 'jpg', 'webp'])) {
+                $image_type = 'jpg';
+            }
+            
+            $image_base64 = base64_decode($image_parts[1]);
+            $fileName = 'meals/' . Str::random(20) . '.' . $image_type;
+            
+            // Save using Storage facade
+            Storage::disk('public')->put($fileName, $image_base64);
+
+            return $fileName;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

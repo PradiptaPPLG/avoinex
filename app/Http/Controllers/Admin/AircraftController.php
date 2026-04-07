@@ -31,7 +31,6 @@ class AircraftController extends Controller
             'seat_columns' => 'required|integer|min:2|max:12',
             'seat_rows' => 'required|integer|min:5|max:80',
             'business_rows' => 'required|integer|min:0|max:20',
-            'preferred_zone_enabled' => 'nullable|boolean',
             'preferred_zone_start_row' => [
                 'nullable',
                 'integer',
@@ -58,8 +57,6 @@ class AircraftController extends Controller
                 }
             ],
             'baggage_capacity_kg' => 'required|integer|min:0',
-            'has_meal' => 'nullable|boolean',
-            'has_wifi' => 'nullable|boolean',
         ]);
 
         $totalSeats = $validated['seat_columns'] * $validated['seat_rows'];
@@ -117,7 +114,6 @@ class AircraftController extends Controller
             'seat_columns' => 'required|integer|min:2|max:12',
             'seat_rows' => 'required|integer|min:5|max:80',
             'business_rows' => 'required|integer|min:0|max:20',
-            'preferred_zone_enabled' => 'nullable|boolean',
             'preferred_zone_start_row' => [
                 'nullable',
                 'integer',
@@ -144,8 +140,6 @@ class AircraftController extends Controller
                 }
             ],
             'baggage_capacity_kg' => 'required|integer|min:0',
-            'has_meal' => 'nullable|boolean',
-            'has_wifi' => 'nullable|boolean',
         ]);
 
         $totalSeats = $validated['seat_columns'] * $validated['seat_rows'];

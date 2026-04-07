@@ -42,7 +42,7 @@
                             <span class="badge bg-primary">{{ $dest->destination_iata }}</span>
                             <div class="small text-muted mt-1">{{ $dest->date_range }}</div>
                         </td>
-                        <td class="fw-bold text-success">Rp {{ number_format($dest->starting_price_usd, 0, ',', '.') }}</td>
+                        <td class="fw-bold text-success">Rp {{ number_format($dest->starting_price_usd * config('app.usd_to_idr', 15000), 0, ',', '.') }}</td>
                         <td>
                             @if($dest->is_active)
                             <span class="badge bg-success">Aktif</span>

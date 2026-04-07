@@ -19,7 +19,7 @@
                         <th class="px-4 py-3" style="width: 80px;">Image</th>
                         <th class="py-3">Name</th>
                         <th class="py-3">Description</th>
-                        <th class="py-3 text-center">Price (USD)</th>
+                        <th class="py-3 text-center">Price (IDR)</th>
                         <th class="py-3 text-center">Status</th>
                         <th class="px-4 py-3 text-end">Actions</th>
                     </tr>
@@ -41,7 +41,7 @@
                             {{ Str::limit($meal->description, 50) }}
                         </td>
                         <td class="py-3 text-center fw-semibold text-primary">
-                            ${{ number_format($meal->price_usd, 2) }}
+                            Rp {{ number_format($meal->price_usd * config('app.usd_to_idr', 15000), 0, ',', '.') }}
                         </td>
                         <td class="py-3 text-center">
                             @if($meal->is_active)

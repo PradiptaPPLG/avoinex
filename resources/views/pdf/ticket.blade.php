@@ -100,6 +100,20 @@
             border-top: 1px solid #ddd;
             padding-top: 10px;
         }
+        .vip-badge {
+            background-color: #FFC107;
+            color: #000;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .insurance-tag {
+            color: #279ED6;
+            font-size: 11px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -197,8 +211,8 @@
             <tr>
                 <th>No</th>
                 <th>Passenger Name</th>
-                <th>Seat</th>
-                <th>Class</th>
+                <th>Seat & Class</th>
+                <th>Add-ons (Meals & Insurance)</th>
                 <th>Baggage</th>
             </tr>
         </thead>
@@ -206,9 +220,24 @@
             @foreach($booking->bookingSeats as $index => $seat)
             <tr>
                 <td>{{ $index + 1 }}</td>
-                <td style="font-weight: bold; text-transform: uppercase;">{{ $seat->passenger_name }}</td>
-                <td style="font-weight: bold; color: #279ED6;">{{ $seat->seat->seat_number }}</td>
-                <td style="text-transform: capitalize;">{{ $seat->seat->seat_class ?? 'Economy' }}</td>
+                <td style="font-weight: bold; text-transform: uppercase;">{{ $seat->passenger_first_name }} {{ $seat->passenger_last_name }}</td>
+                <td>
+                    <span style="font-weight: bold; color: #279ED6;">{{ $seat->seat->seat_number }}</span>
+                    <span style="text-transform: capitalize; color: #666; font-size: 11px;">({{ $seat->seat->seat_class ?? 'Economy' }})</span>
+                    @if($seat->is_vip_seat_selection)
+                        <span class="vip-badge">VIP CHOICE</span>
+                    @endif
+                </td>
+                <td>
+                    @if($seat->meal_id)
+                        <div style="font-size: 12px;">Meal: {{ $seat->meal->name ?? 'Meal' }}</div>
+                    @endif
+                    @if($seat->has_insurance)
+                        <div class="insurance-tag">Travel Protection Included</div>
+                    @else
+                        <div style="font-size: 11px; color: #999;">No Insurance</div>
+                    @endif
+                </td>
                 <td>{{ $seat->baggage_weight > 0 ? $seat->baggage_weight . ' kg' : 'Cabin Only' }}</td>
             </tr>
             @endforeach

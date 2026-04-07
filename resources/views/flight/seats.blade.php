@@ -909,6 +909,7 @@
 }
 </style>
 
+@push('scripts')
 <script>
 // SEAT SELECTION LOGIC WITH PASSENGER LIMIT ENFORCEMENT
 console.log('=== SEAT SELECTION PAGE LOADING ===');
@@ -917,11 +918,12 @@ const REQUIRED_SEATS = {{ $requiredSeats ?? 1 }};
 const ADULTS = {{ $adults ?? 1 }};
 const CHILDREN = {{ $children ?? 0 }};
 const INFANTS = {{ $infants ?? 0 }};
-
-console.log(`📋 Required seats: ${REQUIRED_SEATS} (${ADULTS} adults + ${CHILDREN} children, ${INFANTS} infants)`);
+const EXCHANGE_RATE = {{ config('app.usd_to_idr', 15000) }};
 
 let selectedSeats = [];
 let totalPrice = 0;
+let isVipEconomyUnlocked = false;
+const VIP_SEAT_FEE = 150000;
 
 function initializeSeatSelection() {
     console.log('🔄 Initializing seat selection...');
@@ -931,6 +933,7 @@ function initializeSeatSelection() {
     // Clear JS state
     document.querySelectorAll('.seat-item').forEach(s => s.classList.remove('selected'));
     document.getElementById('economySectionWrap')?.classList.remove('vip-unlocked');
+    document.getElementById('economyOverlay')?.classList.remove('d-none');
     document.getElementById('economyOverlay').style.display = 'flex';
     isVipEconomyUnlocked = false;
 
@@ -938,12 +941,15 @@ function initializeSeatSelection() {
     console.log('✅ Initialization complete');
 }
 
-let isVipEconomyUnlocked = false;
-const VIP_SEAT_FEE = 150000;
+// Handled globally now
 
 document.getElementById('btnUnlockVip')?.addEventListener('click', function() {
     isVipEconomyUnlocked = true;
-    document.getElementById('economyOverlay').style.display = 'none';
+    const overlay = document.getElementById('economyOverlay');
+    if (overlay) {
+        overlay.classList.add('d-none');
+        overlay.style.setProperty('display', 'none', 'important');
+    }
     Swal.fire({
         toast: true,
         position: 'top-end',
@@ -973,6 +979,13 @@ document.getElementById('btnRandomSeat')?.addEventListener('click', function() {
     picked.forEach(seatEl => {
         handleSeatClick(seatEl, true); // true = isRandom (no VIP fee)
     });
+
+    // Hide overlay
+    const overlay = document.getElementById('economyOverlay');
+    if (overlay) {
+        overlay.classList.add('d-none');
+        overlay.style.setProperty('display', 'none', 'important');
+    }
 });
 
 document.addEventListener('click', function(event) {
@@ -993,17 +1006,27 @@ document.addEventListener('click', function(event) {
         const seatNumber = seatElement.dataset.seatNumber;
         let basePriceUsd = parseFloat(seatElement.dataset.price);
         
-        // Conversion rate USD to IDR for visual purposes (assume 15000)
-        // Wait, the page sets data-price in USD but visual is Rp.
-        // The previous code had the base price parsed directly from dataset.price which was actually USD!
-        // Ah, wait, if data-price is 150, the UI showed Rp 150.000 in JS?
-        // Let's use the data-price as is, but we ADD the VIP fee.
-        let finalPrice = basePriceUsd * 15000; // Let's strictly convert dataset price to IDR internally if it's in USD.
-        // Actually the backend sends dataset.price as USD (e.g. 150.00), so we multiply by 15000 to get IDR.
-        finalPrice = basePriceUsd * 15000;
+        // Use the dynamic exchange rate injected from Laravel
+        let finalPrice = basePriceUsd * EXCHANGE_RATE; 
         
         const isEconomy = seatElement.dataset.class === 'economy' || seatElement.dataset.class === 'preferred';
         
+        // BLOCK MANUAL SELECTION if not unlocked
+        if (isEconomy && !isRandom && !isVipEconomyUnlocked) {
+            const overlay = document.getElementById('economyOverlay');
+            if (overlay) {
+                overlay.classList.remove('d-none');
+                overlay.style.setProperty('display', 'flex', 'important');
+            }
+            Swal.fire({
+                icon: 'warning',
+                title: 'Manual Selection Locked',
+                text: 'Please unlock manual selection to pick specific seats, or use Random Assignment for free.',
+                confirmButtonColor: '#279ED6'
+            });
+            return;
+        }
+
         // If it's an economy seat selected manually (not random)
         let appliedVipFee = 0;
         if (isEconomy && !isRandom && isVipEconomyUnlocked) {
@@ -1223,4 +1246,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
 console.log('✅ Seat selection script loaded');
 </script>
+@endpush
 @endsection

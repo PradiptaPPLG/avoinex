@@ -17,12 +17,16 @@ class AdminDashboardController extends Controller
             ->where('payment_status', 'paid')
             ->sum('total_price_usd');
         $flightsToday = FlightInstance::whereDate('flight_date', today())->count();
+        
+        // Convert to IDR for display
+        $exchangeRate = config('app.usd_to_idr', 15000);
+        $totalRevenueIdr = $totalRevenue * $exchangeRate;
 
         return view('admin.dashboard', compact(
             'totalBookings',
             'confirmedBookings',
             'cancelledBookings',
-            'totalRevenue',
+            'totalRevenueIdr',
             'flightsToday'
         ));
     }

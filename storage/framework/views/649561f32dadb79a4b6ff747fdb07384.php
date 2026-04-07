@@ -233,13 +233,33 @@
                 
                 
                 
-                <div class="economy-section">
-                    <h5 class="text-success mb-3">
+                <div class="economy-section position-relative pb-4" id="economySectionWrap">
+                    <!-- VIP PAYWALL OVERLAY -->
+                    <div id="economyOverlay" class="position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center px-3" style="z-index: 10; background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); top: 0; left: 0; border-radius: 12px;">
+                        <div class="bg-white p-4 rounded-4 shadow border text-center" style="max-width: 450px;">
+                            <div class="mb-3">
+                                <i class="bi bi-lock-fill text-warning" style="font-size: 2.5rem;"></i>
+                            </div>
+                            <h4 class="fw-bold mb-2">Economy Seat Selection</h4>
+                            <p class="text-muted small mb-4">You can randomly be assigned a seat for free during check-in, or pay a VIP Selection Fee to pick your exact seat right now.</p>
+                            
+                            <div class="d-grid gap-3">
+                                <button type="button" class="btn btn-outline-primary" id="btnRandomSeat">
+                                    <i class="bi bi-shuffle me-2"></i> Random Assignment (Free)
+                                </button>
+                                <button type="button" class="btn btn-warning fw-bold text-dark" id="btnUnlockVip">
+                                    <i class="bi bi-star-fill me-2"></i> Unlock Selection (+ Rp 150.000/seat)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="text-success mb-3 px-3">
                         <i class="bi bi-person-fill"></i> Main Cabin
                         <small class="text-muted ms-2">Rows <?php echo e($econStart); ?>-<?php echo e($totalRows); ?></small>
                     </h5>
                     
-                    <div class="seat-map">
+                    <div class="seat-map px-3">
                         <?php for($row = $econStart; $row <= $totalRows; $row++): ?>
                             <?php
                                 $isPreferred = $prefEnabled && $row >= $prefStart && $row <= $prefEnd;
@@ -895,6 +915,7 @@
 }
 </style>
 
+<?php $__env->startPush('scripts'); ?>
 <script>
 // SEAT SELECTION LOGIC WITH PASSENGER LIMIT ENFORCEMENT
 console.log('=== SEAT SELECTION PAGE LOADING ===');
@@ -903,19 +924,75 @@ const REQUIRED_SEATS = <?php echo e($requiredSeats ?? 1); ?>;
 const ADULTS = <?php echo e($adults ?? 1); ?>;
 const CHILDREN = <?php echo e($children ?? 0); ?>;
 const INFANTS = <?php echo e($infants ?? 0); ?>;
-
-console.log(`📋 Required seats: ${REQUIRED_SEATS} (${ADULTS} adults + ${CHILDREN} children, ${INFANTS} infants)`);
+const EXCHANGE_RATE = <?php echo e(config('app.usd_to_idr', 15000)); ?>;
 
 let selectedSeats = [];
 let totalPrice = 0;
+let isVipEconomyUnlocked = false;
+const VIP_SEAT_FEE = 150000;
 
 function initializeSeatSelection() {
     console.log('🔄 Initializing seat selection...');
     selectedSeats = [];
     totalPrice = 0;
+    
+    // Clear JS state
+    document.querySelectorAll('.seat-item').forEach(s => s.classList.remove('selected'));
+    document.getElementById('economySectionWrap')?.classList.remove('vip-unlocked');
+    document.getElementById('economyOverlay')?.classList.remove('d-none');
+    document.getElementById('economyOverlay').style.display = 'flex';
+    isVipEconomyUnlocked = false;
+
     updateUI();
     console.log('✅ Initialization complete');
 }
+
+// Handled globally now
+
+document.getElementById('btnUnlockVip')?.addEventListener('click', function() {
+    isVipEconomyUnlocked = true;
+    const overlay = document.getElementById('economyOverlay');
+    if (overlay) {
+        overlay.classList.add('d-none');
+        overlay.style.setProperty('display', 'none', 'important');
+    }
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: 'Manual Seat Selection Unlocked',
+        showConfirmButton: false,
+        timer: 3000
+    });
+});
+
+document.getElementById('btnRandomSeat')?.addEventListener('click', function() {
+    // Collect all available economy seats
+    const allEcon = Array.from(document.querySelectorAll('.seat-item[data-class="economy"], .seat-item[data-class="preferred"]'));
+    if (allEcon.length < REQUIRED_SEATS) {
+        Swal.fire('Error', 'Not enough economy seats available!', 'error');
+        return;
+    }
+    
+    // Pick random seats
+    const shuffled = allEcon.sort(() => 0.5 - Math.random());
+    const picked = shuffled.slice(0, REQUIRED_SEATS);
+    
+    // Clear existing
+    handleClearSeats(true);
+    
+    // Check them silently
+    picked.forEach(seatEl => {
+        handleSeatClick(seatEl, true); // true = isRandom (no VIP fee)
+    });
+
+    // Hide overlay
+    const overlay = document.getElementById('economyOverlay');
+    if (overlay) {
+        overlay.classList.add('d-none');
+        overlay.style.setProperty('display', 'none', 'important');
+    }
+});
 
 document.addEventListener('click', function(event) {
     if (event.target.closest('.seat-item')) {
@@ -930,44 +1007,79 @@ document.addEventListener('click', function(event) {
     }
 });
 
-function handleSeatClick(seatElement) {
-    const seatId = seatElement.dataset.seatId;
-    const seatNumber = seatElement.dataset.seatNumber;
-    const price = parseFloat(seatElement.dataset.price);
-    
-    console.log(`🪑 Seat clicked: ${seatNumber} (Rp ${price})`);
-    
-    if (seatElement.classList.contains('selected')) {
-        // Deselect
-        seatElement.classList.remove('selected');
-        selectedSeats = selectedSeats.filter(s => s.id !== seatId);
-        totalPrice -= price;
-        console.log(`➖ Deselected: ${seatNumber}`);
-    } else {
-        // Check against required seats limit
-        if (selectedSeats.length >= REQUIRED_SEATS) {
-            // Auto-cancel the earliest selected seat
-            const oldestSeat = selectedSeats.shift();
-            const oldestSeatElement = document.querySelector(`.seat-item[data-seat-id="${oldestSeat.id}"]`);
-            if (oldestSeatElement) {
-                oldestSeatElement.classList.remove('selected');
+    function handleSeatClick(seatElement, isRandom = false) {
+        const seatId = seatElement.dataset.seatId;
+        const seatNumber = seatElement.dataset.seatNumber;
+        let basePriceUsd = parseFloat(seatElement.dataset.price);
+        
+        // Use the dynamic exchange rate injected from Laravel
+        let finalPrice = basePriceUsd * EXCHANGE_RATE; 
+        
+        const isEconomy = seatElement.dataset.class === 'economy' || seatElement.dataset.class === 'preferred';
+        
+        // BLOCK MANUAL SELECTION if not unlocked
+        if (isEconomy && !isRandom && !isVipEconomyUnlocked) {
+            const overlay = document.getElementById('economyOverlay');
+            if (overlay) {
+                overlay.classList.remove('d-none');
+                overlay.style.setProperty('display', 'flex', 'important');
             }
-            totalPrice -= oldestSeat.price;
-            console.log(`➖ Auto-deselected: ${oldestSeat.number}`);
+            Swal.fire({
+                icon: 'warning',
+                title: 'Manual Selection Locked',
+                text: 'Please unlock manual selection to pick specific seats, or use Random Assignment for free.',
+                confirmButtonColor: '#279ED6'
+            });
+            return;
+        }
+
+        // If it's an economy seat selected manually (not random)
+        let appliedVipFee = 0;
+        if (isEconomy && !isRandom && isVipEconomyUnlocked) {
+            appliedVipFee = VIP_SEAT_FEE;
+        }
+
+        const totalSeatPrice = finalPrice + appliedVipFee;
+        
+        console.log(`🪑 Seat clicked: ${seatNumber} (Base: Rp ${finalPrice}, VIP Fee: Rp ${appliedVipFee})`);
+        
+        if (seatElement.classList.contains('selected')) {
+            // Deselect
+            seatElement.classList.remove('selected');
+            const removedSeat = selectedSeats.find(s => s.id === seatId);
+            if (removedSeat) {
+                totalPrice -= removedSeat.totalSeatPrice;
+                selectedSeats = selectedSeats.filter(s => s.id !== seatId);
+            }
+            console.log(`➖ Deselected: ${seatNumber}`);
+        } else {
+            // Check against required seats limit
+            if (selectedSeats.length >= REQUIRED_SEATS) {
+                // Auto-cancel the earliest selected seat
+                const oldestSeat = selectedSeats.shift();
+                const oldestSeatElement = document.querySelector(`.seat-item[data-seat-id="${oldestSeat.id}"]`);
+                if (oldestSeatElement) {
+                    oldestSeatElement.classList.remove('selected');
+                }
+                totalPrice -= oldestSeat.totalSeatPrice;
+                console.log(`➖ Auto-deselected: ${oldestSeat.number}`);
+            }
+            
+            seatElement.classList.add('selected');
+            selectedSeats.push({
+                id: seatId,
+                number: seatNumber,
+                price: finalPrice, // sending original converted IDR price
+                vipFee: appliedVipFee,
+                totalSeatPrice: totalSeatPrice,
+                isVipSelected: appliedVipFee > 0
+            });
+            totalPrice += totalSeatPrice;
+            console.log(`➕ Selected: ${seatNumber} (${selectedSeats.length}/${REQUIRED_SEATS})`);
         }
         
-        seatElement.classList.add('selected');
-        selectedSeats.push({
-            id: seatId,
-            number: seatNumber,
-            price: price
-        });
-        totalPrice += price;
-        console.log(`➕ Selected: ${seatNumber} (${selectedSeats.length}/${REQUIRED_SEATS})`);
+        updateUI();
     }
-    
-    updateUI();
-}
 
 function toggleSeatDisabledState() {
     // We no longer disable unselected seats when max is reached.
@@ -978,13 +1090,13 @@ function toggleSeatDisabledState() {
     });
 }
 
-function handleClearSeats() {
+function handleClearSeats(bypassConfirm = false) {
     if (selectedSeats.length === 0) {
-        alert('No seats to clear');
+        if(!bypassConfirm) alert('No seats to clear');
         return;
     }
     
-    if (confirm('Clear all selected seats?')) {
+    if (bypassConfirm || confirm('Clear all selected seats?')) {
         document.querySelectorAll('.seat-item.selected').forEach(seat => {
             seat.classList.remove('selected');
         });
@@ -1111,16 +1223,17 @@ function updateSeatList() {
     
     let html = '<div class="row">';
     selectedSeats.forEach((seat, index) => {
+        let vipBadge = seat.isVipSelected ? `<span class="badge bg-warning text-dark ms-2" style="font-size: 0.65rem;">VIP Seat +Rp150k</span>` : '';
         html += `
             <div class="col-md-4 mb-2">
                 <div class="border rounded p-2 bg-light">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <strong class="fs-5">${seat.number}</strong>
+                            <strong class="fs-5">${seat.number}</strong> ${vipBadge}
                             <div class="small text-muted">Passenger ${index + 1}</div>
                         </div>
                         <div class="text-end">
-                            <span class="text-primary fw-bold">Rp ${seat.price.toLocaleString('id-ID')}</span>
+                            <span class="text-primary fw-bold">Rp ${seat.totalSeatPrice.toLocaleString('id-ID')}</span>
                         </div>
                     </div>
                 </div>
@@ -1139,5 +1252,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 console.log('✅ Seat selection script loaded');
 </script>
+<?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\Avoinex\resources\views/flight/seats.blade.php ENDPATH**/ ?>

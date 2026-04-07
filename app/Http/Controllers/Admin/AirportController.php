@@ -28,8 +28,8 @@ class AirportController extends Controller
             'airport_name' => 'required|max:255',
             'city' => 'required|max:100',
             'country_code' => 'required|exists:countries,country_code',
-            'is_active' => 'required|boolean',
         ]);
+        $validated['is_active'] = $request->boolean('is_active');
 
         Airport::create($validated);
 
@@ -53,8 +53,8 @@ class AirportController extends Controller
             'airport_name' => 'required|max:255',
             'city' => 'required|max:100',
             'country_code' => 'required|exists:countries,country_code',
-            'is_active' => 'required|boolean',
         ]);
+        $validated['is_active'] = $request->boolean('is_active');
 
         $airport->update($validated);
 

@@ -30,11 +30,14 @@ class FeaturedDestinationController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'origin_iata' => 'required|string|max:10',
             'destination_iata' => 'required|string|max:10',
-            'starting_price_usd' => 'required|numeric|min:0',
+            'starting_price_idr' => 'required|numeric|min:0',
             'date_range' => 'required|string|max:50',
-            'sort_order' => 'integer',
-            'is_active' => 'boolean'
+            'sort_order' => 'integer'
         ]);
+
+        $exchangeRate = config('app.usd_to_idr', 15000);
+        $validated['starting_price_usd'] = round($validated['starting_price_idr'] / $exchangeRate, 2);
+        unset($validated['starting_price_idr']);
 
         if ($request->hasFile('image')) {
             $imageName = time() . '.' . $request->image->extension();
@@ -63,10 +66,14 @@ class FeaturedDestinationController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'origin_iata' => 'required|string|max:10',
             'destination_iata' => 'required|string|max:10',
-            'starting_price_usd' => 'required|numeric|min:0',
+            'starting_price_idr' => 'required|numeric|min:0',
             'date_range' => 'required|string|max:50',
             'sort_order' => 'integer'
         ]);
+
+        $exchangeRate = config('app.usd_to_idr', 15000);
+        $validated['starting_price_usd'] = round($validated['starting_price_idr'] / $exchangeRate, 2);
+        unset($validated['starting_price_idr']);
 
         if ($request->hasFile('image')) {
             if ($featuredDestination->image_path && file_exists(public_path($featuredDestination->image_path))) {

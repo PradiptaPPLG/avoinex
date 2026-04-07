@@ -48,8 +48,8 @@ class FlashSaleController extends Controller
             'end_time' => 'required|date|after:start_time',
             'max_seats' => 'required|integer|min:1',
             'priority' => 'required|integer|min:0',
-            'is_active' => 'required|boolean',
         ]);
+        $validated['is_active'] = $request->boolean('is_active');
 
         FlashSale::create($validated);
 
@@ -86,8 +86,8 @@ class FlashSaleController extends Controller
             'end_time' => 'required|date|after:start_time',
             'max_seats' => 'required|integer|min:1',
             'priority' => 'required|integer|min:0',
-            'is_active' => 'required|boolean',
         ]);
+        $validated['is_active'] = $request->boolean('is_active');
 
         $flashSale->update($validated);
 
