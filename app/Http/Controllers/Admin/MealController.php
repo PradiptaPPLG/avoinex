@@ -122,4 +122,18 @@ class MealController extends Controller
             return null;
         }
     }
+
+    public function bulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->ids;
+        if ($ids && is_array($ids)) {
+            foreach ($ids as $id) {
+                $item = \App\Models\Meal::find($id);
+                if ($item) {
+                    if ($item->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($item->image_path)) { \Illuminate\Support\Facades\Storage::disk('public')->delete($item->image_path); } $item->delete();
+                }
+            }
+        }
+        return redirect()->back()->with('success', count($ids ?? []) . ' items deleted successfully.');
+    }
 }

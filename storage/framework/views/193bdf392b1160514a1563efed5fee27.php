@@ -8,11 +8,16 @@
             <i class="bi bi-plus-lg me-1"></i> Tambah Destinasi
         </a>
     </div>
-    <div class="card-body p-0">
+    <div class="card-body p-0">    <div class="p-3 border-bottom bg-light" id="bulkActions" style="display: none;">
+        <button type="button" class="btn btn-sm btn-danger d-inline-flex align-items-center" onclick="submitBulkDelete('<?php echo e(route('admin.featured_destinations.bulk_delete')); ?>')" id="btnBulkDelete">
+            <i class="bi bi-check-all me-1"></i> Pilih (<span id="bulkCount">0</span>) - Hapus Selected
+        </button>
+    </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
+                        <th style="width: 40px;"><input type="checkbox" class="form-check-input" id="selectAll"></th>
                         <th>Urutan</th>
                         <th>Gambar</th>
                         <th>Destinasi</th>
@@ -65,6 +70,7 @@
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
+                        <td style="width: 40px;"><input type="checkbox" class="form-check-input row-checkbox" value="<?php echo e($item->id); ?>"></td>
                         <td colspan="7" class="text-center py-4 text-muted">Belum ada destinasi populer yang ditambahkan.</td>
                     </tr>
                     <?php endif; ?>
@@ -74,5 +80,7 @@
     </div>
 </div>
 <?php $__env->stopSection(); ?>
+
+
 
 <?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\Avoinex\resources\views/admin/featured_destinations/index.blade.php ENDPATH**/ ?>

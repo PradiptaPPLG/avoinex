@@ -103,4 +103,18 @@ class FeaturedDestinationController extends Controller
 
         return redirect()->route('admin.featured_destinations.index')->with('success', 'Featured destination deleted successfully.');
     }
+
+    public function bulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->ids;
+        if ($ids && is_array($ids)) {
+            foreach ($ids as $id) {
+                $item = \App\Models\FeaturedDestination::find($id);
+                if ($item) {
+                    if ($item->image_path && file_exists(public_path($item->image_path))) { unlink(public_path($item->image_path)); } $item->delete();
+                }
+            }
+        }
+        return redirect()->back()->with('success', count($ids ?? []) . ' items deleted successfully.');
+    }
 }

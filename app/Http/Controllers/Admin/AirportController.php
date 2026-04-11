@@ -70,4 +70,18 @@ class AirportController extends Controller
         return redirect()->route('admin.airports.index')
             ->with('success', 'Airport deleted successfully.');
     }
+
+    public function bulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->ids;
+        if ($ids && is_array($ids)) {
+            foreach ($ids as $id) {
+                $item = \App\Models\Airport::find($id);
+                if ($item) {
+                    $item->update(['is_active' => false]);
+                }
+            }
+        }
+        return redirect()->back()->with('success', count($ids ?? []) . ' items deleted successfully.');
+    }
 }

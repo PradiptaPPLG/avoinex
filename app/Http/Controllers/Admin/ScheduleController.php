@@ -91,4 +91,18 @@ class ScheduleController extends Controller
         return redirect()->route('admin.schedules.index')
             ->with('success', 'Schedule deleted successfully.');
     }
+
+    public function bulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->ids;
+        if ($ids && is_array($ids)) {
+            foreach ($ids as $id) {
+                $item = \App\Models\Schedule::find($id);
+                if ($item) {
+                    $item->update(['is_active' => false]);
+                }
+            }
+        }
+        return redirect()->back()->with('success', count($ids ?? []) . ' items deleted successfully.');
+    }
 }

@@ -123,15 +123,14 @@
 
         .brand-icon-lg {
             width: 72px; height: 72px;
-            background: var(--primary);
+            background: white;
             border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 32px;
             margin: 0 auto 24px;
-            box-shadow: 0 8px 24px rgba(0,102,204,0.5);
+            box-shadow: none;
+            padding: 8px;
         }
 
         .brand-block h1 {
@@ -413,7 +412,7 @@
 
         <div class="brand-block">
             <div class="brand-icon-lg">
-                <i class="bi bi-airplane-fill"></i>
+                <img src="<?php echo e(asset('images/logo_new.png')); ?>" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
             <h1>AVOINEX</h1>
             <p>Admin Portal</p>
@@ -518,6 +517,166 @@ unset($__errorArgs, $__bag); ?>
             </div>
         </div>
     </div>
+    <!-- SECURITY GIMMICK POPUP -->
+    <div id="gimmickPopup" style="display: none; position: fixed; inset: 0; background: rgba(8,15,30,0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+        <!-- Scanning Phase -->
+        <div id="scanPhase" style="text-align: center;">
+            <div style="width: 100px; height: 100px; border: 4px solid var(--primary-dark); border-radius: 50%; border-top-color: var(--primary); animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+            <h3 style="color: white; font-family: 'JetBrains Mono', monospace; font-size: 20px; letter-spacing: 2px;">AUTHENTICATING...</h3>
+            <p style="color: var(--primary); font-family: 'JetBrains Mono', monospace; font-size: 14px;" class="scan-text">Scanning credentials</p>
+        </div>
+        
+        <!-- Welcome Phase -->
+        <div id="welcomePhase" style="display: none; text-align: center; animation: cardEntrance3D 0.5s forwards;">
+            <div style="width: 100px; height: 100px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 0 30px rgba(13,175,122,0.4);">
+                <i class="bi bi-check-lg" style="font-size: 50px; color: white;"></i>
+            </div>
+            <h2 style="color: white; font-weight: 800; font-size: 32px; margin-bottom: 10px;">Howdy, Pradipta! 👋</h2>
+            <p style="color: var(--text-muted); font-size: 16px;">Access Granted. Preparing dashboard...</p>
+        </div>
+    </div>
 
+    <style>
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        /* A little blinking text effect for scanning log */
+        .scan-text { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .spin-icon { animation: spin 1s linear infinite; display: inline-block; }
+    </style>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = this;
+            const btn = form.querySelector('.btn-login');
+            const originalBtnText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="bi bi-arrow-repeat spin-icon me-2"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: new FormData(form)
+                });
+                
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch(e) {}
+
+                if (response.ok && data && data.success) {
+                    if (data.show_gimmick) {
+                        // Start Gimmick
+                        const popup = document.getElementById('gimmickPopup');
+                        const scanPhase = document.getElementById('scanPhase');
+                        const welcomePhase = document.getElementById('welcomePhase');
+                        const scanText = popup.querySelector('.scan-text');
+
+                        popup.style.display = 'flex';
+
+                        // Update scanning text over time for extra effect
+                        let scanInterval = setInterval(() => {
+                            const logs = [
+                                "Verifying identity matrix...",
+                                "Bypassing mainframe security...",
+                                "Checking admin privileges...",
+                                "Decrypting tokens...",
+                                "Accessing database nodes..."
+                            ];
+                            scanText.innerText = logs[Math.floor(Math.random() * logs.length)];
+                        }, 500);
+
+                        // Wait 3 seconds
+                        setTimeout(() => {
+                            clearInterval(scanInterval);
+                            scanPhase.style.display = 'none';
+                            welcomePhase.style.display = 'block';
+
+                            // Wait 1.5 second to show the "Howdy Pradipta" checkmark
+                            setTimeout(() => {
+                                window.location.href = "<?php echo e(route('admin.dashboard')); ?>";
+                            }, 1500);
+
+                        }, 3000);
+                    } else {
+                        // Skip gimmick, redirect instantly
+                        window.location.href = "<?php echo e(route('admin.dashboard')); ?>";
+                    }
+
+                } else if (data && data.troll) {
+                    // Troll Logic for "11223344"
+                    const popup = document.getElementById('gimmickPopup');
+                    const scanPhase = document.getElementById('scanPhase');
+                    const welcomePhase = document.getElementById('welcomePhase');
+                    const scanText = popup.querySelector('.scan-text');
+                    
+                    popup.style.display = 'flex';
+                    scanPhase.style.display = 'block';
+                    welcomePhase.style.display = 'none';
+
+                    // Update scanning text over time for extra effect
+                    let scanInterval = setInterval(() => {
+                        const logs = [
+                            "Verifying identity matrix...",
+                            "Bypassing mainframe security...",
+                            "Checking admin privileges...",
+                            "Decrypting tokens...",
+                            "Accessing database nodes..."
+                        ];
+                        scanText.innerText = logs[Math.floor(Math.random() * logs.length)];
+                    }, 500);
+
+                    // Wait 3 seconds, same as the Success animation
+                    setTimeout(() => {
+                        clearInterval(scanInterval);
+                        scanPhase.style.display = 'none';
+                        
+                        let trollPhase = document.getElementById('trollPhase');
+                        if(!trollPhase) {
+                            // Generate fake IP
+                            const fakeIp = Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255);
+                            
+                            trollPhase = document.createElement('div');
+                            trollPhase.id = 'trollPhase';
+                            trollPhase.style.textAlign = 'center';
+                            trollPhase.innerHTML = `
+                                <div style="width: 100px; height: 100px; background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 0 50px rgba(239,68,68,0.8); animation: pulseAlert 0.5s infinite alternate;">
+                                    <i class="bi bi-shield-lock-fill" style="font-size: 50px; color: white;"></i>
+                                </div>
+                                <h2 style="color: var(--danger); font-weight: 900; font-size: 40px; margin-bottom: 10px; letter-spacing: 5px;">ACCESS DENIED</h2>
+                                <p style="color: white; font-size: 16px; font-family: 'JetBrains Mono', monospace; font-weight: bold; animation: blink 1s step-end infinite;">SECURITY BREACH DETECTED.</p>
+                                <p style="color: var(--danger); font-size: 18px; font-family: 'JetBrains Mono', monospace; margin-top: 15px;">Target locked onto IP: <span style="color:white;">${fakeIp}</span></p>
+                                <p style="color: var(--text-muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; margin-top: 5px;">Initiating defense protocols...</p>
+                            `;
+                            const style = document.createElement('style');
+                            style.innerHTML = `@keyframes pulseAlert { from { transform: scale(1); box-shadow: 0 0 20px rgba(239,68,68,0.5); } to { transform: scale(1.1); box-shadow: 0 0 60px rgba(239,68,68,1); } }`;
+                            document.head.appendChild(style);
+                            popup.appendChild(trollPhase);
+                        }
+                        
+                        popup.style.background = 'rgba(30,5,5,0.95)';
+                        trollPhase.style.display = 'block';
+                        
+                        // Close after 5 seconds and rollback state so standard form submit happens to show standard error page
+                        setTimeout(() => {
+                            form.submit();
+                        }, 5000);
+                        
+                    }, 3000);
+                } else {
+                    // Fallback to normal submission to trigger Laravel validation session errors
+                    form.submit();
+                }
+            } catch (error) {
+                // Fallback
+                form.submit();
+            }
+        });
+    </script>
 </body>
 </html><?php /**PATH C:\xampp\htdocs\Avoinex\resources\views/admin/login.blade.php ENDPATH**/ ?>

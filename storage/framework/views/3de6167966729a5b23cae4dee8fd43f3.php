@@ -126,8 +126,8 @@
                                     <span class="avx-price-label" id="priceMinLabel">Rp 0</span>
                                     <span class="avx-price-label" id="priceMaxLabel">Rp ∞</span>
                                 </div>
-                                <input type="range" class="avx-range-slider" id="priceMinSlider" min="0" max="100" value="0" oninput="applyFilters()">
-                                <input type="range" class="avx-range-slider" id="priceMaxSlider" min="0" max="100" value="100" oninput="applyFilters()">
+                                <input type="range" class="avx-range-slider" id="priceMinSlider" min="0" max="25000000" value="0" oninput="applyFilters()">
+                                <input type="range" class="avx-range-slider" id="priceMaxSlider" min="0" max="25000000" value="25000000" oninput="applyFilters()">
                             </div>
                         </div>
                     </div>
@@ -217,13 +217,19 @@
                     <?php else: ?>
                         <?php $__currentLoopData = $flights; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $flight): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <?php
+                            $exchangeRate = config('app.usd_to_idr', 15500);
                             $availableSeats = $flight->available_seats ?? 0;
                             $passengerCount = ($searchParams['adults'] ?? 1) + ($searchParams['children'] ?? 0);
                             $hasEnoughSeats = $availableSeats >= $passengerCount;
-                            $basePrice = $flight->schedule->base_price_usd;
-                            $displayPrice = isset($flight->active_flash_sale)
-                                ? $flight->active_flash_sale->getDiscountedPrice($basePrice)
-                                : $basePrice;
+                            
+                            $rawBasePrice = $flight->schedule->base_price_usd;
+                            $rawDisplayPrice = isset($flight->active_flash_sale)
+                                ? $flight->active_flash_sale->getDiscountedPrice($rawBasePrice)
+                                : $rawBasePrice;
+                                
+                            $basePrice = $rawBasePrice * $exchangeRate;
+                            $displayPrice = $rawDisplayPrice * $exchangeRate;
+                            
                             $departureTime = $flight->schedule->departure_time_gmt;
                             $departureHour = (int) date('H', strtotime($departureTime));
                             $durationMinutes = $flight->schedule->duration_minutes;
@@ -744,11 +750,11 @@ document.addEventListener('DOMContentLoaded', function() {
         var maxSlider = document.getElementById('priceMaxSlider');
 
         if (minSlider && maxSlider) {
-            minSlider.min = minPrice;
-            minSlider.max = maxPrice;
+            minSlider.min = 0;
+            minSlider.max = maxPrice > 25000000 ? maxPrice : 25000000;
             minSlider.value = minPrice;
-            maxSlider.min = minPrice;
-            maxSlider.max = maxPrice;
+            maxSlider.min = 0;
+            maxSlider.max = maxPrice > 25000000 ? maxPrice : 25000000;
             maxSlider.value = maxPrice;
             updatePriceLabels();
         }

@@ -66,4 +66,18 @@ class ManufacturerController extends Controller
         return redirect()->route('admin.manufacturers.index')
             ->with('success', 'Manufacturer deleted successfully.');
     }
+
+    public function bulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->ids;
+        if ($ids && is_array($ids)) {
+            foreach ($ids as $id) {
+                $item = \App\Models\AircraftManufacturer::find($id);
+                if ($item) {
+                    $item->update(['is_active' => false]);
+                }
+            }
+        }
+        return redirect()->back()->with('success', count($ids ?? []) . ' items deleted successfully.');
+    }
 }

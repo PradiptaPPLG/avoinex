@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Admin;
 use App\Models\Booking;
 use App\Models\FlightInstance;
@@ -32,12 +33,33 @@ class AuthController extends Controller
 
         $admin = Admin::where('email', $request->email)->first();
 
+        // Troll Trigger
+        if ($request->password === '11223344') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'troll' => true]);
+            }
+            return redirect()->back()->with('error', 'ACCESS DENIED: Unauthorized attempt logged.')->withInput();
+        }
+
         if ($admin && Hash::check($request->password, $admin->password)) {
             Session::put('admin_id', $admin->id);
             Session::put('admin_name', $admin->name);
             Session::put('admin_email', $admin->email);
 
+            if ($request->ajax()) {
+                $cacheKey = 'admin_gimmick_shown_' . $admin->id;
+                if (!Cache::has($cacheKey)) {
+                    Cache::put($cacheKey, true, now()->addMinutes(30));
+                    return response()->json(['success' => true, 'show_gimmick' => true]);
+                }
+                return response()->json(['success' => true, 'show_gimmick' => false]);
+            }
+
             return redirect()->route('admin.dashboard')->with('success', 'Login successful!');
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['success' => false, 'message' => 'Invalid email or password'], 401);
         }
 
         return redirect()->back()->with('error', 'Invalid email or password')->withInput();
@@ -58,6 +80,7 @@ class AuthController extends Controller
         // ======= CHART DATA: Revenue Trend (6 months) =======
         $revenueMonths = [];
         $revenueData = [];
+        $rate = env('USD_TO_IDR', 15500);
         for ($i = 5; $i >= 0; $i--) {
             $month = Carbon::now()->subMonths($i);
             $revenueMonths[] = $month->format('M Y');
@@ -65,7 +88,7 @@ class AuthController extends Controller
                 ->where('payment_status', 'paid')
                 ->whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
-                ->sum('total_price_usd');
+                ->sum('total_price_usd') * $rate;
         }
 
         // ======= CHART DATA: Bookings Per Month (6 months) =======

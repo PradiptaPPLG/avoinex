@@ -1,23 +1,21 @@
-@extends('admin.layouts.app')
+<?php $__env->startSection('title', 'Airport Management'); ?>
+<?php $__env->startSection('page-title', 'Airports'); ?>
 
-@section('title', 'Airport Management')
-@section('page-title', 'Airports')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="card">
     <div class="card-header d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-2">
             <i class="bi bi-geo-alt-fill text-primary"></i>
             <h5 class="mb-0">Airport Registry</h5>
-            <span class="badge bg-primary ms-1">{{ $airports->total() }} airports</span>
+            <span class="badge bg-primary ms-1"><?php echo e($airports->total()); ?> airports</span>
         </div>
-        <a href="{{ route('admin.airports.create') }}" class="btn btn-primary">
+        <a href="<?php echo e(route('admin.airports.create')); ?>" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Add Airport
         </a>
     </div>
     <div class="card-body p-0">    <div class="p-3 border-bottom bg-light" id="bulkActions" style="display: none;">
-        <button type="button" class="btn btn-sm btn-danger d-inline-flex align-items-center" onclick="submitBulkDelete('{{ route('admin.airports.bulk_delete') }}')" id="btnBulkDelete">
+        <button type="button" class="btn btn-sm btn-danger d-inline-flex align-items-center" onclick="submitBulkDelete('<?php echo e(route('admin.airports.bulk_delete')); ?>')" id="btnBulkDelete">
             <i class="bi bi-check-all me-1"></i> Pilih (<span id="bulkCount">0</span>) - Hapus Selected
         </button>
     </div>
@@ -34,16 +32,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($airports as $airport)
+                    <?php $__empty_1 = true; $__currentLoopData = $airports; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $airport): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
-                        <td style="width: 40px;"><input type="checkbox" class="form-check-input row-checkbox" value="{{ $airport->iata_code }}"></td>
+                        <td style="width: 40px;"><input type="checkbox" class="form-check-input row-checkbox" value="<?php echo e($airport->iata_code); ?>"></td>
                         <td>
-                            <span style="font-family:'JetBrains Mono',monospace; font-size: 14px; font-weight: 700; background: var(--surface-2); padding: 3px 10px; border-radius: 6px; border: 1px solid var(--border);">{{ $airport->iata_code }}</span>
+                            <span style="font-family:'JetBrains Mono',monospace; font-size: 14px; font-weight: 700; background: var(--surface-2); padding: 3px 10px; border-radius: 6px; border: 1px solid var(--border);"><?php echo e($airport->iata_code); ?></span>
                         </td>
-                        <td style="font-weight: 600;">{{ $airport->airport_name }}</td>
-                        <td style="color: var(--text-secondary);">{{ $airport->city }}</td>
+                        <td style="font-weight: 600;"><?php echo e($airport->airport_name); ?></td>
+                        <td style="color: var(--text-secondary);"><?php echo e($airport->city); ?></td>
                         <td>
-                            <span class="badge bg-secondary">{{ $airport->country->country_name ?? $airport->country_code }}</span>
+                            <span class="badge bg-secondary"><?php echo e($airport->country->country_name ?? $airport->country_code); ?></span>
                         </td>
                         <td>
                                                         <div class="dropdown">
@@ -52,15 +50,15 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border: 1px solid var(--border); border-radius: 8px; font-size: 13px;">
                                     <li>
-                                        <a class="dropdown-item" href="{{ route('admin.airports.edit', $airport->airport_id) }}">
+                                        <a class="dropdown-item" href="<?php echo e(route('admin.airports.edit', $airport->airport_id)); ?>">
                                             <i class="bi bi-pencil me-2 text-primary"></i> Edit
                                         </a>
                                     </li>
                                     <li>
-                                        <form action="{{ route('admin.airports.destroy', $airport->airport_id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="button" class="dropdown-item text-danger" onclick="confirmDelete(event, this.closest('form'), 'Delete airport {{ $airport->iata_code }}?')">
+                                        <form action="<?php echo e(route('admin.airports.destroy', $airport->airport_id)); ?>" method="POST">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('DELETE'); ?>
+                                            <button type="button" class="dropdown-item text-danger" onclick="confirmDelete(event, this.closest('form'), 'Delete airport <?php echo e($airport->iata_code); ?>?')">
                                                 <i class="bi bi-trash me-2 text-danger"></i> Delete
                                             </button>
                                         </form>
@@ -69,30 +67,33 @@
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
 <td colspan="5" class="text-center py-5">
                             <i class="bi bi-geo-alt" style="font-size: 32px; color: var(--border); display: block; margin-bottom: 12px;"></i>
                             <span style="color: var(--text-muted); font-weight: 500;">No airports found</span>
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
-        @if($airports->hasPages())
+        <?php if($airports->hasPages()): ?>
         <div class="d-flex justify-content-end px-4 py-3" style="border-top: 1px solid var(--border);">
-            {{ $airports->links() }}
+            <?php echo e($airports->links()); ?>
+
         </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
 
 
 
 
 
+
+<?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\Avoinex\resources\views/admin/airports/index.blade.php ENDPATH**/ ?>

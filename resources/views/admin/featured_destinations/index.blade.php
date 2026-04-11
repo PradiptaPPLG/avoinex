@@ -10,11 +10,16 @@
             <i class="bi bi-plus-lg me-1"></i> Tambah Destinasi
         </a>
     </div>
-    <div class="card-body p-0">
+    <div class="card-body p-0">    <div class="p-3 border-bottom bg-light" id="bulkActions" style="display: none;">
+        <button type="button" class="btn btn-sm btn-danger d-inline-flex align-items-center" onclick="submitBulkDelete('{{ route('admin.featured_destinations.bulk_delete') }}')" id="btnBulkDelete">
+            <i class="bi bi-check-all me-1"></i> Pilih (<span id="bulkCount">0</span>) - Hapus Selected
+        </button>
+    </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
+                        <th style="width: 40px;"><input type="checkbox" class="form-check-input" id="selectAll"></th>
                         <th>Urutan</th>
                         <th>Gambar</th>
                         <th>Destinasi</th>
@@ -27,6 +32,7 @@
                 <tbody>
                     @forelse($destinations as $dest)
                     <tr>
+                        <td style="width: 40px;"><input type="checkbox" class="form-check-input row-checkbox" value="{{ $dest->id }}"></td>
                         <td>{{ $dest->sort_order }}</td>
                         <td>
                             @if($dest->image_path)
@@ -67,7 +73,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">Belum ada destinasi populer yang ditambahkan.</td>
+<td colspan="7" class="text-center py-4 text-muted">Belum ada destinasi populer yang ditambahkan.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -76,3 +82,9 @@
     </div>
 </div>
 @endsection
+
+
+
+
+
+

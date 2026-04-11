@@ -23,8 +23,10 @@
             <div class="avx-flash-hero-container px-4">
                 @foreach($heroFlashSales as $flashSale)
                     @php
-                        $basePrice = $flashSale->flightInstance->schedule->base_price_usd;
-                        $discountedPrice = $flashSale->getDiscountedPrice($basePrice);
+                        $rate = env('USD_TO_IDR', 15500);
+                        $basePriceUsd = $flashSale->flightInstance->schedule->base_price_usd;
+                        $basePrice = $basePriceUsd * $rate;
+                        $discountedPrice = $flashSale->getDiscountedPrice($basePriceUsd) * $rate;
                         $remainingSeats = $flashSale->getRemainingSeats();
                         $seatsClaimed = $flashSale->seats_sold;
                         $totalSeats = $flashSale->max_seats;
@@ -252,8 +254,10 @@
                 <div class="avx-kupon-track d-flex gap-4 overflow-auto pb-4 pt-2 px-2" style="scrollbar-width: none;">
                     @foreach($secondaryFlashSales as $deal)
                         @php
-                            $basePrice = $deal->flightInstance->schedule->base_price_usd;
-                            $discountedPrice = $deal->getDiscountedPrice($basePrice);
+                            $rate = env('USD_TO_IDR', 15500);
+                            $basePriceUsd = $deal->flightInstance->schedule->base_price_usd;
+                            $basePrice = $basePriceUsd * $rate;
+                            $discountedPrice = $deal->getDiscountedPrice($basePriceUsd) * $rate;
                         @endphp
                         <div class="avx-kupon-card flex-shrink-0 avx-reveal avx-delay-{{ ($loop->index % 5) * 100 }}">
                             <div class="avx-kupon-top position-relative p-4">
@@ -354,7 +358,7 @@
                                 </div>
                                 <div class="col-7 text-end">
                                     <span class="text-muted small me-1">Mulai dari</span>
-                                    <span class="text-warning fw-bold">Rp {{ number_format($dest->starting_price_usd, 0, ',', '.') }}</span>
+                                    <span class="text-warning fw-bold">Rp {{ number_format($dest->starting_price_usd * env('USD_TO_IDR', 15500), 0, ',', '.') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -424,12 +428,15 @@
                                     </div>
                                     <div class="col-md-3 text-end" data-available-seats="{{ $flight->available_seats ?? 0 }}" data-flight-id="{{ $flight->flight_instance_id }}">
                                         @php
+                                            $rate = env('USD_TO_IDR', 15500);
                                             $availableSeats = $flight->available_seats ?? 0;
-                                            $basePrice = $flight->schedule->base_price_usd;
+                                            $basePriceUsd = $flight->schedule->base_price_usd;
+                                            $basePrice = $basePriceUsd * $rate;
                                             $hasFlashSale = isset($flight->active_flash_sale);
-                                            $displayPrice = $hasFlashSale 
-                                                ? $flight->active_flash_sale->getDiscountedPrice($basePrice)
-                                                : $basePrice;
+                                            $displayPriceUsd = $hasFlashSale 
+                                                ? $flight->active_flash_sale->getDiscountedPrice($basePriceUsd)
+                                                : $basePriceUsd;
+                                            $displayPrice = $displayPriceUsd * $rate;
                                             $flashSaleSeats = $hasFlashSale 
                                                 ? $flight->active_flash_sale->getRemainingSeats()
                                                 : null;

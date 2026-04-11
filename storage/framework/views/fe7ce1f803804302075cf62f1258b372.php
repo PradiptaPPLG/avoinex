@@ -3,7 +3,7 @@
 
 <?php $__env->startSection('content'); ?>
 
-<div class="card">
+<div class="card avx-reveal">
     <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
             <i class="bi bi-ticket-perforated-fill text-primary"></i>
@@ -14,6 +14,12 @@
                 <a href="?status=" class="btn btn-sm <?php echo e(!request('status') ? 'btn-primary' : 'btn-secondary'); ?>">All</a>
                 <a href="?status=pending" class="btn btn-sm <?php echo e(request('status') == 'pending' ? 'btn-primary' : 'btn-secondary'); ?>">Pending</a>
                 <a href="?status=confirmed" class="btn btn-sm <?php echo e(request('status') == 'confirmed' ? 'btn-primary' : 'btn-secondary'); ?>">Confirmed</a>
+                <a href="?status=refund_requested" class="btn btn-sm <?php echo e(request('status') == 'refund_requested' ? 'btn-warning' : 'btn-secondary'); ?>">
+                    Refund
+                    <?php if(isset($refundCount) && $refundCount > 0): ?>
+                        <span class="badge bg-danger"><?php echo e($refundCount); ?></span>
+                    <?php endif; ?>
+                </a>
                 <a href="?status=cancelled" class="btn btn-sm <?php echo e(request('status') == 'cancelled' ? 'btn-primary' : 'btn-secondary'); ?>">Cancelled</a>
             </div>
         </form>
@@ -59,6 +65,8 @@
                         <td>
                             <?php if($booking->booking_status == 'confirmed'): ?>
                                 <span class="badge bg-success">Confirmed</span>
+                            <?php elseif($booking->booking_status == 'refund_requested'): ?>
+                                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Refund Req.</span>
                             <?php elseif($booking->booking_status == 'cancelled'): ?>
                                 <span class="badge bg-danger">Cancelled</span>
                             <?php else: ?>
@@ -68,6 +76,12 @@
                         <td>
                             <?php if($booking->payment_status == 'paid'): ?>
                                 <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Paid</span>
+                            <?php elseif($booking->payment_status == 'refund_pending'): ?>
+                                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass me-1"></i>Refund Pending</span>
+                            <?php elseif($booking->payment_status == 'refunded'): ?>
+                                <span class="badge bg-info"><i class="bi bi-arrow-counterclockwise me-1"></i>Refunded</span>
+                            <?php elseif($booking->payment_status == 'refund_rejected'): ?>
+                                <span class="badge bg-secondary"><i class="bi bi-x-octagon me-1"></i>Ref. Rejected</span>
                             <?php else: ?>
                                 <span class="badge bg-warning"><i class="bi bi-clock me-1"></i>Unpaid</span>
                             <?php endif; ?>

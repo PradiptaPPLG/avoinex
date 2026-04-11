@@ -328,4 +328,18 @@ class AircraftController extends Controller
             }
         }
     }
+
+    public function bulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->ids;
+        if ($ids && is_array($ids)) {
+            foreach ($ids as $id) {
+                $item = \App\Models\Aircraft::find($id);
+                if ($item) {
+                    $item->update(['is_active' => false]);
+                }
+            }
+        }
+        return redirect()->back()->with('success', count($ids ?? []) . ' items deleted successfully.');
+    }
 }

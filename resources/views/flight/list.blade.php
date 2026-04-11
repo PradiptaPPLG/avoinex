@@ -68,14 +68,17 @@
                 
                 <div class="col-md-2 text-end">
                     @php
+                        $rate = env('USD_TO_IDR', 15500);
                         $availableSeats = $flight->available_seats ?? 0;
                         $totalSeats = $flight->aircraftInstance->aircraft->total_seats ?? 180;
                         $isFull = $availableSeats <= 0;
-                        $basePrice = $flight->schedule->base_price_usd;
+                        $basePriceUsd = $flight->schedule->base_price_usd;
+                        $basePrice = $basePriceUsd * $rate;
                         $hasFlashSale = isset($flight->active_flash_sale);
-                        $displayPrice = $hasFlashSale 
-                            ? $flight->active_flash_sale->getDiscountedPrice($basePrice) 
-                            : $basePrice;
+                        $displayPriceUsd = $hasFlashSale 
+                            ? $flight->active_flash_sale->getDiscountedPrice($basePriceUsd) 
+                            : $basePriceUsd;
+                        $displayPrice = $displayPriceUsd * $rate;
                         $flashSaleSeats = $hasFlashSale 
                             ? $flight->active_flash_sale->getRemainingSeats() 
                             : null;

@@ -11,11 +11,16 @@
 </div>
 
 <div class="card border-0 shadow-sm">
-    <div class="card-body p-0">
+    <div class="card-body p-0">    <div class="p-3 border-bottom bg-light" id="bulkActions" style="display: none;">
+        <button type="button" class="btn btn-sm btn-danger d-inline-flex align-items-center" onclick="submitBulkDelete('{{ route('admin.flash_sales.bulk_delete') }}')" id="btnBulkDelete">
+            <i class="bi bi-check-all me-1"></i> Pilih (<span id="bulkCount">0</span>) - Hapus Selected
+        </button>
+    </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
                 <thead>
                     <tr>
+                        <th style="width: 40px;"><input type="checkbox" class="form-check-input" id="selectAll"></th>
                         <th class="px-4 py-3">Flight & Route</th>
                         <th class="py-3">Discount</th>
                         <th class="py-3">Period</th>
@@ -28,6 +33,7 @@
                 <tbody>
                     @forelse($flashSales as $sale)
                         <tr>
+                        <td style="width: 40px;"><input type="checkbox" class="form-check-input row-checkbox" value="{{ $sale->flash_sale_id }}"></td>
                             <td class="px-4 py-3">
                                 <div class="fw-bold">{{ $sale->flightInstance->flightInstanceCode() }}</div>
                                 <small class="text-muted">
@@ -81,7 +87,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
+<td colspan="7" class="text-center py-5 text-muted">
                                 <i class="bi bi-calendar-x fs-1 d-block mb-3 opacity-50"></i>
                                 No flash sales found. Start by creating a new one!
                             </td>
@@ -98,3 +104,9 @@
     @endif
 </div>
 @endsection
+
+
+
+
+
+

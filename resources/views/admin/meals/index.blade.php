@@ -11,7 +11,11 @@
 </div>
 
 <div class="card border-0 shadow-sm rounded-4">
-    <div class="card-body p-0">
+    <div class="card-body p-0">    <div class="p-3 border-bottom bg-light" id="bulkActions" style="display: none;">
+        <button type="button" class="btn btn-sm btn-danger d-inline-flex align-items-center" onclick="submitBulkDelete('{{ route('admin.meals.bulk_delete') }}')" id="btnBulkDelete">
+            <i class="bi bi-check-all me-1"></i> Pilih (<span id="bulkCount">0</span>) - Hapus Selected
+        </button>
+    </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
@@ -27,6 +31,7 @@
                 <tbody>
                     @forelse($meals as $meal)
                     <tr>
+                        <td style="width: 40px;"><input type="checkbox" class="form-check-input row-checkbox" value="{{ $meal->meal_id }}"></td>
                         <td class="px-4 py-3">
                             @if($meal->image_path)
                                 <img src="{{ asset('storage/' . $meal->image_path) }}" alt="{{ $meal->name }}" class="rounded shadow-sm" style="width: 48px; height: 48px; object-fit: cover;">
@@ -65,7 +70,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
+<td colspan="6" class="text-center py-5 text-muted">
                             <i class="bi bi-inbox fs-2 d-block mb-3"></i>
                             No meals found. Start by adding a new one!
                         </td>
@@ -81,3 +86,9 @@
     {{ $meals->links() }}
 </div>
 @endsection
+
+
+
+
+
+

@@ -103,4 +103,18 @@ class AirlineController extends Controller
         return redirect()->route('admin.airlines.index')
             ->with('success', 'Airline deleted successfully.');
     }
+
+    public function bulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->ids;
+        if ($ids && is_array($ids)) {
+            foreach ($ids as $id) {
+                $item = \App\Models\Airline::find($id);
+                if ($item) {
+                    $item->update(['is_active' => false]);
+                }
+            }
+        }
+        return redirect()->back()->with('success', count($ids ?? []) . ' items deleted successfully.');
+    }
 }

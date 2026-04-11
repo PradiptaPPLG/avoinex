@@ -101,4 +101,18 @@ class FlashSaleController extends Controller
 
         return redirect()->route('admin.flash_sales.index')->with('success', 'Flash Sale deleted successfully.');
     }
+
+    public function bulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->ids;
+        if ($ids && is_array($ids)) {
+            foreach ($ids as $id) {
+                $item = \App\Models\FlashSale::find($id);
+                if ($item) {
+                    $item->delete();
+                }
+            }
+        }
+        return redirect()->back()->with('success', count($ids ?? []) . ' items deleted successfully.');
+    }
 }

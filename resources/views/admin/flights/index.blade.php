@@ -15,11 +15,16 @@
             <i class="bi bi-plus-lg me-1"></i> New Flight
         </a>
     </div>
-    <div class="card-body p-0">
+    <div class="card-body p-0">    <div class="p-3 border-bottom bg-light" id="bulkActions" style="display: none;">
+        <button type="button" class="btn btn-sm btn-danger d-inline-flex align-items-center" onclick="submitBulkDelete('{{ route('admin.flights.bulk_delete') }}')" id="btnBulkDelete">
+            <i class="bi bi-check-all me-1"></i> Pilih (<span id="bulkCount">0</span>) - Hapus Selected
+        </button>
+    </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
+                        <th style="width: 40px;"><input type="checkbox" class="form-check-input" id="selectAll"></th>
                         <th>Flight No.</th>
                         <th>Aircraft</th>
                         <th>Date</th>
@@ -30,6 +35,7 @@
                 <tbody>
                     @forelse($flights as $flight)
                     <tr>
+                        <td style="width: 40px;"><input type="checkbox" class="form-check-input row-checkbox" value="{{ $flight->flight_instance_id }}"></td>
                         <td>
                             <span style="font-family:'JetBrains Mono',monospace; font-size: 14px; font-weight: 700; color: var(--text-primary);">
                                 {{ $flight->schedule->flight_number ?? 'N/A' }}
@@ -62,23 +68,32 @@
                             </div>
                         </td>
                         <td>
-                            <div class="d-flex gap-1">
-                                <a href="{{ route('admin.flights.edit', $flight->flight_instance_id) }}" class="btn btn-sm btn-warning" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form action="{{ route('admin.flights.destroy', $flight->flight_instance_id) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" class="btn btn-sm btn-danger" title="Delete" onclick="confirmDelete(event, this.closest('form'), 'Delete this flight instance?')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                                        <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid var(--border); box-shadow: none;">
+                                    <i class="bi bi-three-dots-vertical text-secondary"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border: 1px solid var(--border); border-radius: 8px; font-size: 13px;">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.flights.edit', $flight->flight_instance_id) }}">
+                                            <i class="bi bi-pencil me-2 text-primary"></i> Edit
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form action="{{ route('admin.flights.destroy', $flight->flight_instance_id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="dropdown-item text-danger" onclick="confirmDelete(event, this.closest('form'), 'Delete this flight instance?')">
+                                                <i class="bi bi-trash me-2 text-danger"></i> Delete
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-5">
+<td colspan="5" class="text-center py-5">
                             <i class="bi bi-airplane-engines" style="font-size: 32px; color: var(--border); display: block; margin-bottom: 12px;"></i>
                             <span style="color: var(--text-muted); font-weight: 500;">No flight instances found</span>
                         </td>
@@ -97,3 +112,8 @@
 </div>
 
 @endsection
+
+
+
+
+

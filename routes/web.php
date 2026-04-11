@@ -129,6 +129,7 @@ Route::prefix('admin')->group(function () {
                     Route::post('/', [AircraftController::class , 'store'])->name('store');
                     Route::get('/{id}/edit', [AircraftController::class , 'edit'])->name('edit');
                     Route::put('/{id}', [AircraftController::class , 'update'])->name('update');
+                    Route::post('/bulk-delete', [AircraftController::class, 'bulkDelete'])->name('bulk_delete');
                     Route::delete('/{id}', [AircraftController::class , 'destroy'])->name('destroy');
                     Route::post('/{id}/restore', [AircraftController::class , 'restore'])->name('restore');
                 }
@@ -140,6 +141,7 @@ Route::prefix('admin')->group(function () {
                     Route::post('/', [ScheduleController::class , 'store'])->name('store');
                     Route::get('/{id}/edit', [ScheduleController::class , 'edit'])->name('edit');
                     Route::put('/{id}', [ScheduleController::class , 'update'])->name('update');
+                    Route::post('/bulk-delete', [ScheduleController::class, 'bulkDelete'])->name('bulk_delete');
                     Route::delete('/{id}', [ScheduleController::class , 'destroy'])->name('destroy');
                 }
                 );
@@ -150,6 +152,7 @@ Route::prefix('admin')->group(function () {
                     Route::post('/', [AdminFlightController::class , 'store'])->name('store');
                     Route::get('/{id}/edit', [AdminFlightController::class , 'edit'])->name('edit');
                     Route::put('/{id}', [AdminFlightController::class , 'update'])->name('update');
+                    Route::post('/bulk-delete', [AdminFlightController::class, 'bulkDelete'])->name('bulk_delete');
                     Route::delete('/{id}', [AdminFlightController::class , 'destroy'])->name('destroy');
                 }
                 );
@@ -168,6 +171,7 @@ Route::prefix('admin')->group(function () {
                     Route::post('/', [FlashSaleController::class , 'store'])->name('store');
                     Route::get('/{id}/edit', [FlashSaleController::class , 'edit'])->name('edit');
                     Route::put('/{id}', [FlashSaleController::class , 'update'])->name('update');
+                    Route::post('/bulk-delete', [FlashSaleController::class, 'bulkDelete'])->name('bulk_delete');
                     Route::delete('/{id}', [FlashSaleController::class , 'destroy'])->name('destroy');
                 }
                 );
@@ -178,6 +182,7 @@ Route::prefix('admin')->group(function () {
                     Route::post('/', [MealController::class, 'store'])->name('store');
                     Route::get('/{meal}/edit', [MealController::class, 'edit'])->name('edit');
                     Route::put('/{meal}', [MealController::class, 'update'])->name('update');
+                    Route::post('/bulk-delete', [MealController::class, 'bulkDelete'])->name('bulk_delete');
                     Route::delete('/{meal}', [MealController::class, 'destroy'])->name('destroy');
                 });
 
@@ -187,6 +192,7 @@ Route::prefix('admin')->group(function () {
                     Route::post('/', [FeaturedDestinationController::class , 'store'])->name('store');
                     Route::get('/{featuredDestination}/edit', [FeaturedDestinationController::class , 'edit'])->name('edit');
                     Route::put('/{featuredDestination}', [FeaturedDestinationController::class , 'update'])->name('update');
+                    Route::post('/bulk-delete', [FeaturedDestinationController::class, 'bulkDelete'])->name('bulk_delete');
                     Route::delete('/{featuredDestination}', [FeaturedDestinationController::class , 'destroy'])->name('destroy');
                 }
                 );
@@ -198,6 +204,7 @@ Route::prefix('admin')->group(function () {
                     Route::post('/', [AirportController::class , 'store'])->name('store');
                     Route::get('/{id}/edit', [AirportController::class , 'edit'])->name('edit');
                     Route::put('/{id}', [AirportController::class , 'update'])->name('update');
+                    Route::post('/bulk-delete', [AirportController::class, 'bulkDelete'])->name('bulk_delete');
                     Route::delete('/{id}', [AirportController::class , 'destroy'])->name('destroy');
                 }
                 );
@@ -208,6 +215,7 @@ Route::prefix('admin')->group(function () {
                     Route::post('/', [ManufacturerController::class , 'store'])->name('store');
                     Route::get('/{id}/edit', [ManufacturerController::class , 'edit'])->name('edit');
                     Route::put('/{id}', [ManufacturerController::class , 'update'])->name('update');
+                    Route::post('/bulk-delete', [ManufacturerController::class, 'bulkDelete'])->name('bulk_delete');
                     Route::delete('/{id}', [ManufacturerController::class , 'destroy'])->name('destroy');
                 }
                 );
@@ -218,6 +226,7 @@ Route::prefix('admin')->group(function () {
                     Route::post('/', [CountryController::class , 'store'])->name('store');
                     Route::get('/{id}/edit', [CountryController::class , 'edit'])->name('edit');
                     Route::put('/{id}', [CountryController::class , 'update'])->name('update');
+                    Route::post('/bulk-delete', [CountryController::class, 'bulkDelete'])->name('bulk_delete');
                     Route::delete('/{id}', [CountryController::class , 'destroy'])->name('destroy');
                 }
                 );
@@ -228,6 +237,7 @@ Route::prefix('admin')->group(function () {
                     Route::post('/', [AirlineController::class , 'store'])->name('store');
                     Route::get('/{id}/edit', [AirlineController::class , 'edit'])->name('edit');
                     Route::put('/{id}', [AirlineController::class , 'update'])->name('update');
+                    Route::post('/bulk-delete', [AirlineController::class, 'bulkDelete'])->name('bulk_delete');
                     Route::delete('/{id}', [AirlineController::class , 'destroy'])->name('destroy');
                 }
                 );

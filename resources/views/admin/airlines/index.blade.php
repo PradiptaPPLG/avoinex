@@ -16,11 +16,16 @@
             <i class="bi bi-plus-lg me-1"></i> Add Airline
         </a>
     </div>
-    <div class="card-body p-0">
+    <div class="card-body p-0">    <div class="p-3 border-bottom bg-light" id="bulkActions" style="display: none;">
+        <button type="button" class="btn btn-sm btn-danger d-inline-flex align-items-center" onclick="submitBulkDelete('{{ route('admin.airlines.bulk_delete') }}')" id="btnBulkDelete">
+            <i class="bi bi-check-all me-1"></i> Pilih (<span id="bulkCount">0</span>) - Hapus Selected
+        </button>
+    </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
+                        <th style="width: 40px;"><input type="checkbox" class="form-check-input" id="selectAll"></th>
                         <th>Code</th>
                         <th>Airline Name</th>
                         <th>Country</th>
@@ -32,6 +37,7 @@
                 <tbody>
                     @forelse($airlines as $airline)
                     <tr>
+                        <td style="width: 40px;"><input type="checkbox" class="form-check-input row-checkbox" value="{{ $airline->airline_code }}"></td>
                         <td>
                             <span style="font-family:'JetBrains Mono',monospace; font-size: 14px; font-weight: 700; background: var(--surface-2); padding: 3px 10px; border-radius: 6px; border: 1px solid var(--border);">{{ $airline->airline_code }}</span>
                         </td>
@@ -55,23 +61,32 @@
                         </td>
                         <td style="font-family:'JetBrains Mono',monospace; font-size: 12px; color: var(--text-secondary);">{{ $airline->contact_phone ?? '—' }}</td>
                         <td>
-                            <div class="d-flex gap-1">
-                                <a href="{{ route('admin.airlines.edit', $airline->airline_id) }}" class="btn btn-sm btn-warning" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form action="{{ route('admin.airlines.destroy', $airline->airline_id) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" class="btn btn-sm btn-danger" title="Delete" onclick="confirmDelete(event, this.closest('form'), 'Delete airline {{ $airline->airline_name }}?')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                                        <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid var(--border); box-shadow: none;">
+                                    <i class="bi bi-three-dots-vertical text-secondary"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border: 1px solid var(--border); border-radius: 8px; font-size: 13px;">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.airlines.edit', $airline->airline_id) }}">
+                                            <i class="bi bi-pencil me-2 text-primary"></i> Edit
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form action="{{ route('admin.airlines.destroy', $airline->airline_id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="dropdown-item text-danger" onclick="confirmDelete(event, this.closest('form'), 'Delete airline {{ $airline->airline_name }}?')">
+                                                <i class="bi bi-trash me-2 text-danger"></i> Delete
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5">
+<td colspan="6" class="text-center py-5">
                             <i class="bi bi-briefcase" style="font-size: 32px; color: var(--border); display: block; margin-bottom: 12px;"></i>
                             <span style="color: var(--text-muted); font-weight: 500;">No airlines found</span>
                         </td>
@@ -90,3 +105,9 @@
 </div>
 
 @endsection
+
+
+
+
+
+

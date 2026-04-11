@@ -81,14 +81,13 @@
 
         .brand-icon {
             width: 38px; height: 38px;
-            background: var(--primary);
-            border-radius: 10px;
+            background: white;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 18px;
-            box-shadow: 0 4px 12px rgba(0,102,204,0.4);
+            box-shadow: none;
+            padding: 4px;
         }
 
         .brand-text {
@@ -626,7 +625,7 @@
         <div class="sidebar-brand">
             <a href="{{ route('admin.dashboard') }}" class="brand-logo">
                 <div class="brand-icon">
-                    <i class="bi bi-airplane-fill"></i>
+                    <img src="{{ asset('images/logo_new.png') }}" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <div class="brand-text">
                     <span class="brand-name">AVOINEX</span>
@@ -925,6 +924,66 @@
                 });
             });
         });
+    </script>
+    <script>
+        // Admin Table Bulk Action JS
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAll = document.getElementById('selectAll');
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+            const bulkActionsDiv = document.getElementById('bulkActions');
+            const bulkCount = document.getElementById('bulkCount');
+            
+            function toggleBulkActions() {
+                const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+                const anyChecked = checkedCheckboxes.length > 0;
+                
+                if (bulkActionsDiv) {
+                    bulkActionsDiv.style.display = anyChecked ? 'block' : 'none';
+                }
+                if(bulkCount) {
+                    bulkCount.innerText = checkedCheckboxes.length;
+                }
+            }
+
+            if (selectAll && rowCheckboxes.length > 0) {
+                selectAll.addEventListener('change', function() {
+                    rowCheckboxes.forEach(cb => cb.checked = selectAll.checked);
+                    toggleBulkActions();
+                });
+
+                rowCheckboxes.forEach(cb => {
+                    cb.addEventListener('change', toggleBulkActions);
+                });
+            }
+        });
+
+        function submitBulkDelete(route) {
+            const checked = document.querySelectorAll('.row-checkbox:checked');
+            if (checked.length === 0) return;
+            // Native confirm since the form is dynamically generated. We can change this to SWAL later if wanted
+            if (!confirm('Are you sure you want to delete these ' + checked.length + ' selected items?')) return;
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = route;
+            
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_token';
+            csrf.value = '{{ csrf_token() }}';
+            form.appendChild(csrf);
+
+            checked.forEach(cb => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ids[]';
+                input.value = cb.value;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        }
     </script>
     @stack('scripts')
 </body>

@@ -274,17 +274,50 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0,0,0,0.55);
+            background: rgba(0,0,0,0);
             z-index: 999999;
+            perspective: 1500px;
+            transition: background 0.4s ease;
+        }
+
+        .avx-modal-overlay.overlay-active {
+            background: rgba(0,0,0,0.55);
         }
 
         /* Container that centers the card */
         .avx-modal-container {
-            overflow: hidden;
+            overflow: visible;
             width: 560px;
             max-width: 94vw;
             max-height: 92vh;
             outline: none;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .avx-modal-container.enter-anim {
+            transform: scale(0.8) translateY(30px);
+            opacity: 0;
+        }
+        
+        .avx-modal-container.exit-anim {
+            transform: scale(0.8) translateY(-30px);
+            opacity: 0;
+        }
+
+        .avx-modal-container.flip-enter {
+            transform: rotateY(-90deg) scale(0.9);
+            opacity: 0;
+        }
+
+        .avx-modal-container.flip-exit {
+            transform: rotateY(90deg) scale(0.9);
+            opacity: 0;
+        }
+
+        .avx-modal-container.anim-active {
+            transform: rotateY(0deg) scale(1) translateY(0);
+            opacity: 1;
         }
 
         /* Card with specified stroke and bigger radius (96px) */
@@ -498,7 +531,7 @@
 <header class="avx-topbar">
     <div class="avx-left">
         <a href="/" id="avoinex-logo-link">
-            <img src="<?php echo e(asset('images/logotext.png')); ?>" class="avx-logo">
+            <img src="<?php echo e(asset('images/logo_new.png')); ?>" class="avx-logo">
         </a>
         <?php if(!session('client_id')): ?>
         <span class="avx-currency-block">
@@ -887,25 +920,72 @@ document.addEventListener('DOMContentLoaded', function() {
 // ===== AVX SCOPE JS (safe, vanilla, resilient) =====
 (function(){
     function $(id){ return document.getElementById(id); }
-    function showOverlay(id) {
+    
+    function showOverlay(id, isFlip = false) {
         const el = $(id + 'Modal');
         if(!el) return;
         el.style.display = 'flex';
         el.setAttribute('aria-hidden','false');
         document.body.style.overflow = 'hidden';
+        
+        const container = el.querySelector('.avx-modal-container');
+        if(container) {
+            container.classList.remove('anim-active', 'exit-anim', 'flip-exit');
+            if(isFlip) {
+                container.classList.add('flip-enter');
+            } else {
+                container.classList.add('enter-anim');
+            }
+            void container.offsetWidth; // force reflow
+            container.classList.add('anim-active');
+            container.classList.remove('enter-anim', 'flip-enter');
+        }
+        
+        if(!isFlip) {
+            void el.offsetWidth;
+            el.classList.add('overlay-active');
+        } else {
+            el.classList.add('overlay-active');
+        }
+
         const focusable = el.querySelector('button, a, input, [tabindex]:not([tabindex="-1"])');
         if(focusable) focusable.focus();
     }
-    function hideOverlay(id) {
+    
+    function hideOverlay(id, isFlip = false) {
         const el = $(id + 'Modal');
         if(!el) return;
-        el.style.display = 'none';
-        el.setAttribute('aria-hidden','true');
-        document.body.style.overflow = '';
-        const loginForm = $('emailLoginForm');
-        const regForm = $('emailRegisterForm');
-        if(loginForm) loginForm.style.display = 'none';
-        if(regForm) regForm.style.display = 'none';
+        
+        const container = el.querySelector('.avx-modal-container');
+        if(!isFlip) {
+             el.classList.remove('overlay-active');
+        }
+        
+        if(container) {
+            container.classList.remove('anim-active');
+            if(isFlip) {
+                container.classList.add('flip-exit');
+            } else {
+                container.classList.add('exit-anim');
+            }
+            
+            setTimeout(() => {
+                if(el.style.display !== 'none') {
+                    el.style.display = 'none';
+                    el.setAttribute('aria-hidden','true');
+                    document.body.style.overflow = '';
+                    const loginForm = $('emailLoginForm');
+                    const regForm = $('emailRegisterForm');
+                    if(loginForm) loginForm.style.display = 'none';
+                    if(regForm) regForm.style.display = 'none';
+                    container.classList.remove('exit-anim', 'flip-exit');
+                }
+            }, 400); // Wait for transition
+        } else {
+            el.style.display = 'none';
+            el.setAttribute('aria-hidden','true');
+            document.body.style.overflow = '';
+        }
     }
 
     window.showModal = function(type){ 
@@ -915,8 +995,10 @@ document.addEventListener('DOMContentLoaded', function() {
     window.closeModal = function(type){ hideOverlay(type); };
 
     window.switchModal = function(from, to){
-        hideOverlay(from);
-        setTimeout(function(){ showOverlay(to); }, 160);
+        hideOverlay(from, true);
+        setTimeout(function(){ 
+            showOverlay(to, true); 
+        }, 150); // overlap for flip effect
     };
 
     window.toggleEmailLogin = function(){
@@ -1302,7 +1384,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="avx-footer-main">
         <!-- Brand -->
         <div class="avx-footer-brand">
-            <img src="<?php echo e(asset('images/logotext.png')); ?>" alt="Avoinex">
+            <img src="<?php echo e(asset('images/logo_new.png')); ?>" alt="Avoinex">
             <p class="avx-footer-tagline"><?php echo e($siteSettings['footer_tagline'] ?? 'Your Trusted Partner for Smarter, Easier, and More Affordable Flight Booking.'); ?></p>
             <div class="avx-footer-socials">
                 <?php if(!empty($siteSettings['social_instagram']) && $siteSettings['social_instagram'] !== '#'): ?>
