@@ -52,7 +52,7 @@
                         <input type="hidden" name="passengers" value="<?php echo e($totalPax ?? 1); ?>">
                         <input type="hidden" name="travel_class" value="economy">
                         <div class="avx-search-main">
-                            <label class="avx-field position-relative" for="from_display_search" style="z-index: 10;">
+                            <div class="avx-field position-relative" style="z-index: 10;">
                                 <span class="avx-field-label text-muted small fw-bold">DARI</span>
                                 <div class="avx-input-wrap">
                                     <i class="bi bi-geo-alt text-primary me-2"></i>
@@ -61,13 +61,13 @@
                                            value="<?php echo e(isset($origin) ? $origin->city . ' (' . $origin->iata_code . ') - ' . $origin->airport_name : ''); ?>">
                                 </div>
                                 <div class="avx-autocomplete-dropdown" id="from_dropdown_search" style="display: none;"></div>
-                            </label>
-                            <div class="avx-swap-container" style="display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px;">
-                                <button type="button" class="avx-swap-btn" id="swapLocationsBtnSearch" aria-label="Swap locations" title="Swap locations">
+                            </div>
+                            <div class="avx-swap-container" style="display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; position: relative; z-index: 11;">
+                                <button type="button" class="avx-swap-btn" id="swapLocationsBtnSearch" aria-label="Swap locations" title="Swap locations" onclick="swapSearchLocations(event)">
                                     <i class="bi bi-arrow-left-right"></i>
                                 </button>
                             </div>
-                            <label class="avx-field position-relative" for="to_display_search" style="z-index: 9;">
+                            <div class="avx-field position-relative" style="z-index: 9;">
                                 <span class="avx-field-label text-muted small fw-bold">KE</span>
                                 <div class="avx-input-wrap">
                                     <i class="bi bi-geo text-primary me-2"></i>
@@ -76,14 +76,14 @@
                                            value="<?php echo e(isset($destination) ? $destination->city . ' (' . $destination->iata_code . ') - ' . $destination->airport_name : ''); ?>">
                                 </div>
                                 <div class="avx-autocomplete-dropdown" id="to_dropdown_search" style="display: none;"></div>
-                            </label>
+                            </div>
                             <label class="avx-field" for="depart_search">
                                 <span class="avx-field-label text-muted small fw-bold">TANGGAL PERGI</span>
                                 <div class="avx-input-wrap avx-input-date">
                                     <input id="depart_search" name="depart" type="date" required value="<?php echo e($searchParams['depart'] ?? ''); ?>">
                                 </div>
                             </label>
-                            <button class="btn btn-primary avx-cta-search w-100 mt-4 h-100" type="submit" style="min-height: 56px; border-radius: 12px; font-weight: bold;">
+                            <button class="btn btn-primary avx-cta-search" type="submit" style="height: 56px; border-radius: 12px; font-weight: bold; padding: 0 24px; align-self: end; white-space: nowrap;">
                                 <i class="bi bi-search me-1"></i> Cari Tiket
                             </button>
                         </div>
@@ -640,7 +640,7 @@
 /* ===== SEARCH FORM STYLES ===== */
 .avx-search-main {
     display: grid;
-    grid-template-columns: 1fr 40px 1fr 1fr 1fr;
+    grid-template-columns: 1fr 40px 1fr 1fr auto;
     gap: 16px;
     align-items: end;
 }
@@ -713,6 +713,35 @@
 var currentSort = 'price_asc';
 var allPrices = [];
 
+// ===== SWAP LOCATIONS (standalone function for inline onclick) =====
+function swapSearchLocations(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    var swapBtn = document.getElementById('swapLocationsBtnSearch');
+    if (swapBtn) {
+        swapBtn.classList.add('swapping');
+        setTimeout(function() { swapBtn.classList.remove('swapping'); }, 400);
+    }
+
+    var fromDisplay = document.getElementById('from_display_search');
+    var fromValue = document.getElementById('from_search');
+    var toDisplay = document.getElementById('to_display_search');
+    var toValue = document.getElementById('to_search');
+
+    // Swap display values
+    var tempDisplay = fromDisplay.value;
+    fromDisplay.value = toDisplay.value;
+    toDisplay.value = tempDisplay;
+
+    // Swap hidden IATA code values
+    var tempValue = fromValue.value;
+    fromValue.value = toValue.value;
+    toValue.value = tempValue;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // ===== COLLECT FLIGHT DATA =====
@@ -766,29 +795,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===== AUTOCOMPLETE =====
     setupAutocompleteSearch('from_display_search', 'from_search', 'from_dropdown_search');
     setupAutocompleteSearch('to_display_search', 'to_search', 'to_dropdown_search');
-
-    // ===== SWAP LOCATIONS =====
-    var swapBtn = document.getElementById('swapLocationsBtnSearch');
-    if (swapBtn) {
-        swapBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            this.classList.add('swapping');
-            setTimeout(function() { swapBtn.classList.remove('swapping'); }, 400);
-
-            var fromDisplay = document.getElementById('from_display_search');
-            var fromValue = document.getElementById('from_search');
-            var toDisplay = document.getElementById('to_display_search');
-            var toValue = document.getElementById('to_search');
-
-            var tempDisplay = fromDisplay.value;
-            fromDisplay.value = toDisplay.value;
-            toDisplay.value = tempDisplay;
-
-            var tempValue = fromValue.value;
-            fromValue.value = toValue.value;
-            toValue.value = tempValue;
-        });
-    }
 
     // ===== DATE VALIDATION =====
     var departInput = document.getElementById('depart_search');

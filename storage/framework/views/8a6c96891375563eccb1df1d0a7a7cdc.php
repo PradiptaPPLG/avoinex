@@ -33,6 +33,7 @@
                 <tbody>
                     <?php $__empty_1 = true; $__currentLoopData = $flights; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $flight): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
+                        <td style="width: 40px;"><input type="checkbox" class="form-check-input row-checkbox" value="<?php echo e($flight->flight_instance_id); ?>"></td>
                         <td>
                             <span style="font-family:'JetBrains Mono',monospace; font-size: 14px; font-weight: 700; color: var(--text-primary);">
                                 <?php echo e($flight->schedule->flight_number ?? 'N/A'); ?>
@@ -91,8 +92,7 @@
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
-                        <td style="width: 40px;"><input type="checkbox" class="form-check-input row-checkbox" value="<?php echo e($item->flight_instance_id); ?>"></td>
-                        <td colspan="5" class="text-center py-5">
+<td colspan="5" class="text-center py-5">
                             <i class="bi bi-airplane-engines" style="font-size: 32px; color: var(--border); display: block; margin-bottom: 12px;"></i>
                             <span style="color: var(--text-muted); font-weight: 500;">No flight instances found</span>
                         </td>
@@ -112,6 +112,10 @@
 </div>
 
 <?php $__env->stopSection(); ?>
+
+
+
+
 
 
 <?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\Avoinex\resources\views/admin/flights/index.blade.php ENDPATH**/ ?>

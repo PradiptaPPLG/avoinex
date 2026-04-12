@@ -257,7 +257,7 @@
         <tr>
             <td class="info-label">Total Amount</td>
             <td class="info-value" style="font-size: 20px; color: #279ED6;">
-                <?php $exchangeRate = config('app.usd_to_idr', 15000); ?>
+                <?php $exchangeRate = config('app.usd_to_idr', 15500); ?>
                 Rp <?php echo e(number_format($booking->total_price_usd * $exchangeRate, 0, ',', '.')); ?>
 
             </td>
