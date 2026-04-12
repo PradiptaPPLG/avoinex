@@ -74,6 +74,19 @@
                         $isFull = $availableSeats <= 0;
                         $basePriceUsd = $flight->schedule->base_price_usd;
                         $basePrice = $basePriceUsd * $rate;
+                        
+                        // Runtime check: verify flash sale is still truly active
+                        if (isset($flight->active_flash_sale)) {
+                            $fs = $flight->active_flash_sale;
+                            $fsStillActive = $fs->is_active 
+                                && $fs->end_time >= now() 
+                                && $fs->start_time <= now() 
+                                && $fs->seats_sold < $fs->max_seats;
+                            if (!$fsStillActive) {
+                                unset($flight->active_flash_sale);
+                            }
+                        }
+                        
                         $hasFlashSale = isset($flight->active_flash_sale);
                         $displayPriceUsd = $hasFlashSale 
                             ? $flight->active_flash_sale->getDiscountedPrice($basePriceUsd) 

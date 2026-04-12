@@ -1138,6 +1138,7 @@ document.addEventListener('DOMContentLoaded', function() {
         font-family: 'Poppins', sans-serif;
         position: relative;
         overflow: hidden;
+        z-index: 2000;
     }
 
     .avx-footer::before {

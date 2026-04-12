@@ -163,7 +163,7 @@
 
         <!-- Order Summary -->
         <div class="col-md-4">
-            <div class="card sticky-top" style="top: 20px;">
+            <div class="card sticky-top" style="top: 88px; z-index: 10;">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-receipt-cutoff me-2"></i>Order Summary</h5>
                 </div>

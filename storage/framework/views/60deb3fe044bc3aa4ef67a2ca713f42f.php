@@ -12,22 +12,21 @@
         }
         .header {
             width: 100%;
-            border-bottom: 2px solid #279ED6;
+            border-bottom: 3px solid #279ED6;
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            color: #279ED6;
+        .header td {
+            vertical-align: middle;
+        }
+        .logo-img {
+            height: 40px;
         }
         .e-ticket-title {
             text-align: right;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
-            color: #666;
-            display: inline-block;
-            float: right;
+            color: #555;
         }
         .booking-info {
             width: 100%;
@@ -78,6 +77,39 @@
             font-size: 14px;
             color: #666;
         }
+        .flight-arrow {
+            color: #279ED6;
+            margin: 0 auto;
+            text-align: center;
+            display: block;
+            height: 20px;
+            position: relative;
+            width: 80px;
+        }
+        .arrow-line {
+            height: 2px;
+            background-color: #279ED6;
+            width: 100%;
+            position: absolute;
+            top: 50%;
+            margin-top: -1px;
+        }
+        .arrow-head {
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 10px solid #279ED6;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            margin-top: -5px;
+        }
+        .flight-duration {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
         .passenger-table {
             width: 100%;
             border-collapse: collapse;
@@ -118,12 +150,12 @@
 </head>
 <body>
 
-    <table class="header">
+    <table class="header" style="width: 100%;">
         <tr>
-            <td>
-                <div class="logo">Avoinex</div>
+            <td style="width: 50%;">
+                <img src="<?php echo e(public_path('images/logo_new.png')); ?>" class="logo-img" alt="Avoinex">
             </td>
-            <td>
+            <td style="width: 50%;">
                 <div class="e-ticket-title">E-TICKET / BOARDING PASS</div>
             </td>
         </tr>
@@ -190,8 +222,11 @@
                                 <div style="font-weight: bold; margin-top: 5px;"><?php echo e($booking->flightInstance->schedule->departure_time_gmt); ?></div>
                             </td>
                             <td width="20%">
-                                <div style="color: #999; font-size: 24px;">&#9992;</div>
-                                <div style="font-size: 11px; color: #999;"><?php echo e($booking->flightInstance->schedule->duration_minutes); ?> min</div>
+                                <div class="flight-arrow">
+                                    <div class="arrow-line"></div>
+                                    <div class="arrow-head"></div>
+                                </div>
+                                <div class="flight-duration"><?php echo e($booking->flightInstance->schedule->duration_minutes); ?> min</div>
                             </td>
                             <td width="40%">
                                 <div class="airport-code"><?php echo e($booking->flightInstance->schedule->destinationAirport->iata_code); ?></div>
