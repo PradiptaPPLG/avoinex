@@ -51,7 +51,7 @@
                         <input type="hidden" name="children" value="{{ $searchParams['children'] ?? 0 }}">
                         <input type="hidden" name="infants" value="{{ $searchParams['infants'] ?? 0 }}">
                         <input type="hidden" name="passengers" value="{{ $totalPax ?? 1 }}">
-                        <input type="hidden" name="travel_class" value="economy">
+                        <input type="hidden" name="travel_class" id="hiddenTravelClassSearch" value="{{ $searchParams['travel_class'] ?? 'economy' }}">
                         <div class="avx-search-main">
                             <div class="avx-field position-relative" style="z-index: 10;">
                                 <span class="avx-field-label text-muted small fw-bold">DARI</span>
@@ -78,12 +78,30 @@
                                 </div>
                                 <div class="avx-autocomplete-dropdown" id="to_dropdown_search" style="display: none;"></div>
                             </div>
-                            <label class="avx-field" for="depart_search">
-                                <span class="avx-field-label text-muted small fw-bold">TANGGAL PERGI</span>
-                                <div class="avx-input-wrap avx-input-date">
-                                    <input id="depart_search" name="depart" type="date" required value="{{ $searchParams['depart'] ?? '' }}">
+                            <div class="avx-field position-relative" style="z-index: 8;">
+                                <span class="avx-field-label text-muted small fw-bold">KELAS</span>
+                                <div class="avx-class-select-container">
+                                    <button type="button" class="avx-input-wrap w-100 justify-content-between" id="classToggleBtnSearch">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-workspace text-primary me-2"></i>
+                                            <span id="classSummaryTextSearch">{{ ucfirst($searchParams['travel_class'] ?? 'Economy') }}</span>
+                                        </div>
+                                        <i class="bi bi-chevron-down small text-muted"></i>
+                                    </button>
+                                    
+                                    <div class="avx-class-dropdown" id="classDropdownSearch" style="display: none; width: 100%; top: 100%; left: 0; position: absolute;">
+                                        <button type="button" class="avx-class-option {{ ($searchParams['travel_class'] ?? 'economy') == 'economy' ? 'active' : '' }}" data-value="economy">
+                                            <span>Economy</span>
+                                        </button>
+                                        <button type="button" class="avx-class-option {{ ($searchParams['travel_class'] ?? '') == 'premium' ? 'active' : '' }}" data-value="premium">
+                                            <span>Premium Economy</span>
+                                        </button>
+                                        <button type="button" class="avx-class-option {{ ($searchParams['travel_class'] ?? '') == 'business' ? 'active' : '' }}" data-value="business">
+                                            <span>Business</span>
+                                        </button>
+                                    </div>
                                 </div>
-                            </label>
+                            </div>
                             <button class="btn btn-primary avx-cta-search" type="submit" style="height: 56px; border-radius: 12px; font-weight: bold; padding: 0 24px; align-self: end; white-space: nowrap;">
                                 <i class="bi bi-search me-1"></i> Cari Tiket
                             </button>
@@ -299,7 +317,7 @@
                                         <p class="text-muted small mb-2">per person</p>
 
                                         @if($hasEnoughSeats)
-                                            <a href="{{ route('flight.seats', $flight->flight_instance_id) }}?adults={{ $searchParams['adults'] ?? 1 }}&children={{ $searchParams['children'] ?? 0 }}&infants={{ $searchParams['infants'] ?? 0 }}" class="btn btn-primary px-4">Select</a>
+                                            <a href="{{ route('flight.seats', $flight->flight_instance_id) }}?adults={{ $searchParams['adults'] ?? 1 }}&children={{ $searchParams['children'] ?? 0 }}&infants={{ $searchParams['infants'] ?? 0 }}&travel_class={{ $searchParams['travel_class'] ?? 'economy' }}" class="btn btn-primary px-4">Select</a>
                                         @else
                                             <button class="btn btn-secondary" disabled title="Not enough seats available">
                                                 <i class="bi bi-exclamation-circle"></i> Limited
@@ -653,7 +671,7 @@
 /* ===== SEARCH FORM STYLES ===== */
 .avx-search-main {
     display: grid;
-    grid-template-columns: 1fr 40px 1fr 1fr auto;
+    grid-template-columns: 1.2fr 40px 1.2fr 1fr 1fr auto;
     gap: 16px;
     align-items: end;
 }
@@ -814,6 +832,40 @@ document.addEventListener('DOMContentLoaded', function() {
     if (departInput) {
         var today = new Date().toISOString().split('T')[0];
         departInput.min = today;
+    }
+    // ===== CLASS DROPDOWN FOR MODIFY SEARCH =====
+    var classToggle = document.getElementById('classToggleBtnSearch');
+    var classDropdown = document.getElementById('classDropdownSearch');
+    var classHidden = document.getElementById('hiddenTravelClassSearch');
+    var classSummaryText = document.getElementById('classSummaryTextSearch');
+    var classOptions = document.querySelectorAll('#classDropdownSearch .avx-class-option');
+
+    if (classToggle && classDropdown) {
+        classToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var isVisible = classDropdown.style.display === 'block';
+            classDropdown.style.display = isVisible ? 'none' : 'block';
+        });
+
+        classOptions.forEach(function(opt) {
+            opt.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var val = this.getAttribute('data-value');
+                var text = this.innerText;
+                
+                classHidden.value = val;
+                classSummaryText.innerText = text;
+                
+                classOptions.forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                
+                classDropdown.style.display = 'none';
+            });
+        });
+
+        document.addEventListener('click', function() {
+            classDropdown.style.display = 'none';
+        });
     }
 });
 

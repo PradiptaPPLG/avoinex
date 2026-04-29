@@ -701,6 +701,22 @@
                 </a>
             </div>
 
+            <div class="nav-section-label">Promotions</div>
+
+            <div class="nav-item">
+                <a href="{{ route('admin.banners.index') }}" class="nav-link {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
+                    <i class="bi bi-images nav-icon"></i>
+                    Hero Banners
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="{{ route('admin.coupons.index') }}" class="nav-link {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
+                    <i class="bi bi-ticket-detailed nav-icon"></i>
+                    Coupons & Deals
+                </a>
+            </div>
+
             <div class="nav-section-label">Master Data</div>
 
             <div class="nav-item">

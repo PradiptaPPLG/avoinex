@@ -34,8 +34,8 @@
                 <div class="details">
                     <div style="margin-bottom: 10px;"><strong>Rincian Refund:</strong></div>
                     <table width="100%">
-                        <tr><td>Total Bayar:</td><td align="right">Rp {{ number_format($booking->total_price_usd * 15500, 0, ',', '.') }}</td></tr>
-                        <tr><td>Nominal Refund:</td><td align="right"><strong>Rp {{ number_format($booking->refund_amount_usd * 15500, 0, ',', '.') }}</strong></td></tr>
+                        <tr><td>Total Bayar:</td><td align="right">Rp {{ number_format($booking->total_price_usd * config('app.usd_to_idr', 15500), 0, ',', '.') }}</td></tr>
+                        <tr><td>Nominal Refund:</td><td align="right"><strong>Rp {{ number_format($booking->refund_amount_usd * config('app.usd_to_idr', 15500), 0, ',', '.') }}</strong></td></tr>
                         @if($booking->refund_admin_notes)
                         <tr><td colspan="2" style="padding-top:10px; border-top:1px solid #ddd;"><strong>Catatan Admin:</strong><br>{{ $booking->refund_admin_notes }}</td></tr>
                         @endif

@@ -98,15 +98,20 @@ class FlightController extends Controller
                     $isAvailable = !$isBooked && $seatPrices[$seatId]->is_available;
                 }
                 else {
-                    // Harga default berdasarkan kelas
+                    $scheduleBasePrice = $flight->schedule->base_price_usd;
+                    
+                    // Harga default berdasarkan kelas (Multipliers)
                     if ($seat->seat_class == 'business') {
-                        $basePrice = 250.00;
+                        $basePrice = $scheduleBasePrice * 2.0;
                     }
                     elseif ($seat->seat_class == 'first') {
-                        $basePrice = 400.00;
+                        $basePrice = $scheduleBasePrice * 3.0;
+                    }
+                    elseif ($seat->seat_class == 'preferred') {
+                        $basePrice = $scheduleBasePrice * 1.25;
                     }
                     else {
-                        $basePrice = 150.00;
+                        $basePrice = $scheduleBasePrice;
                     }
                     $isAvailable = !$isBooked;
 

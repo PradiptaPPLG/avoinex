@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Client;
 use App\Models\Booking;
 use App\Models\BookingSeat;
 use App\Models\FlightInstance;
+use App\Mail\RefundRequestedMail;
 
 class BookingController extends Controller
 {
@@ -135,49 +137,45 @@ class BookingController extends Controller
             \Log::info('Looking for client with email: ' . $validated['contact_email']);
             $client = Client::where('email', $validated['contact_email'])->first();
 
-            // Jika tidak ditemukan dari email, coba cari dari Passport penumpang pertama 
-            // (menghindari error Integrity constraint violation unique passport)
-            if (!$client && !empty($validated['passenger_passport'][0])) {
-                $client = Client::where('passport', $validated['passenger_passport'][0])->first();
-            }
+            if ($client) {
+                // Jika ditemukan dari email, perbarui datanya (termasuk passport jika baru)
+                $client->update([
+                    'first_name' => $validated['contact_first_name'],
+                    'last_name' => $validated['contact_last_name'],
+                    'phone' => $validated['contact_phone'],
+                    'passport' => $validated['passenger_passport'][0] ?? $client->passport,
+                    'iata_country_code' => $validated['contact_country'] ?? $client->iata_country_code
+                ]);
+                \Log::info('Existing client found by email and updated:', ['client_id' => $client->client_id]);
+            } else {
+                // Jika tidak ditemukan dari email, coba cari dari Passport
+                $passport = $validated['passenger_passport'][0] ?? null;
+                if ($passport) {
+                    $client = Client::where('passport', $passport)->first();
+                }
 
-            if (!$client) {
-                // Jika masih tidak ada, coba buat baru sambil men-catch error duplicate yang langka
-                try {
+                if ($client) {
+                    // Jika ditemukan dari passport, update email-nya (mungkin user ganti email)
+                    $client->update([
+                        'first_name' => $validated['contact_first_name'],
+                        'last_name' => $validated['contact_last_name'],
+                        'email' => $validated['contact_email'],
+                        'phone' => $validated['contact_phone'],
+                        'iata_country_code' => $validated['contact_country'] ?? $client->iata_country_code
+                    ]);
+                    \Log::info('Existing client found by passport and email updated:', ['client_id' => $client->client_id]);
+                } else {
+                    // Jika benar-benar baru
                     $client = Client::create([
                         'first_name' => $validated['contact_first_name'],
                         'last_name' => $validated['contact_last_name'],
                         'phone' => $validated['contact_phone'],
                         'email' => $validated['contact_email'],
-                        'passport' => $validated['passenger_passport'][0] ?? 'UNKNOWN-' . uniqid(),
+                        'passport' => $validated['passenger_passport'][0] ?? 'PASS-' . strtoupper(substr(md5(uniqid()), 0, 8)),
                         'iata_country_code' => $validated['contact_country'] ?? 'ID'
                     ]);
                     \Log::info('New client created:', ['client_id' => $client->client_id]);
-                } catch (\Illuminate\Database\QueryException $e) {
-                    // Jika tetap bentrok passport (e.g. gara2 race condition atau UNKNOWN duplicate), generate random passport
-                    if ($e->errorInfo[1] == 1062) {
-                        $client = Client::create([
-                            'first_name' => $validated['contact_first_name'],
-                            'last_name' => $validated['contact_last_name'],
-                            'phone' => $validated['contact_phone'],
-                            'email' => $validated['contact_email'],
-                            'passport' => 'PASS-' . substr(md5(uniqid()), 0, 8),
-                            'iata_country_code' => $validated['contact_country'] ?? 'ID'
-                        ]);
-                        \Log::info('Client created with generated passport string due to collision');
-                    } else {
-                        throw $e;
-                    }
                 }
-            } else {
-                // Jika ditemukan (baik dari email atau passport), perbarui datanya dengan kontak terbaru
-                $client->update([
-                    'first_name' => $validated['contact_first_name'],
-                    'last_name' => $validated['contact_last_name'],
-                    'phone' => $validated['contact_phone'],
-                    'email' => $validated['contact_email']
-                ]);
-                \Log::info('Existing client updated:', ['client_id' => $client->client_id]);
             }
 
             // 2. Buat Booking
@@ -232,6 +230,33 @@ class BookingController extends Controller
                 'booking_code' => $booking->booking_code,
                 'total_price' => $booking->total_price_usd
             ]);
+
+            // 2.5 Reserve Flash Sale Seats immediately (Lock Quota)
+            try {
+                $flashSale = \App\Models\FlashSale::where('flight_id', $flightInstanceId)->active()->first();
+                if ($flashSale) {
+                    $passengerCount = count($validated['passenger_first_name']);
+                    
+                    // Check if seat prices match flash sale (to ensure it's a promo booking)
+                    $isPromoBooking = false;
+                    foreach ($validated['seat_prices'] as $sPrice) {
+                        // If any seat price is less than normal, we assume promo
+                        // We use a safe margin for comparison
+                        $normalPriceIdr = ($flightInst->schedule->base_price_usd ?? 0) * $exchangeRate;
+                        if ($sPrice < ($normalPriceIdr - 100)) {
+                            $isPromoBooking = true;
+                            break;
+                        }
+                    }
+
+                    if ($isPromoBooking) {
+                        $flashSale->increment('seats_sold', $passengerCount);
+                        \Log::info('Flash sale quota reserved:', ['flash_sale_id' => $flashSale->id, 'reserved' => $passengerCount]);
+                    }
+                }
+            } catch (\Exception $fe) {
+                \Log::warning('Flash sale reservation failed, but continuing booking: ' . $fe->getMessage());
+            }
 
             // 3. Buat BookingSeat untuk setiap penumpang
             \Log::info('Creating booking seats, count: ' . count($validated['passenger_first_name']));
@@ -426,10 +451,23 @@ class BookingController extends Controller
         ]);
 
         // Restore flash sale quota if applicable
-        $this->restoreFlashSaleQuota($booking);
+        $booking->restoreFlashSaleQuota();
+
+        // Kirim email konfirmasi "tanda terima" permintaan refund ke user
+        try {
+            $booking->load([
+                'client',
+                'flightInstance.schedule.originAirport',
+                'flightInstance.schedule.destinationAirport',
+            ]);
+            Mail::to($booking->client->email)->send(new RefundRequestedMail($booking));
+            \Log::info('Refund requested email sent to: ' . $booking->client->email, ['booking_code' => $booking->booking_code]);
+        } catch (\Exception $mailEx) {
+            \Log::warning('Gagal kirim email konfirmasi refund request: ' . $mailEx->getMessage(), ['booking_code' => $booking->booking_code]);
+        }
 
         return redirect()->route('booking.index')
-            ->with('success', 'Permintaan refund berhasil dikirim! Tim kami akan memprosesnya dalam 1-3 hari kerja.');
+            ->with('success', 'Permintaan refund berhasil dikirim! Email konfirmasi telah dikirim ke ' . $booking->client->email . '. Tim kami akan memprosesnya dalam 1–3 hari kerja.');
     }
 
     /**
@@ -460,35 +498,27 @@ class BookingController extends Controller
                 'refund_reason'       => $request->input('refund_reason', 'Guest cancellation request'),
                 'refund_requested_at' => now(),
             ]);
-            $this->restoreFlashSaleQuota($booking);
-            return back()->with('success', 'Permintaan refund berhasil dikirim! Tim kami akan memprosesnya dalam 1-3 hari kerja.');
+            $booking->restoreFlashSaleQuota();
+
+            // Kirim email konfirmasi "tanda terima" permintaan refund ke guest
+            try {
+                $booking->load([
+                    'client',
+                    'flightInstance.schedule.originAirport',
+                    'flightInstance.schedule.destinationAirport',
+                ]);
+                Mail::to($booking->client->email)->send(new RefundRequestedMail($booking));
+                \Log::info('Guest refund requested email sent to: ' . $booking->client->email, ['booking_code' => $booking->booking_code]);
+            } catch (\Exception $mailEx) {
+                \Log::warning('Gagal kirim email konfirmasi refund request (guest): ' . $mailEx->getMessage(), ['booking_code' => $booking->booking_code]);
+            }
+
+            return back()->with('success', 'Permintaan refund berhasil dikirim! Email konfirmasi telah dikirim ke ' . $booking->client->email . '. Tim kami akan memprosesnya dalam 1–3 hari kerja.');
         }
 
         return back()->with('error', 'Booking ini tidak bisa dibatalkan atau di-refund.');
     }
 
-    /**
-     * Restore flash sale quota when a booking is cancelled/refunded.
-     */
-    private function restoreFlashSaleQuota(Booking $booking)
-    {
-        $booking->load('bookingSeats.flightSeatPrice');
-        $flashSale = \App\Models\FlashSale::where('flight_id', $booking->flight_instance_id)->first();
-
-        if ($flashSale) {
-            $passengerCount = $booking->bookingSeats->count();
-            $isPromoBooking = false;
-            foreach ($booking->bookingSeats as $seat) {
-                if ($seat->price_at_booking < ($seat->flightSeatPrice->price_usd ?? 0)) {
-                    $isPromoBooking = true;
-                    break;
-                }
-            }
-            if ($isPromoBooking && $flashSale->seats_sold >= $passengerCount) {
-                $flashSale->decrement('seats_sold', $passengerCount);
-            }
-        }
-    }
 
     public function confirmation($id)
     {

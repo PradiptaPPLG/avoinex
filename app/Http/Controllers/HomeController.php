@@ -9,13 +9,27 @@ use App\Models\FlightInstance;
 use App\Models\BookingSeat;
 use App\Models\Booking;
 use App\Models\FlashSale;
+use App\Models\PromotionalBanner;
 
 class HomeController extends Controller
 {
     public function index()
     {
+        // Fetch active banners for carousel
+        $banners = PromotionalBanner::where('is_active', true)
+            ->orderBy('order')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Fetch active coupons
+        $coupons = \App\Models\Coupon::where('is_active', true)
+            ->where('end_date', '>=', now())
+            ->orderBy('end_date', 'asc')
+            ->get();
+
         // Ambil semua bandara untuk dropdown search
         $airports = Airport::orderBy('city')->get();
+
 
         // Ambil available flights from FlightInstance
         // NOTE: Removed strict filtering temporarily for debugging purposes
@@ -91,15 +105,26 @@ class HomeController extends Controller
             $clientEmail = session('client_email');
             $client = Client::find($clientId);
 
-            return view('home', compact('client', 'airports', 'clientName', 'clientEmail', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime', 'featuredDestinations'));
+            return view('home', compact('client', 'airports', 'clientName', 'clientEmail', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime', 'featuredDestinations', 'banners', 'coupons'));
         }
 
-        return view('home', compact('airports', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime', 'featuredDestinations'));
+        return view('home', compact('airports', 'flights', 'heroFlashSales', 'secondaryFlashSales', 'serverTime', 'featuredDestinations', 'banners', 'coupons'));
     }
 
     public function dashboard()
     {
         return $this->index();
+    }
+
+    public function deals()
+    {
+        $banners = PromotionalBanner::where('is_active', true)->orderBy('order')->get();
+        $coupons = \App\Models\Coupon::where('is_active', true)
+            ->where('end_date', '>=', now())
+            ->orderBy('end_date', 'asc')
+            ->get();
+
+        return view('pages.deals', compact('banners', 'coupons'));
     }
 
     private function getAirlineName($code)

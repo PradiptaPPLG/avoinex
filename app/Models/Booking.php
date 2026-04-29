@@ -131,4 +131,35 @@ class Booking extends Model
     {
         return $this->hasOne(Payment::class, 'booking_id', 'booking_id');
     }
+
+    /**
+     * Restore flash sale quota if this was a promo booking.
+     */
+    public function restoreFlashSaleQuota()
+    {
+        $this->load(['bookingSeats.flightSeatPrice', 'flightInstance.schedule']);
+        $flightInstance = $this->flightInstance;
+        
+        if (!$flightInstance) return;
+
+        $flashSale = \App\Models\FlashSale::where('flight_id', $flightInstance->flight_instance_id)->first();
+
+        if ($flashSale) {
+            $passengerCount = $this->bookingSeats->count();
+            $isPromoBooking = false;
+            
+            foreach ($this->bookingSeats as $seat) {
+                $normalPrice = $flightInstance->schedule->base_price_usd ?? 0;
+                if ($seat->price_at_booking < ($normalPrice - 0.01)) {
+                    $isPromoBooking = true;
+                    break;
+                }
+            }
+            
+            if ($isPromoBooking && $flashSale->seats_sold >= $passengerCount) {
+                $flashSale->decrement('seats_sold', $passengerCount);
+                \Log::info('Flash sale quota restored:', ['booking_id' => $this->booking_id, 'restored' => $passengerCount]);
+            }
+        }
+    }
 }

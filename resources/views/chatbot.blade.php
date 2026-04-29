@@ -58,7 +58,7 @@
         position: fixed;
         bottom: 30px;
         right: 30px;
-        z-index: 9999;
+        z-index: 1040;
     }
 
     @media (max-width: 768px) {
@@ -213,7 +213,7 @@
         background-color: var(--chatbot-bg);
         border-radius: 16px;
         box-shadow: var(--chatbot-shadow);
-        z-index: 9999;
+        z-index: 1040;
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -486,7 +486,7 @@
                 <p class="chatbot-status" id="chatbotStatus">{{ $currentAi['title'] }}</p>
             </div>
         </div>
-        <button class="chatbot-close" id="chatbotCloseBtn" aria-label="Close Chat">&times;</button>
+        <a href="{{ route('ai-models') }}" class="chatbot-close" id="chatbotSettingsBtn" aria-label="AI Settings"><i class="bi bi-gear"></i></a>
     </div>
     
     <div class="chatbot-body" id="chatbotBody">
@@ -531,7 +531,7 @@
         const widgetBtn = document.getElementById('chatbotWidgetBtn');
         const chatWindow = document.getElementById('chatbotWindow');
         
-        const closeBtn = document.getElementById('chatbotCloseBtn');
+        const settingsBtn = document.getElementById('chatbotSettingsBtn');
         const chatBody = document.getElementById('chatbotBody');
         const inputField = document.getElementById('chatbotInput');
         const sendBtn = document.getElementById('chatbotSendBtn');
@@ -688,7 +688,6 @@
         });
 
         
-        closeBtn.addEventListener('click', closeChat);
         
         // Close chat when clicking outside the chat window and widget
         document.addEventListener('click', (e) => {

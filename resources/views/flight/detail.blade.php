@@ -109,9 +109,13 @@
                             
                             <!-- Price -->
                             <div class="mb-3">
+                                @php
+                                    $exchangeRate = config('app.usd_to_idr', 15500);
+                                    $displayPrice = ($flight->price ?? $flight->schedule->base_price_usd) * $exchangeRate;
+                                @endphp
                                 <h6>Price</h6>
-                                <h3 class="text-primary">Rp {{ number_format($flight->schedule->base_price_usd, 0, ',', '.') }}</h3>
-                                <small class="text-muted">per person • Economy class</small>
+                                <h3 class="text-primary">Rp {{ number_format($displayPrice, 0, ',', '.') }}</h3>
+                                <small class="text-muted">per person • {{ ucfirst($travelClass ?? 'economy') }} class</small>
                             </div>
                             
                             <!-- Action Button -->
@@ -121,7 +125,7 @@
                                         <i class="bi bi-x-circle"></i> No Seats Available
                                     </button>
                                 @else
-                                    <a href="{{ route('flight.seats', $flight->flight_instance_id) }}" 
+                                    <a href="{{ route('flight.seats', $flight->flight_instance_id) }}?travel_class={{ $travelClass ?? 'economy' }}&adults={{ request('adults', 1) }}&children={{ request('children', 0) }}&infants={{ request('infants', 0) }}" 
                                        class="btn btn-primary btn-lg">
                                         <i class="bi bi-ticket"></i> Select Seats
                                     </a>

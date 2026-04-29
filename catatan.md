@@ -25,7 +25,7 @@ Pastikan error hilang.
 
 
 4️⃣ Commit di branch itu
-git add .
+git add .\\
 git commit -m "Fix booking not found error in BookingController"
 5️⃣ Push branch fix ke GitHub
 git push origin fix/booking-notfound

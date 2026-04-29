@@ -70,6 +70,28 @@
         .avx-topbar .avx-flag-img{ width:18px; }
 
         .avx-topbar .avx-right{ display:flex; gap:12px; align-items:center; }
+
+        .avx-find-booking-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #e8f7fd, #d0eef9);
+            border: 1.5px solid #a8d8ef;
+            color: #1a7ab5;
+            font-weight: 600;
+            font-size: 13.5px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .avx-find-booking-btn:hover {
+            background: linear-gradient(135deg, #d0eef9, #b8e4f5);
+            color: #1a7ab5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(39,158,214,0.2);
+        }
         .avx-login-btn{
             background:transparent;
             border:2px solid var(--primary);
@@ -93,11 +115,12 @@
         .avx-user-profile-wrapper {
             display: inline-flex;
             align-items: center;
-            background: white;
-            border: 1px solid #279ED6;
+            background: var(--primary);
+            border: none;
             border-radius: 10px;
             padding: 4px 8px 4px 4px;
             position: relative;
+            cursor: pointer;
         }
 
         .avx-user-profile {
@@ -112,16 +135,16 @@
             height: 32px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #279ED6;
+            border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f0f8ff;
+            background: transparent;
         }
 
         .avx-user-name {
-            font-weight: 600;
-            color: #279ED6;
+            font-weight: 700;
+            color: #fff;
             font-size: 14px;
             max-width: 150px;
             overflow: hidden;
@@ -543,6 +566,7 @@
 
     <div class="avx-right">
         <?php if(session('client_id')): ?>
+
             <!-- Bantuan Link -->
             <a href="<?php echo e(route('support')); ?>" class="avx-help-link">Bantuan</a>
             
@@ -559,16 +583,15 @@
                         <?php if(session('client_avatar') && session('client_avatar') != 'default'): ?>
                             <img src="<?php echo e(session('client_avatar')); ?>" alt="<?php echo e(session('client_name')); ?>" style="width:100%;height:100%;border-radius:50%;">
                         <?php else: ?>
-                            <svg class="avx-default-avatar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #279ED6;">
+                            <svg class="avx-default-avatar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: #fff;">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         <?php endif; ?>
                     </div>
                     <span class="avx-user-name"><?php echo e(session('client_name')); ?></span>
                     
-                    <!-- Dropdown arrow -->
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="margin-left: 4px;">
-                        <path d="M6 9L12 15L18 9" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M6 9L12 15L18 9" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
                 
@@ -585,10 +608,6 @@
                     <a href="<?php echo e(route('booking.index')); ?>" class="avx-dropdown-item">
                         <svg class="avx-dropdown-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                         My Bookings
-                    </a>
-                    <a href="#" class="avx-dropdown-item" onclick="event.preventDefault(); showModal('aiHub');">
-                        <svg class="avx-dropdown-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M13 14h-2a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1zm5-4h2v3h-2zm-12 0h2v3H6zM9 13H7v5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-5h-2M15 5H9a1 1 0 0 0-1 1v2h8V6a1 1 0 0 0-1-1zM12 2a1 1 0 0 1 1 1v2h-2V3a1 1 0 0 1 1-1z"/><circle cx="10.5" cy="11.5" r=".5" fill="currentColor"/><circle cx="13.5" cy="11.5" r=".5" fill="currentColor"/></svg>
-                        AI Assistant Hub
                     </a>
                     <div class="avx-dropdown-item logout">
                         <form id="logout-form" action="<?php echo e(route('logout')); ?>" method="POST" style="display: none;">
@@ -609,6 +628,10 @@
                 </div>
             </div>
         <?php else: ?>
+            <a href="<?php echo e(route('booking.find.form')); ?>" class="avx-find-booking-btn" id="navbar-find-booking-btn">
+                <i class="bi bi-ticket-perforated-fill me-1"></i>
+                <span>Cek Pesanan</span>
+            </a>
             <button class="avx-login-btn" onclick="showModal('login')"><i class="bi bi-box-arrow-in-right me-1"></i>Login</button>
             <button class="avx-signup-btn" onclick="showModal('register')"><i class="bi bi-person-plus-fill me-1"></i>Register</button>
         <?php endif; ?>
@@ -1138,7 +1161,7 @@ document.addEventListener('DOMContentLoaded', function() {
         font-family: 'Poppins', sans-serif;
         position: relative;
         overflow: hidden;
-        z-index: 2000;
+        z-index: 100;
     }
 
     .avx-footer::before {

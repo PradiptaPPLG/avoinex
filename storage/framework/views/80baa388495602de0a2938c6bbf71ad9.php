@@ -233,10 +233,60 @@
             
         </section>
 
-    
+
+        
 
     </main>
 </div>
+
+<?php if(isset($coupons) && $coupons->count() > 0): ?>
+<!-- TOP COUPONS SECTION -->
+<section class="container mt-5 mb-5">
+    <h3 class="fw-bold mb-4 px-2" style="font-size: 1.5rem; color: #1f2937;">Klaim Kupon Spesial</h3>
+    <div class="row g-3 px-2">
+        <?php $__currentLoopData = $coupons->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $coupon): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="d-flex h-100">
+                    <div class="bg-primary text-white p-3 d-flex flex-column justify-content-center align-items-center" style="width: 100px;">
+                        <div class="fw-bold" style="font-size: 1.2rem;">
+                            <?php if($coupon->discount_type == 'percentage'): ?>
+                                <?php echo e(number_format($coupon->discount_value, 0)); ?>%
+                            <?php else: ?>
+                                Rp<?php echo e(number_format($coupon->discount_value/1000, 0)); ?>k
+                            <?php endif; ?>
+                        </div>
+                        <div class="small fw-bold">OFF</div>
+                    </div>
+                    <div class="p-3 flex-grow-1">
+                        <h6 class="fw-bold mb-1"><?php echo e($coupon->title); ?></h6>
+                        <p class="text-muted small mb-2" style="font-size: 0.75rem;">Min. spend Rp<?php echo e(number_format($coupon->min_spend/1000, 0)); ?>k</p>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 fw-bold avx-claim-btn" data-code="<?php echo e($coupon->code); ?>">CLAIM</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </div>
+</section>
+
+<script>
+document.querySelectorAll('.avx-claim-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const code = this.getAttribute('data-code');
+        navigator.clipboard.writeText(code).then(() => {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="bi bi-check2"></i> COPIED';
+            this.classList.replace('btn-outline-primary', 'btn-success');
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.classList.replace('btn-success', 'btn-outline-primary');
+            }, 2000);
+        });
+    });
+});
+</script>
+<?php endif; ?>
 
 <?php if(isset($secondaryFlashSales) && $secondaryFlashSales->count() > 0): ?>
     <div class="avx-kupon-wrapper mt-5">
@@ -369,6 +419,104 @@
             
         </section>
     </div>
+<?php endif; ?>
+
+<?php if(isset($banners) && $banners->count() > 0): ?>
+<!-- PROMO BANNERS CAROUSEL -->
+<section class="container mt-5 mb-5 promo-carousel-section">
+    <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+        <h3 class="fw-bold mb-0" style="font-size: 1.5rem; color: #1f2937;">Jangan sampai kelewatan promo ini!</h3>
+        <a href="<?php echo e(route('deals')); ?>" class="text-primary fw-bold text-decoration-none small">Lihat semua <i class="bi bi-chevron-right"></i></a>
+    </div>
+    
+    <div id="promoCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+        <div class="carousel-inner rounded-4">
+            <?php $__currentLoopData = $banners->chunk(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <div class="carousel-item <?php echo e($chunkIndex == 0 ? 'active' : ''); ?>">
+                <div class="row g-3 px-1">
+                    <?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $banner): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="col-md-4">
+                        <a href="<?php echo e($banner->link_url ?? '#'); ?>" class="avx-promo-banner-card d-block position-relative overflow-hidden rounded-4">
+                            <img src="<?php echo e(asset('storage/' . $banner->image_path)); ?>" class="img-fluid w-100" alt="<?php echo e($banner->title); ?>" style="height: 200px; object-fit: cover;">
+                            <div class="avx-promo-banner-overlay p-4 d-flex flex-column justify-content-end">
+                                
+                            </div>
+                        </a>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+            </div>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </div>
+        
+        <?php if($banners->count() > 3): ?>
+        <button class="carousel-control-prev agoda-style-control" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="carousel-control-next agoda-style-control" type="button" data-bs-target="#promoCarousel" data-bs-slide="next">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <?php endif; ?>
+    </div>
+</section>
+
+<style>
+/* Section styling */
+.promo-carousel-section {
+    position: relative;
+}
+
+/* Agoda Style Controls */
+.agoda-style-control {
+    width: 40px !important;
+    height: 40px !important;
+    background-color: white !important;
+    border-radius: 50% !important;
+    opacity: 1 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    border: 1px solid #eee !important;
+    transition: all 0.3s ease !important;
+    z-index: 10 !important;
+}
+
+.agoda-style-control i {
+    color: #444 !important;
+    font-size: 1.2rem !important;
+    font-weight: bold !important;
+}
+
+.agoda-style-control:hover {
+    background-color: #f8f9fa !important;
+    transform: translateY(-50%) scale(1.1) !important;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2) !important;
+}
+
+.carousel-control-prev.agoda-style-control {
+    left: -20px !important;
+}
+
+.carousel-control-next.agoda-style-control {
+    right: -20px !important;
+}
+
+/* Smooth Slide */
+.carousel-item {
+    transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+}
+
+.avx-promo-banner-card {
+    transition: none;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.avx-promo-banner-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 70%);
+}
+</style>
 <?php endif; ?>
 
 <?php if(isset($flights) && $flights->count()): ?>

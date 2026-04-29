@@ -25,42 +25,52 @@
     </div>
 
     <div class="container" style="margin-top: -40px;">
-        <!-- Quick Links Cards -->
-        <div class="row g-4 mb-5 justify-content-center">
-            <div class="col-md-4 avx-reveal avx-delay-100">
-                <a href="{{ route('booking.index') }}" class="text-decoration-none">
-                    <div class="card h-100 avx-support-card border-0 shadow-sm text-center p-4">
-                        <div class="avx-icon-circle bg-primary bg-opacity-10 text-primary mx-auto mb-3">
-                            <i class="bi bi-ticket-detailed"></i>
-                        </div>
-                        <h4 class="h5 fw-bold text-dark mb-2">My Bookings</h4>
-                        <p class="text-muted small mb-0">View, modify, or cancel your existing flight reservations.</p>
+        <!-- TABS NAV -->
+        <ul class="nav nav-pills mb-5 justify-content-center avx-reveal" id="supportTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active px-4 py-2 rounded-pill fw-bold me-2" id="general-tab" data-bs-toggle="pill" data-bs-target="#general-content" type="button" role="tab" aria-controls="general-content" aria-selected="true" style="transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">General Support</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="supportTabsContent">
+            <!-- GENERAL SUPPORT TAB -->
+            <div class="tab-pane fade show active" id="general-content" role="tabpanel" aria-labelledby="general-tab">
+                <!-- Quick Links Cards -->
+                <div class="row g-4 mb-5 justify-content-center">
+                    <div class="col-md-4 avx-reveal avx-delay-100">
+                        <a href="{{ route('booking.index') }}" class="text-decoration-none">
+                            <div class="card h-100 avx-support-card border-0 shadow-sm text-center p-4">
+                                <div class="avx-icon-circle bg-primary bg-opacity-10 text-primary mx-auto mb-3">
+                                    <i class="bi bi-ticket-detailed"></i>
+                                </div>
+                                <h4 class="h5 fw-bold text-dark mb-2">My Bookings</h4>
+                                <p class="text-muted small mb-0">View, modify, or cancel your existing flight reservations.</p>
+                            </div>
+                        </a>
                     </div>
-                </a>
-            </div>
-            <div class="col-md-4 avx-reveal avx-delay-200">
-                <a href="{{ route('booking.find.form') }}" class="text-decoration-none">
-                    <div class="card h-100 avx-support-card border-0 shadow-sm text-center p-4">
-                        <div class="avx-icon-circle bg-success bg-opacity-10 text-success mx-auto mb-3">
-                            <i class="bi bi-search"></i>
-                        </div>
-                        <h4 class="h5 fw-bold text-dark mb-2">Find E-Ticket</h4>
-                        <p class="text-muted small mb-0">Retrieve your booking using your booking code and email.</p>
+                    <div class="col-md-4 avx-reveal avx-delay-200">
+                        <a href="{{ route('booking.find.form') }}" class="text-decoration-none">
+                            <div class="card h-100 avx-support-card border-0 shadow-sm text-center p-4">
+                                <div class="avx-icon-circle bg-success bg-opacity-10 text-success mx-auto mb-3">
+                                    <i class="bi bi-search"></i>
+                                </div>
+                                <h4 class="h5 fw-bold text-dark mb-2">Find E-Ticket</h4>
+                                <p class="text-muted small mb-0">Retrieve your booking using your booking code and email.</p>
+                            </div>
+                        </a>
                     </div>
-                </a>
-            </div>
-            <div class="col-md-4 avx-reveal avx-delay-300">
-                <a href="#" class="text-decoration-none">
-                    <div class="card h-100 avx-support-card border-0 shadow-sm text-center p-4">
-                        <div class="avx-icon-circle bg-warning bg-opacity-10 text-warning mx-auto mb-3">
-                            <i class="bi bi-briefcase"></i>
-                        </div>
-                        <h4 class="h5 fw-bold text-dark mb-2">Baggage Info</h4>
-                        <p class="text-muted small mb-0">Learn about our cabin and checked baggage allowances.</p>
+                    <div class="col-md-4 avx-reveal avx-delay-300">
+                        <a href="#" class="text-decoration-none">
+                            <div class="card h-100 avx-support-card border-0 shadow-sm text-center p-4">
+                                <div class="avx-icon-circle bg-warning bg-opacity-10 text-warning mx-auto mb-3">
+                                    <i class="bi bi-briefcase"></i>
+                                </div>
+                                <h4 class="h5 fw-bold text-dark mb-2">Baggage Info</h4>
+                                <p class="text-muted small mb-0">Learn about our cabin and checked baggage allowances.</p>
+                            </div>
+                        </a>
                     </div>
-                </a>
-            </div>
-        </div>
+                </div>
 
         <!-- FAQ Section -->
         <div class="card border-0 shadow-sm mb-5 rounded-4 overflow-hidden avx-faq-card avx-reveal">
@@ -176,6 +186,10 @@
                 </div>
             </div>
         </div>
+            </div> <!-- End General Support Tab -->
+
+
+        </div> <!-- End Tab Content -->
     </div>
 </div>
 
@@ -248,6 +262,34 @@
 .avx-support-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+}
+/* Tabs Styling */
+.nav-pills .nav-link {
+    color: #555;
+    background-color: transparent;
+}
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+    background-color: #279ED6;
+    color: white;
+}
+#models-tab:not(.active):hover {
+    background-color: #f0f7ff !important;
+    transform: translateY(-2px);
+}
+#models-tab.active {
+    background-color: #11549D !important;
+    color: white !important;
+    border: 1px solid #11549D;
+}
+.ai-plan-card {
+    transition: all 0.3s ease;
+}
+.ai-plan-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+}
+.ai-features-list li i {
+    font-size: 14px;
 }
 .avx-faq-card {
     transition: all 0.3s ease;
@@ -488,6 +530,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     searchInput.addEventListener('input', filterFAQs);
     searchBtn.addEventListener('click', filterFAQs);
+
+    // 3. Handle hash in URL to open specific tab (e.g., #models)
+    if (window.location.hash) {
+        const hash = window.location.hash;
+        if (hash === '#models' || hash === '#models-content') {
+            const modelsTab = document.getElementById('models-tab');
+            if (modelsTab) {
+                // If using Bootstrap 5 bundle, we can trigger the click
+                modelsTab.click();
+                // Smooth scroll to tabs
+                setTimeout(() => {
+                    document.getElementById('supportTabs').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        }
+    }
 });
 
     // Chatbot Toggle

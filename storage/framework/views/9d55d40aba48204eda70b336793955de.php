@@ -1,7 +1,7 @@
 <?php $__env->startPush('styles'); ?>
 <style>
     @media print {
-        .btn, .alert-success, .card-header.bg-success {
+        .btn, .alert-soft-green, .card-header.bg-soft-green {
             display: none !important;
         }
         .card {
@@ -33,37 +33,37 @@
 <div class="container mt-4 mb-4">
     <!-- Booking Steps -->
     <div class="mb-4 position-relative d-print-none">
-        <div class="progress" style="height: 3px; position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); z-index: 1;">
-            <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress" style="height: 3px; position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); z-index: 1; background-color: rgba(39, 158, 214, 0.2);">
+            <div class="progress-bar" role="progressbar" style="width: 100%; background-color: #279ED6;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
         <div class="d-flex justify-content-between position-relative" style="z-index: 2;">
             <div class="text-center" style="width: 32%;">
-                <div class="bg-success text-white rounded-pill py-2 border border-2 border-success shadow-sm">
+                <div class="rounded-pill py-2 border border-2 shadow-sm" style="background-color: #BDE3FF; border-color: #BDE3FF !important; color: #003366;">
                     <i class="bi bi-check-circle-fill me-1"></i> 1. Passenger Details
                 </div>
             </div>
             <div class="text-center" style="width: 32%;">
-                <div class="bg-success text-white rounded-pill py-2 border border-2 border-success shadow-sm">
+                <div class="rounded-pill py-2 border border-2 shadow-sm" style="background-color: #BDE3FF; border-color: #BDE3FF !important; color: #003366;">
                     <i class="bi bi-check-circle-fill me-1"></i> 2. Payment
                 </div>
             </div>
             <div class="text-center" style="width: 32%;">
-                <div class="bg-success text-white rounded-pill py-2 border border-2 border-success fw-bold shadow-sm">
+                <div class="text-white rounded-pill py-2 border border-2 shadow-sm" style="background-color: #003366; border-color: #003366 !important;">
                     <i class="bi bi-check-circle-fill me-1"></i> 3. Confirmation
                 </div>
             </div>
         </div>
     </div>
-    <div class="card border-success">
-        <div class="card-header bg-success text-white">
-            <h4 class="mb-0"><i class="bi bi-check-circle"></i> Booking Confirmed!</h4>
+    <div class="card shadow-sm border-0" style="border: 1px solid #C8E6C9 !important; border-radius: 12px; overflow: hidden;">
+        <div class="card-header py-3 fw-bold" style="background-color: #E8F5E9; color: #2E7D32; border-bottom: 2px solid #C8E6C9;">
+            <h4 class="mb-0 fs-5"><i class="bi bi-check-circle-fill me-2"></i> Booking Confirmed!</h4>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-8">
-                    <div class="alert alert-success">
-                        <h5>Thank you for your booking!</h5>
-                        <p class="mb-0">Your e-ticket has been sent to <strong><?php echo e($booking->client->email); ?></strong></p>
+                    <div class="alert shadow-sm border-0" style="background-color: #F1F8E9; border-left: 5px solid #81C784; color: #335933; border-radius: 8px;">
+                        <h6 class="fw-bold mb-1"><i class="bi bi-envelope-check-fill me-2"></i>Thank you for your booking!</h6>
+                        <p class="mb-0 small">Your e-ticket has been sent to <strong><?php echo e($booking->client->email); ?></strong>. Please check your inbox and spam folder.</p>
                     </div>
                     
                     <div class="row">
@@ -71,7 +71,7 @@
                             <h6>Booking Details</h6>
                             <p><strong>Booking Code:</strong> <?php echo e($booking->booking_code); ?></p>
                             <p><strong>Booking Date:</strong> <?php echo e($booking->created_at->format('d M Y H:i')); ?></p>
-                            <p><strong>Status:</strong> <span class="badge bg-success">Confirmed</span></p>
+                            <p class="mb-2"><strong>Status:</strong> <span class="badge" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9;">Confirmed</span></p>
                         </div>
                         <div class="col-md-6">
                             <h6>Flight Details</h6>

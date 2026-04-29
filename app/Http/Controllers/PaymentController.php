@@ -52,57 +52,10 @@ class PaymentController extends Controller
 
             $booking = Booking::with(['bookingSeats.flightSeatPrice'])->lockForUpdate()->find($request->booking_id);
 
-            // 1. Lock flash sale record
-            $flashSale = \App\Models\FlashSale::where('flight_id', $booking->flight_instance_id) // Add index to flight_id lookup!
-                ->lockForUpdate()
-                ->first();
-
-            $isPromoBooking = false;
-            foreach ($booking->bookingSeats as $seat) {
-                // If price at booking is less than normal price, it used a promo
-                if ($seat->price_at_booking < ($seat->flightSeatPrice->price_usd ?? 0)) {
-                    $isPromoBooking = true;
-                    break;
-                }
-            }
-
-            if ($isPromoBooking && $flashSale) {
-                $passengerCount = $booking->bookingSeats->count();
-                // 2. Recalculate remaining seats
-                $remaining = $flashSale->getRemainingSeats();
-
-                if ($remaining >= $passengerCount && $flashSale->is_active && $flashSale->end_time >= now()) {
-                    // 3. If seats available → continue
-                    // 4. Increment seats_sold
-                    $flashSale->seats_sold += $passengerCount;
-                    $flashSale->save();
-                } else {
-                    // 5. If remaining seats are already 0, fallback to normal price
-                    // We must revert all discounted seats to base price
-                    $totalAdditional = 0;
-                    foreach ($booking->bookingSeats as $bSeat) {
-                        $basePrice = $bSeat->flightSeatPrice->price_usd ?? $bSeat->price_at_booking;
-                        $diff = max(0, $basePrice - $bSeat->price_at_booking);
-                        if ($diff > 0) {
-                            $bSeat->price_at_booking = $basePrice;
-                            $bSeat->save();
-                            $totalAdditional += $diff;
-                        }
-                    }
-
-                    if ($totalAdditional > 0) {
-                        $taxRate = 0.10;
-                        $taxOnAdditional = $totalAdditional * $taxRate;
-                        $booking->total_price_usd += ($totalAdditional + $taxOnAdditional);
-                        $booking->save();
-                        
-                        \DB::commit(); // Save the reverted price
-                        
-                        // Fail the payment implicitly and notify user to pay normal price
-                        return redirect()->route('payment.page', $booking->booking_id)
-                            ->with('error', 'The Flash Sale has expired or run out of seats! The price has been updated to the normal base price. Please review and pay again.');
-                    }
-                }
+            if (!$booking || $booking->booking_status !== 'pending') {
+                \DB::rollBack();
+                return redirect()->route('booking.index')
+                    ->with('error', 'Sesi pembayaran telah berakhir atau booking tidak valid. Silakan pesan kembali.');
             }
 
             // Simulasi pembayaran sukses

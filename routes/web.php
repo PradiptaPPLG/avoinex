@@ -20,8 +20,9 @@ Route::get('/flight/{id}', [FlightSearchController::class , 'show'])->name('flig
 Route::get('/api/airports/autocomplete', [FlightSearchController::class, 'airportAutocomplete'])->name('api.airports.autocomplete');
 
 
-Route::get('/deals', fn() => view('pages.deals'))->name('deals');
+Route::get('/deals', [HomeController::class, 'deals'])->name('deals');
 Route::get('/support', fn() => view('pages.support'))->name('support');
+Route::get('/ai-models', fn() => view('pages.models'))->name('ai-models');
 
 /* |-------------------------------------------------------------------------- | AUTH ROUTES |-------------------------------------------------------------------------- */
 
@@ -100,6 +101,8 @@ use App\Http\Controllers\Admin\AirportController;
 use App\Http\Controllers\Admin\ManufacturerController;
 use App\Http\Controllers\Admin\CountryController;
 use App\Http\Controllers\Admin\AirlineController;
+use App\Http\Controllers\Admin\PromotionalBannerController;
+use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\HelpController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\MealController;
@@ -196,6 +199,26 @@ Route::prefix('admin')->group(function () {
                     Route::delete('/{featuredDestination}', [FeaturedDestinationController::class , 'destroy'])->name('destroy');
                 }
                 );
+
+                Route::prefix('promotional-banners')->name('admin.banners.')->group(function () {
+                    Route::get('/', [PromotionalBannerController::class, 'index'])->name('index');
+                    Route::get('/create', [PromotionalBannerController::class, 'create'])->name('create');
+                    Route::post('/', [PromotionalBannerController::class, 'store'])->name('store');
+                    Route::get('/{banner}/edit', [PromotionalBannerController::class, 'edit'])->name('edit');
+                    Route::put('/{banner}', [PromotionalBannerController::class, 'update'])->name('update');
+                    Route::post('/bulk-delete', [PromotionalBannerController::class, 'bulkDelete'])->name('bulk_delete');
+                    Route::delete('/{banner}', [PromotionalBannerController::class, 'destroy'])->name('destroy');
+                });
+
+                Route::prefix('coupons')->name('admin.coupons.')->group(function () {
+                    Route::get('/', [CouponController::class, 'index'])->name('index');
+                    Route::get('/create', [CouponController::class, 'create'])->name('create');
+                    Route::post('/', [CouponController::class, 'store'])->name('store');
+                    Route::get('/{coupon}/edit', [CouponController::class, 'edit'])->name('edit');
+                    Route::put('/{coupon}', [CouponController::class, 'update'])->name('update');
+                    Route::post('/bulk-delete', [CouponController::class, 'bulkDelete'])->name('bulk_delete');
+                    Route::delete('/{coupon}', [CouponController::class, 'destroy'])->name('destroy');
+                });
 
                 // Master Data
                 Route::prefix('airports')->name('admin.airports.')->group(function () {
